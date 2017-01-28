@@ -34,8 +34,8 @@ public class ClientRunner extends AbstractClientRunner {
             final HelloWorldInput helloWorldInput = HelloWorldInput.builder()
                     .name("Jantje (" + new Date().getTime() + ")")
                     .build();
-            final HelloWorldOutput s = exampleService.helloWorldCall(helloWorldInput).call();
-            logger.info(s.getName());
+            final HelloWorldOutput output = exampleService.helloWorldCall(helloWorldInput).call();
+            logger.info(output.getMessage());
         } catch (DependencyException e) {
             logger.error(e.getCause().getClass().getSimpleName() + ": " + e.getCause().getMessage());
         }
