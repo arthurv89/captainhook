@@ -44,7 +44,7 @@ public class ClientRunner extends AbstractClientRunner {
     private void doHelloWorldCall() {
         try {
             final HelloWorldInput helloWorldInput = HelloWorldInput.builder()
-                    .name("Jantje (" + new Date().getTime() + ")")
+                    .name("World (" + new Date().getTime() + ")")
                     .build();
             final HelloWorldOutput output = exampleService.helloWorldCall(helloWorldInput).call();
             logger.info(output.getMessage());
@@ -84,7 +84,7 @@ public class HelloWorldInput extends Input {
 ```java
 @Value
 public class HelloWorldOutput extends Output {
-    private final String name;
+    private final String message;
 }
 ```
 
