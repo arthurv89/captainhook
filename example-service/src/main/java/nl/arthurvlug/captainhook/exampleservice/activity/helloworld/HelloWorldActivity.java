@@ -3,6 +3,8 @@ package nl.arthurvlug.captainhook.exampleservice.activity.helloworld;
 import nl.arthurvlug.captainhook.exampleservice.server.activity.AbstractExampleActivity;
 import nl.arthurvlug.captainhook.framework.server.Activity;
 
+import java.util.Calendar;
+
 @Activity
 public class HelloWorldActivity extends AbstractExampleActivity<HelloWorldInput, HelloWorldOutput> {
     @Override
@@ -11,6 +13,9 @@ public class HelloWorldActivity extends AbstractExampleActivity<HelloWorldInput,
         if(Math.random() < 0.3) {
             throw new RuntimeException("Purposely thrown an exception");
         }
-        return new HelloWorldOutput("Hello, " + helloWorldInput.getName() + "!");
+        return HelloWorldOutput.builder()
+                .message("Hello, " + helloWorldInput.getName() + "!")
+                .respondingTime(Calendar.getInstance())
+                .build();
     }
 }
