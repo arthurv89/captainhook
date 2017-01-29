@@ -120,3 +120,12 @@ public class HelloWorldActivity extends DefaultAbstractActivity<HelloWorldInput,
     }
 }
 ```
+
+### Step 4: Run the application
+```bash
+bash build.sh
+bash start-service.sh
+
+# In another terminal
+bash start-client.sh
+```
