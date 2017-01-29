@@ -32,7 +32,7 @@
                 <executions>
                     <execution>
                         <id>run-service</id>
-                        <phase>package</phase>
+                        <phase>none</phase>
                         <goals>
                             <goal>java</goal>
                         </goals>

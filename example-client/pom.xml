@@ -31,8 +31,8 @@
                 <version>1.4.0</version>
                 <executions>
                     <execution>
-                        <id>run-service</id>
-                        <phase>package</phase>
+                        <id>run-client</id>
+                        <phase>none</phase>
                         <goals>
                             <goal>java</goal>
                         </goals>
