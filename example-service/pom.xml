@@ -14,6 +14,26 @@
 
     <build>
         <plugins>
+<!--
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>buildnumber-maven-plugin</artifactId>
+                <version>1.2</version>
+                <executions>
+                    <execution>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>create</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <doCheck>false</doCheck>
+                    <doUpdate>false</doUpdate>
+                </configuration>
+            </plugin>
+-->
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -42,6 +62,64 @@
                     <mainClass>nl.arthurvlug.captainhook.exampleservice.server.ServiceMain</mainClass>
                 </configuration>
             </plugin>
+
+            <!-- Copy JSPs from dependencies -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <id>unpack</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>nl.arthurvlug.captainhook</groupId>
+                                    <artifactId>framework-plugins-selfdiagnose</artifactId>
+                                    <version>1.0-SNAPSHOT</version>
+                                    <type>jar</type>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${project.build.directory}/dependency-resources</outputDirectory>
+                                    <includes>/WEB-INF/jsp/**/*.jsp,*.properties</includes>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.8</version>
+                <executions>
+                    <execution>
+                        <id>bla</id>
+                        <phase>package</phase>
+                        <configuration>
+                            <target>
+                                <delete dir="${project.basedir}/src/main/webapp/WEB-INF/jsp/plugins"/>
+                                <copy todir="${project.basedir}/src/main/webapp/WEB-INF/jsp/plugins" flatten="true">
+                                    <fileset dir="${project.build.directory}/dependency-resources">
+                                        <include name="**/*.jsp"/>
+                                    </fileset>
+                                </copy>
+                                <copy todir="${project.basedir}/src/main/resources/plugins" flatten="true">
+                                    <fileset dir="${project.build.directory}/dependency-resources">
+                                        <include name="**/*.properties"/>
+                                    </fileset>
+                                </copy>
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
@@ -49,6 +127,11 @@
         <dependency>
             <groupId>nl.arthurvlug.captainhook</groupId>
             <artifactId>service-clientlib</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>nl.arthurvlug.captainhook</groupId>
+            <artifactId>framework-plugins-selfdiagnose</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
 

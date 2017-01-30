@@ -10,7 +10,8 @@ import org.springframework.context.annotation.ComponentScan;
 @ComponentScan(basePackages = {
         "nl.arthurvlug.captainhook.framework.server",
         "nl.arthurvlug.captainhook.framework.common",
-        ServiceConfiguration.PACKAGE_NAME + ".common"
+        ServiceConfiguration.PACKAGE_NAME + ".common",
+        ServiceConfiguration.PACKAGE_NAME + ".server"
 })
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ExampleServiceController extends Controller {

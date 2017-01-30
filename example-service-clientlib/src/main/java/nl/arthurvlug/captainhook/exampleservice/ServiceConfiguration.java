@@ -9,4 +9,5 @@ import org.springframework.stereotype.Component;
 public class ServiceConfiguration {
     public static final String baseUrl = "http://localhost:8080";
     public static final String PACKAGE_NAME = "nl.arthurvlug.captainhook.exampleservice";
+    public static final String VERSION = "1.0";
 }

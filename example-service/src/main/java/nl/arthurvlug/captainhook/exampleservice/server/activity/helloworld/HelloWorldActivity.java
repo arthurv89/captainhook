@@ -1,5 +1,7 @@
-package nl.arthurvlug.captainhook.exampleservice.activity.helloworld;
+package nl.arthurvlug.captainhook.exampleservice.server.activity.helloworld;
 
+import nl.arthurvlug.captainhook.exampleservice.activity.helloworld.HelloWorldInput;
+import nl.arthurvlug.captainhook.exampleservice.activity.helloworld.HelloWorldOutput;
 import nl.arthurvlug.captainhook.exampleservice.server.activity.AbstractExampleActivity;
 import nl.arthurvlug.captainhook.framework.server.Activity;
 
