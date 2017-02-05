@@ -1,29 +1,40 @@
 package nl.arthurvlug.captainhook.framework.server;
 
+import com.google.common.base.Throwables;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.reflect.ClassPath;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import org.reflections.Reflections;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class ActivityScanner {
     @Autowired
     private AbstractCommonConfiguration commonConfiguration;
 
-    Map<String, AbstractActivity> scan() {
+    public Map<String, AbstractActivity> scan() {
         final String packageName = commonConfiguration.getPackageName();
 
-        final Map<String, AbstractActivity> map = new Reflections(packageName)
-                .getTypesAnnotatedWith(Activity.class)
-                .stream()
+        return getStringAbstractActivityMap(packageName).stream()
+                .map(x -> x.load())
+                .filter(x -> x.getAnnotationsByType(Activity.class).length != 0)
                 .collect(Collectors.toMap(c -> c.getSimpleName().replace("Activity", ""), this::newInstance));
-        return map;
+    }
+
+    private ImmutableSet<ClassPath.ClassInfo> getStringAbstractActivityMap(final String packageName) {
+        try {
+            final ClassLoader loader = Thread.currentThread().getContextClassLoader();
+            final ClassPath classpath = ClassPath.from(loader); // scans the class path used by classloader
+            return classpath.getTopLevelClassesRecursive(packageName);
+        } catch (IOException e) {
+            throw Throwables.propagate(e);
+        }
     }
 
     private AbstractActivity newInstance(final Class<?> c) {

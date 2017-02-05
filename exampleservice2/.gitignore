@@ -1,0 +1,5 @@
+src/main/resources/plugins/
+src/main/webapp/WEB-INF/jsp/plugins/
+target/
+*.iml
+.idea/

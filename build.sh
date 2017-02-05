@@ -8,13 +8,16 @@ function e {
 	rm -rf $BASE_PATH/$folder/target && \
 	rm -rf $BASE_PATH/$folder/src/main/resources/plugins && \
 	rm -rf $BASE_PATH/$folder/src/main/webapp/WEB-INF/jsp/plugins && \
-	mvn clean install
+	mvn clean install && \
+	printf "\n\n\n\n\n"
 }
 
 e framework-core \ &&
-e framework-plugins-selfdiagnose \ &&
-e example-service-clientlib \ &&
-e example-service \ &&
-e example-client
+#e framework-plugins-selfdiagnose \ &&
+#e exampleservice-clientlib \ &&
+#e exampleservice \ &&
+e exampleservice2-clientlib \ &&
+#e exampleservice2 \ &&
+#e main
 
 echo "Done."

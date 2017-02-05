@@ -10,7 +10,7 @@ public class ExceptionResult {
     private final String message;
     private final byte[] stackTrace;
 
-    public ExceptionResult(final Exception e) {
+    public ExceptionResult(final Throwable e) {
         this.className = e.getClass().getName();
         this.message = e.getMessage();
         this.stackTrace = serializeStackTrace(e);

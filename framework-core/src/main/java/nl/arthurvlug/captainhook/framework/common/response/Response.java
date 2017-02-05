@@ -13,7 +13,7 @@ public class Response<T> {
         return new SuccessResponse<T>(value);
     }
 
-    public static <T, E extends Exception> FailureResponse failure(final E e) {
+    public static <T, E extends Throwable> FailureResponse failure(final E e) {
         return new FailureResponse<T>(e);
     }
 

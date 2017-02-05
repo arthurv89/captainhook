@@ -1,1 +1,1 @@
-cd example-service && mvn exec:java
+cd exampleservice && mvn exec:java

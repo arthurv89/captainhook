@@ -1,34 +1,40 @@
 package nl.arthurvlug.captainhook.framework.client;
 
 import com.google.gson.reflect.TypeToken;
-import nl.arthurvlug.captainhook.framework.server.Call;
-import nl.arthurvlug.captainhook.framework.server.Input;
-import nl.arthurvlug.captainhook.framework.server.Request;
 import nl.arthurvlug.captainhook.framework.common.response.DependencyException;
 import nl.arthurvlug.captainhook.framework.common.response.ExceptionResult;
 import nl.arthurvlug.captainhook.framework.common.response.Output;
 import nl.arthurvlug.captainhook.framework.common.response.Response;
 import nl.arthurvlug.captainhook.framework.common.serialization.Serializer;
 import nl.arthurvlug.captainhook.framework.common.serialization.SerializerTypes;
+import nl.arthurvlug.captainhook.framework.server.Call;
+import nl.arthurvlug.captainhook.framework.server.Input;
+import nl.arthurvlug.captainhook.framework.server.Request;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
 import java.lang.reflect.InvocationTargetException;
 
 public abstract class AbstractService {
     private static final Serializer SERIALIZER = SerializerTypes.JSON.getSerializer();
 
-    @Autowired
     private AbstractClientActivityPool clientActivityPool;
 
-    @Autowired
     private AbstractClientConfiguration clientConfiguration;
+
+    protected AbstractService(final AbstractClientActivityPool clientActivityPool,
+                              final AbstractClientConfiguration clientConfiguration) {
+        this.clientActivityPool = clientActivityPool;
+        this.clientConfiguration = clientConfiguration;
+    }
 
     protected <I extends Input, O extends Output> Call<O> createCall(final String activity,
                                                                      final I input) {
@@ -100,7 +106,7 @@ public abstract class AbstractService {
         final byte[] payload = SERIALIZER.serialize(request);
         final String baseUrl = clientConfiguration.getBaseUrl();
 
-        HttpPost httpPost = new HttpPost(baseUrl + "?activity=" + activity + "&encoding=" + SerializerTypes.JSON.name());
+        HttpPost httpPost = new HttpPost(baseUrl + "/activity?activity=" + activity + "&encoding=" + SerializerTypes.JSON.name());
         httpPost.setEntity(new ByteArrayEntity(payload));
         HttpClient httpClient = HttpClientBuilder.create().build();
         final HttpResponse response = httpClient.execute(httpPost);

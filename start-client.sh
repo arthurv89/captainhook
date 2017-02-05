@@ -1,1 +1,1 @@
-cd example-client && mvn exec:java
+cd main && mvn exec:java
