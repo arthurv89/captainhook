@@ -13,6 +13,15 @@
     </properties>
 
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/generated-sources</directory>
+                <includes>
+                    <include>**/*.class</include>
+                </includes>
+            </resource>
+        </resources>
+
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -24,14 +33,42 @@
                 </configuration>
             </plugin>
 
-            <!-- Generate sources -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <id>copy-dependency-resources-to-target-folder</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>nl.arthurvlug.captainhook</groupId>
+                                    <artifactId>framework-core</artifactId>
+                                    <version>1.0-SNAPSHOT</version>
+                                    <type>jar</type>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${project.build.directory}/dependency-resources/framework-core/generated-template</outputDirectory>
+                                    <includes>**/*.java</includes>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>1.5.0</version>
                 <executions>
                     <execution>
-                        <phase>generate-sources</phase>
+                        <id>replace-template-sources</id>
+                        <phase>compile</phase>
                         <goals>
                             <goal>java</goal>
                         </goals>
@@ -39,25 +76,39 @@
                 </executions>
                 <configuration>
                     <mainClass>nl.arthurvlug.captainhook.framework.server.generateClasses.GenerateClasses</mainClass>
-                    <arguments>${project.artifactId}</arguments>
+                    <arguments>
+                        <argument>${project.artifactId}</argument>
+                        <argument>${project.groupId}</argument>
+                    </arguments>
                 </configuration>
             </plugin>
 
-            <!-- Add generated sources to the jar -->
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.3</version>
+                <configuration>
+                    <includes>
+                        <include>**/*.class</include>
+                    </includes>
+                </configuration>
+            </plugin>
+
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
                 <version>1.7</version>
                 <executions>
                     <execution>
-                        <id>add-source</id>
+                        <id>add-source-to-jar</id>
                         <phase>generate-sources</phase>
                         <goals>
                             <goal>add-source</goal>
                         </goals>
                         <configuration>
                             <sources>
-                                <source>src/main/generated</source>
+                                <source>${project.basedir}/src/main/generated-sources</source>
                             </sources>
                         </configuration>
                     </execution>

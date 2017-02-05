@@ -5,10 +5,8 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import nl.arthurvlug.captainhook.exampleservice.activity.helloworld.HelloWorldInput;
 import nl.arthurvlug.captainhook.exampleservice.activity.helloworld.HelloWorldOutput;
-import nl.arthurvlug.captainhook.exampleservice.client.ExampleserviceClient;
 import nl.arthurvlug.captainhook.exampleservice2.activity.ping.PingInput;
 import nl.arthurvlug.captainhook.exampleservice2.activity.ping.PingOutput;
-import nl.arthurvlug.captainhook.exampleservice2.client.Exampleservice2Client;
 import nl.arthurvlug.captainhook.framework.client.AbstractClientRunner;
 import nl.arthurvlug.captainhook.framework.client.AbstractService;
 import nl.arthurvlug.captainhook.framework.common.response.DependencyException;
@@ -21,10 +19,10 @@ import org.springframework.stereotype.Component;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ClientRunner extends AbstractClientRunner {
     @Autowired
-    private ExampleserviceClient exampleService;
+    private nl.arthurvlug.captainhook.exampleservice.client.Client exampleService;
 
     @Autowired
-    private Exampleservice2Client exampleService2;
+    private nl.arthurvlug.captainhook.exampleservice2.client.Client exampleService2;
 
     @Override
     public void run() {
@@ -81,9 +79,9 @@ public class ClientRunner extends AbstractClientRunner {
 
     private void handleError(final Exception e, AbstractService clientName) {
         if (e.getCause() instanceof HttpHostConnectException) {
-            log.error("Server " + clientName.getClass().getSimpleName() + " not ready. Waiting 500 ms");
+            log.error("Server " + clientName.getClass().getName() + " not ready. Waiting 500 ms");
         } else {
-            log.error(e.getCause().getClass().getSimpleName() + ": " + e.getCause().getMessage());
+            log.error(e.getCause().getClass().getName() + ": " + e.getCause().getMessage());
         }
     }
 }

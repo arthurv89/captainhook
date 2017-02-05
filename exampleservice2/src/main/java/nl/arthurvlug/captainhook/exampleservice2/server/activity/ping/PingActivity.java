@@ -1,8 +1,8 @@
 package nl.arthurvlug.captainhook.exampleservice2.server.activity.ping;
 
-import nl.arthurvlug.captainhook.exampleservice2.server.activity.AbstractExampleActivity;
 import nl.arthurvlug.captainhook.exampleservice2.activity.ping.PingInput;
 import nl.arthurvlug.captainhook.exampleservice2.activity.ping.PingOutput;
+import nl.arthurvlug.captainhook.exampleservice2.server.activity.AbstractExampleActivity;
 import nl.arthurvlug.captainhook.framework.server.Activity;
 
 @Activity
