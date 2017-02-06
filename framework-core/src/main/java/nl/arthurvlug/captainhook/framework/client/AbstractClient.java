@@ -7,7 +7,6 @@ import nl.arthurvlug.captainhook.framework.common.response.Output;
 import nl.arthurvlug.captainhook.framework.common.response.Response;
 import nl.arthurvlug.captainhook.framework.common.serialization.Serializer;
 import nl.arthurvlug.captainhook.framework.common.serialization.SerializerTypes;
-import nl.arthurvlug.captainhook.framework.server.Call;
 import nl.arthurvlug.captainhook.framework.server.Input;
 import nl.arthurvlug.captainhook.framework.server.Request;
 import org.apache.commons.io.IOUtils;
@@ -16,6 +15,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
+import rx.Observable;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -23,22 +23,26 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.lang.reflect.InvocationTargetException;
 
-public abstract class AbstractService {
+public abstract class AbstractClient {
     private static final Serializer SERIALIZER = SerializerTypes.JSON.getSerializer();
 
     private AbstractClientActivityPool clientActivityPool;
 
     private AbstractClientConfiguration clientConfiguration;
 
-    protected AbstractService(final AbstractClientActivityPool clientActivityPool,
-                              final AbstractClientConfiguration clientConfiguration) {
+    protected AbstractClient(final AbstractClientActivityPool clientActivityPool,
+                             final AbstractClientConfiguration clientConfiguration) {
         this.clientActivityPool = clientActivityPool;
         this.clientConfiguration = clientConfiguration;
     }
 
-    protected <I extends Input, O extends Output> Call<O> createCall(final String activity,
+    protected <I extends Input, O extends Output> Observable<O> createCall(final String activity,
                                                                      final I input) {
-        return () -> get(activity, input);
+        return Observable.create(subscribe -> {
+            final O o = get(activity, input);
+            subscribe.onNext(o);
+            subscribe.onCompleted();
+        });
     }
 
     private <I extends Input, O extends Output> O get(final String activity,
@@ -52,8 +56,8 @@ public abstract class AbstractService {
             return response.getValue();
         } else {
             final ExceptionResult exceptionResult = response.getExceptionResult();
-            final Exception exception = createException(exceptionResult);
-            throw new DependencyException(exception);
+            final Exception e = createException(exceptionResult);
+            throw new DependencyException(e, getName());
         }
     }
 
@@ -67,7 +71,7 @@ public abstract class AbstractService {
         try {
             return readBytes(activity, input);
         } catch (IOException e) {
-            throw new DependencyException(e);
+            throw new DependencyException(e, getName());
         }
     }
 
@@ -114,4 +118,6 @@ public abstract class AbstractService {
 
         return IOUtils.toByteArray(s);
     }
+
+    protected abstract String getName();
 }

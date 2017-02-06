@@ -96,11 +96,18 @@ public class GenerateClasses {
                 .collect(Collectors.joining("\n\n    "));
 
 
-        return contents.replace(endpoint(entryPrototype), endpointDeclarations)
-                .replace(entry(entryPrototype), entryDeclarations)
-                .replace(serviceMethod(entryPrototype), serviceMethodDeclarations)
-                .replace(entryPrototype.getPackage(), getPackage(basePackage, serviceName))
-                .replace("@Component(\"_Endpoint", "@Component(\"" + serviceName);
+        final String prototypeEndpoint = endpoint(entryPrototype);
+        final String prototypeEntry = entry(entryPrototype);
+        final String prototypeServiceMethod = serviceMethod(entryPrototype);
+        final String prototypePackage = entryPrototype.getPackage();
+        final String prototypeComponentAnnotation = "@Component(\"_Endpoint";
+
+        final String replace1 = contents.replace(prototypeEndpoint, endpointDeclarations);
+        final String replace2 = replace1.replace(prototypeEntry, entryDeclarations);
+        final String replace3 = replace2.replace(prototypeServiceMethod, serviceMethodDeclarations);
+        final String replace4 = replace3.replace(prototypePackage, getPackage(basePackage, serviceName));
+        final String replace7 = replace4.replace("_Endpoint", serviceName);
+        return replace7;
     }
 
     @AllArgsConstructor
@@ -132,7 +139,7 @@ public class GenerateClasses {
     }
 
     private static String serviceMethod(final EntryConfig c) {
-        return "public Call<" + outputClass(c) + "> " + lowerFirst(c.endpointName) + "Call(final " + inputClass(c) + " input) {\n" +
+        return "public Observable<" + outputClass(c) + "> " + lowerFirst(c.endpointName) + "Call(final " + inputClass(c) + " input) {\n" +
                 "        return createCall(ActivityConfiguration." + c.endpointName + "Endpoint, input);\n" +
                 "    }";
     }

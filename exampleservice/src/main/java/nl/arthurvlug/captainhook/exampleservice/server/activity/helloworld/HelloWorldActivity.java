@@ -11,7 +11,7 @@ import java.util.Calendar;
 public class HelloWorldActivity extends AbstractExampleActivity<HelloWorldInput, HelloWorldOutput> {
     @Override
     public HelloWorldOutput enact(HelloWorldInput helloWorldInput) throws InterruptedException {
-        Thread.sleep((long) (Math.random() * 500));
+        Thread.sleep((long) (Math.random() * 5000));
         if(Math.random() < 0.1) {
             throw new RuntimeException("Purposely thrown an exception");
         }

@@ -11,12 +11,12 @@ import java.util.Calendar;
 public class HelloWorldActivity extends AbstractExampleActivity<HelloWorldInput, HelloWorldOutput> {
     @Override
     public HelloWorldOutput enact(HelloWorldInput helloWorldInput) throws InterruptedException {
-        Thread.sleep((long) (Math.random() * 500));
+        Thread.sleep((long) (Math.random() * 4000));
         if(Math.random() < 0.1) {
             throw new RuntimeException("Purposely thrown an exception");
         }
         return HelloWorldOutput.builder()
-                .message("Hello, " + helloWorldInput.getName() + "!")
+                .message("Hello 2, " + helloWorldInput.getName() + "!")
                 .respondingTime(Calendar.getInstance())
                 .build();
     }

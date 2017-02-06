@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import java.util.Calendar;
 import java.util.Map;
 import java.util.Optional;
 
@@ -17,9 +16,7 @@ public class SelfDiagnoseController {
     public String welcome(Map<String, Object> model) {
         final AbstractSelfDiagnose selfDiagnose = Optional.ofNullable(_selfDiagnose).orElse(new DefaultSelfDiagnose());
 
-        model.put("items", selfDiagnose.getItems());
-        model.put("time", Calendar.getInstance().getTime());
-        model.put("version", selfDiagnose.getVersion());
+        model.put("selfdiagnose", selfDiagnose);
         return "plugins/selfdiagnose";
     }
 }
