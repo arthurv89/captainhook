@@ -1,7 +1,9 @@
 package nl.arthurvlug.captainhook.framework.common.response;
 
-public class FailureResponse<T> extends Response<T> {
-    public FailureResponse(final Throwable e) {
-        super(null, new ExceptionResult(e));
+import java.util.Map;
+
+public class FailureResponse<O extends Output> extends Response<O> {
+    public FailureResponse(final Throwable e, final Map<String, Object> metadata) {
+        super(null, new ExceptionResult(e), metadata);
     }
 }

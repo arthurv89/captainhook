@@ -1,7 +1,9 @@
 package nl.arthurvlug.captainhook.framework.common.response;
 
-public class SuccessResponse<T> extends Response<T> {
-    public SuccessResponse(final T value) {
-        super(value, null);
+import java.util.Map;
+
+public class SuccessResponse<O extends Output> extends Response<O> {
+    public SuccessResponse(final O value, final Map<String, Object> metadata) {
+        super(value, null, metadata);
     }
 }

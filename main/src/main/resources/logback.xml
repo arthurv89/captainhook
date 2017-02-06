@@ -1,12 +1,31 @@
 <configuration>
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-        <layout class="ch.qos.logback.classic.PatternLayout">
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>INFO</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <encoder>
             <Pattern>[%-5level %d{HH:mm:ss} %logger{16}] %msg %n</Pattern>
-        </layout>
+        </encoder>
+        <target>System.out</target>
     </appender>
+    <appender name="STDERR" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <encoder>
+            <Pattern>[%-5level %d{HH:mm:ss} %logger{16}] %msg %n</Pattern>
+        </encoder>
+        <target>System.err</target>
+    </appender>
+
 
     <root level="debug">
         <appender-ref ref="STDOUT" />
+        <appender-ref ref="STDERR" />
     </root>
     <logger name="org.apache" level="WARN" />
     <logger name="org.apache.axis2" level="WARN" />

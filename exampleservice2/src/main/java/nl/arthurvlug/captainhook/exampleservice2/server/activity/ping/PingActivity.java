@@ -9,8 +9,8 @@ import nl.arthurvlug.captainhook.framework.server.Activity;
 public class PingActivity extends AbstractExampleActivity<PingInput, PingOutput> {
     @Override
     public PingOutput enact(PingInput helloWorldInput) throws InterruptedException {
-        Thread.sleep((long) (Math.random() * 2000));
-        if(Math.random() < 0.3) {
+        Thread.sleep((long) (Math.random() * 500));
+        if(Math.random() < 0.1) {
             throw new RuntimeException("Purposely thrown an exception");
         }
         return PingOutput.builder()

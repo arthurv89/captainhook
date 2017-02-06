@@ -8,24 +8,24 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public abstract class BaseServerActivityPool extends AbstractServerActivityPool {
-    private Map<String, ServerActivityConfig<? extends Input, ? extends Output>> map;
+    private Map<String, ServerActivityConfig<? extends Input, ? extends Output, ? extends AbstractRequestContext>> map;
 
     @Autowired
     private ActivityScanner activityScanner;
 
     public void init() {
-        final Map<String, ServerActivityConfig<? extends Input, ? extends Output>> collect = activityScanner.scan().entrySet().stream().collect(Collectors.toMap(
+        map = activityScanner.scan().entrySet().stream().collect(Collectors.toMap(
                 e -> e.getKey(),
                 e -> activityConfig(e.getKey(), e.getValue())));
-        map = collect;
     }
 
-    private ServerActivityConfig<? extends Input, ? extends Output> activityConfig(final String key, final AbstractActivity value) {
-        final IOType<? extends Input, ? extends Output> ioType = getActivityConfiguration().getIOType(key);
-        return new ServerActivityConfig<>(value, ioType.getRequestTypeToken());
+    private <I extends Input, O extends Output, RC extends AbstractRequestContext> ServerActivityConfig<I, O, RC> activityConfig(final String key, final AbstractActivity<I, O, RC> activity) {
+        final IOType<I, O> ioType = (IOType<I, O>) getActivityConfiguration().getIOType(key);
+        return new ServerActivityConfig<>(activity, ioType.getRequestTypeToken());
     }
 
-    protected ServerActivityConfig<? extends Input, ? extends Output> get(final String activity) {
+    @Override
+    protected ServerActivityConfig<? extends Input, ? extends Output, ? extends AbstractRequestContext> get(final String activity) {
         return map.get(activity);
     }
 

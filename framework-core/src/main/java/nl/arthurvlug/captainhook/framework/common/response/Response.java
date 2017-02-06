@@ -1,29 +1,24 @@
 package nl.arthurvlug.captainhook.framework.common.response;
 
-public class Response<T> {
-    private T value;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.ToString;
+
+import java.util.Map;
+
+@Getter
+@AllArgsConstructor
+@ToString
+public class Response<O extends Output>  {
+    private O value;
     private ExceptionResult exceptionResult;
+    private Map<String, Object> metadata;
 
-    protected Response(final T value, final ExceptionResult exceptionResult) {
-        this.value = value;
-        this.exceptionResult = exceptionResult;
+    public static <T extends Output> SuccessResponse<T> success(final T value, final Map<String, Object> metadata) {
+        return new SuccessResponse<>(value, metadata);
     }
 
-    public static <T, E extends ExceptionResult> SuccessResponse success(final T value) {
-        return new SuccessResponse<T>(value);
+    public static <T extends Output, E extends Throwable> FailureResponse failure(final E e, final Map<String, Object> metadata) {
+        return new FailureResponse<T>(e, metadata);
     }
-
-    public static <T, E extends Throwable> FailureResponse failure(final E e) {
-        return new FailureResponse<T>(e);
-    }
-
-
-    public T getValue() {
-        return value;
-    }
-
-    public ExceptionResult getExceptionResult() {
-        return exceptionResult;
-    }
-
 }

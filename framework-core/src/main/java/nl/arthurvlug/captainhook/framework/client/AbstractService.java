@@ -101,7 +101,7 @@ public abstract class AbstractService {
         }
     }
 
-    private <I> byte[] readBytes(final String activity, final I input) throws IOException {
+    private <I extends Input> byte[] readBytes(final String activity, final I input) throws IOException {
         final Request<I> request = new Request<>(input);
         final byte[] payload = SERIALIZER.serialize(request);
         final String baseUrl = clientConfiguration.getBaseUrl();
