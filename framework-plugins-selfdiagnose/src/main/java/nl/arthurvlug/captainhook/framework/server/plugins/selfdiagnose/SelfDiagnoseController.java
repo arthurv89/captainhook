@@ -15,8 +15,17 @@ public class SelfDiagnoseController {
     @RequestMapping("/selfdiagnose")
     public String welcome(Map<String, Object> model) {
         final AbstractSelfDiagnose selfDiagnose = Optional.ofNullable(_selfDiagnose).orElse(new DefaultSelfDiagnose());
+        selfDiagnose.refresh();
 
+        model.put("statusOk", statusOk(selfDiagnose));
         model.put("selfdiagnose", selfDiagnose);
         return "plugins/selfdiagnose";
+    }
+
+    private boolean statusOk(final AbstractSelfDiagnose selfDiagnose) {
+        return !selfDiagnose.getItems().stream()
+                .filter(x -> !x.getValue().isSuccess())
+                .findFirst()
+                .isPresent();
     }
 }

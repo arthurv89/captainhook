@@ -9,17 +9,24 @@
 				width: 100%;
 			}
 
-			th, td {
-				text-align: left;
-				padding: 8px;
-			}
-
-			tr:nth-child(even){background-color: #f2f2f2}
-
 			th {
-				background-color: <c:out value="${selfdiagnose.layout.tableColor}"/>;
+				background-color: <c:out value="${statusOk ? '#4CAF50' : '#AF4C50'}"/>;
 				color: white;
 			}
+
+			tr:nth-child(odd) {
+			    background-color: <c:out value="${selfdiagnose.layout.tableColor}"/>
+            }
+
+			tr.item-false td {
+                background-color: #f99;
+            }
+
+
+			th, td {
+                text-align: left;
+                padding: 8px;
+            }
         </style>
 	</head>
 	<body>
@@ -30,14 +37,15 @@
 		        <th>Value</th>
             </tr>
             <c:forEach items="${selfdiagnose.items}" var="item">
-                <tr>
+                <tr class="item-${item.value.success}">
                     <td>${item.key}</td>
-                    <td>${item.value}</td>
+                    <td>${item.value.message}</td>
                 </tr>
             </c:forEach>
 		</table>
-        <br/></br>
+
+        <br/><br/>
 		Version: ${selfdiagnose.version}<br/>
-        Time: ${selfdiagnose.time}
+        Time: <fmt:formatDate value="${selfdiagnose.currentTime}" type="date" dateStyle="short" />
 	</body>
 </html>
