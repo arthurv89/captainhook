@@ -1,5 +1,6 @@
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <!DOCTYPE html>
 <html lang="en">
 	<head>
@@ -46,6 +47,6 @@
 
         <br/><br/>
 		Version: ${selfdiagnose.version}<br/>
-        Time: <fmt:formatDate value="${selfdiagnose.currentTime}" type="date" dateStyle="short" />
+        Time: <fmt:formatDate value="${selfdiagnose.currentTime.time}" pattern="yyyy-MM-dd HH:mm:ss.SSS" />
 	</body>
 </html>
