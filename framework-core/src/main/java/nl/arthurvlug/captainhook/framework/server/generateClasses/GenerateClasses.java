@@ -59,7 +59,7 @@ public class GenerateClasses {
 
 
     private static void replaceFiles(final String basePackage, final String serviceName, final File temp) throws IOException {
-        final Set<String> activities = ActivityScanner.run(serviceName);
+        final Set<String> activities = ActivityScanner.run(basePackage + "." + serviceName);
 
         Files.walk(Paths.get(temp.toURI()))
                 .parallel()
@@ -100,7 +100,6 @@ public class GenerateClasses {
         final String prototypeEntry = entry(entryPrototype);
         final String prototypeServiceMethod = serviceMethod(entryPrototype);
         final String prototypePackage = entryPrototype.getPackage();
-        final String prototypeComponentAnnotation = "@Component(\"_Endpoint";
 
         final String replace1 = contents.replace(prototypeEndpoint, endpointDeclarations);
         final String replace2 = replace1.replace(prototypeEntry, entryDeclarations);
@@ -130,18 +129,18 @@ public class GenerateClasses {
         return ".put(" + c.endpointName + "Endpoint, new IOType<>(new TypeToken<Request<" + inputClass(c) + ">>() {}, new TypeToken<Response<" + outputClass(c) + ">>() {}))";
     }
 
+    private static String serviceMethod(final EntryConfig c) {
+        return "public Observable<" + outputClass(c) + "> " + lowerFirst(c.endpointName) + "Call(final " + inputClass(c) + " input) {\n" +
+                "        return createCall(ActivityConfiguration." + c.endpointName + "Endpoint, input);\n" +
+                "    }";
+    }
+
     private static String outputClass(final EntryConfig c) {
         return c.getPackage() + ".activity." + c.endpointName.toLowerCase() + "." + c.endpointName + "Output";
     }
 
     private static String inputClass(final EntryConfig c) {
         return c.getPackage() + ".activity." + c.endpointName.toLowerCase() + "." + c.endpointName + "Input";
-    }
-
-    private static String serviceMethod(final EntryConfig c) {
-        return "public Observable<" + outputClass(c) + "> " + lowerFirst(c.endpointName) + "Call(final " + inputClass(c) + " input) {\n" +
-                "        return createCall(ActivityConfiguration." + c.endpointName + "Endpoint, input);\n" +
-                "    }";
     }
 
     private static String lowerFirst(final String s) {

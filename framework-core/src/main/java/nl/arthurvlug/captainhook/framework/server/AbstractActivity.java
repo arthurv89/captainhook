@@ -1,9 +1,10 @@
 package nl.arthurvlug.captainhook.framework.server;
 
 import nl.arthurvlug.captainhook.framework.common.response.Output;
+import rx.Observable;
 
 public abstract class AbstractActivity<I extends Input, O extends Output, RC extends AbstractRequestContext> {
-    protected abstract O enact(I input) throws Exception;
+    protected abstract Observable<O> enact(I input);
 
     protected abstract RC preActivity(I input);
 

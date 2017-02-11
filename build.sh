@@ -12,12 +12,14 @@ function e {
 	printf "\n\n\n\n\n"
 }
 
-e framework-core \ &&
-e framework-plugins-selfdiagnose \ &&
-e exampleservice-clientlib \ &&
-e exampleservice \ &&
-e exampleservice2-clientlib \ &&
-e exampleservice2 \ &&
+e framework-core && \
+e framework-plugins-selfdiagnose && \
+e exampleservice-clientlib && \
+e exampleservice && \
+e exampleservice2-clientlib && \
+e exampleservice2 && \
+e exampleMiddleService-clientlib && \
+e exampleMiddleService && \
 e main
 
 echo "Done."

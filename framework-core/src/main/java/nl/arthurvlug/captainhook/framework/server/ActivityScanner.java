@@ -3,28 +3,23 @@ package nl.arthurvlug.captainhook.framework.server;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.ClassPath;
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.Map;
+import java.util.List;
 import java.util.stream.Collectors;
 
-@Component
-@AllArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 public class ActivityScanner {
-    @Autowired
-    private AbstractCommonConfiguration commonConfiguration;
+    private final AbstractCommonConfiguration commonConfiguration;
 
-    public Map<String, AbstractActivity> scan() {
+    public List<Class> scan() {
         final String packageName = commonConfiguration.getPackageName();
 
         return getStringAbstractActivityMap(packageName).stream()
                 .map(x -> x.load())
                 .filter(x -> x.getAnnotationsByType(Activity.class).length != 0)
-                .collect(Collectors.toMap(c -> c.getSimpleName().replace("Activity", ""), this::newInstance));
+                .collect(Collectors.toList());
     }
 
     private ImmutableSet<ClassPath.ClassInfo> getStringAbstractActivityMap(final String packageName) {

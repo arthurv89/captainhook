@@ -8,8 +8,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class ActivityScanner {
-    public static Set<String> run(final String serviceName) throws IOException {
-        return new Reflections("nl.arthurvlug.captainhook." + serviceName)
+    public static Set<String> run(final String packageName) throws IOException {
+        return new Reflections(packageName)
                 .getSubTypesOf(Input.class)
                 .stream()
                 .map(c -> c.getSimpleName().replace("Input", ""))

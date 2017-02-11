@@ -14,11 +14,11 @@ public class Response<O extends Output>  {
     private ExceptionResult exceptionResult;
     private Map<String, Object> metadata;
 
-    public static <T extends Output> SuccessResponse<T> success(final T value, final Map<String, Object> metadata) {
+    public static <O extends Output> SuccessResponse<O> success(final O value, final Map<String, Object> metadata) {
         return new SuccessResponse<>(value, metadata);
     }
 
-    public static <T extends Output, E extends Throwable> FailureResponse failure(final E e, final Map<String, Object> metadata) {
-        return new FailureResponse<T>(e, metadata);
+    public static <O extends Output, T extends Throwable> FailureResponse failure(final T t, final Map<String, Object> metadata) {
+        return new FailureResponse<O>(t, metadata);
     }
 }

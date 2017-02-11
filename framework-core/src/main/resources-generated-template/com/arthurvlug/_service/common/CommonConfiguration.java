@@ -7,8 +7,8 @@ import lombok.NoArgsConstructor;
 import nl.arthurvlug.captainhook.framework.server.AbstractCommonConfiguration;
 import org.springframework.stereotype.Component;
 
-@Component("_EndpointCommonConfiguration")
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
+//@Component("_EndpointCommonConfiguration")
+@NoArgsConstructor
 public class CommonConfiguration extends AbstractCommonConfiguration {
     @Getter
     private final String packageName = ServiceConfiguration.PACKAGE_NAME;

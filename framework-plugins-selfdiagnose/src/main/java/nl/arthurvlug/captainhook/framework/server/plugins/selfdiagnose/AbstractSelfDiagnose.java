@@ -14,7 +14,6 @@ public abstract class AbstractSelfDiagnose {
     public abstract String getName();
     public abstract List<SelfDiagnoseItem> getItems();
     public abstract String getVersion();
-    public final Calendar currentTime = Calendar.getInstance();
 
     protected void refresh() {}
 }

@@ -6,7 +6,7 @@
             <onMismatch>DENY</onMismatch>
         </filter>
         <encoder>
-            <Pattern>[%-5level %d{HH:mm:ss} %logger{16}] %msg %n</Pattern>
+            <Pattern>[%-5level %d{HH:mm:ss.SSS} %logger{16}] %msg %n</Pattern>
         </encoder>
         <target>System.out</target>
     </appender>
@@ -17,7 +17,7 @@
             <onMismatch>DENY</onMismatch>
         </filter>
         <encoder>
-            <Pattern>[%-5level %d{HH:mm:ss} %logger{16}] %msg %n</Pattern>
+            <Pattern>[%-5level %d{HH:mm:ss.SSS} %logger{16}] %msg %n</Pattern>
         </encoder>
         <target>System.err</target>
     </appender>
@@ -33,4 +33,6 @@
     <logger name="httpclient.wire" level="WARN" />
     <logger name="org.hibernate" level="WARN" />
     <logger name="org.springframework" level="WARN" />
+    <logger name="io.netty" level="WARN" />
+    <logger name="org.asynchttpclient" level="WARN" />
 </configuration>

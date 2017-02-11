@@ -47,6 +47,10 @@
 
         <br/><br/>
 		Version: ${selfdiagnose.version}<br/>
-        Time: <fmt:formatDate value="${selfdiagnose.currentTime.time}" pattern="yyyy-MM-dd HH:mm:ss.SSS" />
+        Time: <fmt:formatDate value="${currentTime.time}" pattern="yyyy-MM-dd HH:mm:ss.SSS" /><br/>
+		Status: <c:choose>
+                  <c:when test="${statusOk}">All checks passed</c:when>
+                  <c:otherwise>There are ${failingChecks} failing checks</c:otherwise>
+                </c:choose>
 	</body>
 </html>

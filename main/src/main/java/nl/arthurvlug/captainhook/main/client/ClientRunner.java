@@ -1,80 +1,54 @@
 package nl.arthurvlug.captainhook.main.client;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import lombok.Value;
+import com.arthurvlug.captainhook.examplemiddleservice.activity.merge.MergeInput;
+import com.arthurvlug.captainhook.examplemiddleservice.activity.merge.MergeOutput;
 import lombok.extern.slf4j.Slf4j;
-import nl.arthurvlug.captainhook.exampleservice.activity.helloworld.HelloWorldInput;
-import nl.arthurvlug.captainhook.exampleservice.activity.helloworld.HelloWorldOutput;
-import nl.arthurvlug.captainhook.exampleservice2.activity.ping.PingInput;
-import nl.arthurvlug.captainhook.exampleservice2.activity.ping.PingOutput;
 import nl.arthurvlug.captainhook.framework.client.AbstractClientRunner;
 import nl.arthurvlug.captainhook.framework.common.response.DependencyException;
-import org.apache.http.conn.HttpHostConnectException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-import rx.Observable;
-
-import java.util.Optional;
+import rx.Subscriber;
+import rx.schedulers.Schedulers;
 
 @Slf4j
 @Component
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ClientRunner extends AbstractClientRunner {
     @Autowired
-    private nl.arthurvlug.captainhook.exampleservice.client.Client exampleService;
-
-    @Autowired
-    private nl.arthurvlug.captainhook.exampleservice2.client.Client exampleService2;
+    @Qualifier("examplemiddleserviceClient")
+    private com.arthurvlug.captainhook.examplemiddleservice.client.Client exampleMiddleService;
 
     @Override
     public void run() {
-        while(true) {
-            doCalls();
+        for (int i = 1; ; i++) {
+            doCall(i);
         }
     }
 
-    private void doCalls() {
-        log.info("");
-        final Optional<CombinedValue> combinedValueOptional = combine()
-                .map(x -> Optional.of(x))
-                .doOnError(t -> handleError((DependencyException) t))
-                .onErrorResumeNext(t -> Observable.empty())
-                .toBlocking()
-                .firstOrDefault(Optional.empty());
+    private void doCall(final int iterationNo) {
+        log.info("Iteration " + iterationNo + ": Started");
+        exampleMiddleService.mergeCall(MergeInput.builder().name("Iteration " + iterationNo).build())
+                .observeOn(Schedulers.io())
+                .subscribeOn(Schedulers.io())
+                .subscribe(new Subscriber<MergeOutput>() {
+                    @Override
+                    public void onError(final Throwable throwable) {
+                        handleError(throwable, iterationNo);
+                    }
 
-        combinedValueOptional.ifPresent(combinedValue -> {
-            log.info("Service exampleservice:  Responded at timestamp {}: {}",
-                    combinedValue.helloWorldOutput.getRespondingTime().getTime().getTime(),
-                    combinedValue.helloWorldOutput.getMessage());
+                    @Override
+                    public void onNext(final MergeOutput mergeOutput) {
+                        log.info("Iteration " + iterationNo + ": " + String.valueOf(mergeOutput));
+                    }
 
-            log.info("Service exampleservice2: Responded at timestamp {}: {}",
-                    combinedValue.helloWorld2Output.getRespondingTime().getTime().getTime(),
-                    combinedValue.helloWorld2Output.getMessage());
-
-            log.info("Service exampleservice2: Responded: {}",
-                    combinedValue.pingOutput.getY());
-
-            log.info("CombinedValue:           " + combinedValue);
-        });
-
+                    @Override
+                    public void onCompleted() {
+                        // Should not happen
+                        log.debug("Completed");
+                    }
+                });
+        log.info("Iteration " + iterationNo + ": Goint to sleep for 1000ms");
         sleep(1000);
-    }
-
-    private Observable<CombinedValue> combine() {
-        return helloworld()
-                .flatMap(helloWorldOutput -> helloworld2()
-                        .flatMap(helloWorld2Output -> ping()
-                                .map(pingOutput -> new CombinedValue(helloWorldOutput, helloWorld2Output, pingOutput))));
-    }
-
-    @Value
-    @AllArgsConstructor
-    class CombinedValue {
-        HelloWorldOutput helloWorldOutput;
-        nl.arthurvlug.captainhook.exampleservice2.activity.helloworld.HelloWorldOutput helloWorld2Output;
-        PingOutput pingOutput;
     }
 
     private void sleep(final int millis) {
@@ -85,39 +59,11 @@ public class ClientRunner extends AbstractClientRunner {
         }
     }
 
-    private Observable<HelloWorldOutput> helloworld() {
-        log.info("- Running Helloworld");
-        final HelloWorldInput helloWorldInput = HelloWorldInput.builder()
-                .name("World")
-                .build();
-        return exampleService.helloWorldCall(helloWorldInput)
-                .doOnNext(x -> log.info("- Received HelloWorld"));
-    }
-
-    private Observable<nl.arthurvlug.captainhook.exampleservice2.activity.helloworld.HelloWorldOutput> helloworld2() {
-        log.info("--  Running Helloworld2");
-        final nl.arthurvlug.captainhook.exampleservice2.activity.helloworld.HelloWorldInput helloWorldInput = nl.arthurvlug.captainhook.exampleservice2.activity.helloworld.HelloWorldInput.builder()
-                .name("World")
-                .build();
-        return exampleService2.helloWorldCall(helloWorldInput)
-                .doOnNext(x -> log.info("--  Received HelloWorld2"));
-    }
-
-    private Observable<PingOutput> ping() {
-        log.info("---   Running Ping");
-        final PingInput pingInput = PingInput.builder()
-                .x("World")
-                .build();
-        return exampleService2.pingCall(pingInput)
-                .doOnNext(x -> log.info("---   Received Ping"));
-    }
-
-    private void handleError(final DependencyException e) {
-        final String serverName = "Server " + e.getClientName();
-        if (e.getCause() instanceof HttpHostConnectException) {
-            log.error(serverName + " not ready. Waiting 500 ms");
+    private void handleError(final Throwable e, final int iterationNo) {
+        if (e.getCause() instanceof DependencyException) {
+            log.error("Iteration " + iterationNo + ": Dependency threw an exception: " + e.getCause().getClass().getName() + ": " + e.getCause().getMessage());
         } else {
-            log.error(serverName + ": " + e.getCause().getClass().getName() + ": " + e.getCause().getMessage());
+            log.error("Iteration " + iterationNo + ": Unexpected exception: " + e.getCause().getClass().getName() + ": " + e.getCause().getMessage());
         }
     }
 }

@@ -2,7 +2,6 @@ package com.arthurvlug._service.common;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.reflect.TypeToken;
-import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import nl.arthurvlug.captainhook.framework.client.AbstractActivityConfiguration;
 import nl.arthurvlug.captainhook.framework.common.response.Output;
@@ -14,8 +13,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
-@Component("_EndpointActivityConfiguration")
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
+//@Component("_EndpointActivityConfiguration")
+@NoArgsConstructor
 public class ActivityConfiguration extends AbstractActivityConfiguration {
     public static final String _EndpointEndpoint = "_Endpoint";
 
