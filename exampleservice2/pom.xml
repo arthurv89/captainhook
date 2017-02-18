@@ -12,7 +12,48 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+
+    <profiles>
+        <profile>
+            <id>run</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>1.1.1</version>
+                        <executions>
+                            <!-- Start service -->
+                            <execution>
+                                <id>run-service</id>
+                                <phase>none</phase>
+                                <goals>
+                                    <goal>java</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <mainClass>nl.arthurvlug.captainhook.exampleservice2.ServiceMain2</mainClass>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+            <resource>
+                <directory>src/main/generated-sources</directory>
+                <includes>
+                    <include>**/*.class</include>
+                </includes>
+            </resource>
+        </resources>
+
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -24,26 +65,10 @@
                 </configuration>
             </plugin>
 
-            <!-- Start service -->
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>1.4.0</version>
-                <executions>
-                    <execution>
-                        <id>run-service</id>
-                        <phase>none</phase>
-                        <goals>
-                            <goal>java</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <mainClass>nl.arthurvlug.captainhook.exampleservice2.ServiceMain2</mainClass>
-                </configuration>
-            </plugin>
 
-            <!-- Copy JSPs from dependencies -->
+
+
+            <!-- Copy resources from dependencies -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
@@ -69,8 +94,51 @@
                             </artifactItems>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>copy-dependency-resources-to-target-folder</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>nl.arthurvlug.captainhook</groupId>
+                                    <artifactId>framework-core</artifactId>
+                                    <version>1.0-SNAPSHOT</version>
+                                    <type>jar</type>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${project.build.directory}/dependency-resources/framework-core/generated-template</outputDirectory>
+                                    <includes>**/*.java</includes>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.5.0</version>
+                <executions>
+                    <execution>
+                        <id>replace-template-sources</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <mainClass>nl.arthurvlug.captainhook.framework.generation.server.GenerateServerClasses</mainClass>
+                    <arguments>
+                        <argument>${project.artifactId}</argument>
+                        <argument>${project.groupId}</argument>
+                    </arguments>
+                </configuration>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
@@ -83,12 +151,12 @@
                             <target>
                                 <delete dir="${project.basedir}/src/main/webapp/WEB-INF/jsp/plugins"/>
                                 <copy todir="${project.basedir}/src/main/webapp/WEB-INF/jsp/plugins" flatten="true">
-                                    <fileset dir="${project.build.directory}/dependency-resources/selfdiagnose">
+                                    <fileset dir="${project.build.directory}/dependency-resources/selfdiagnose/">
                                         <include name="**/*.jsp"/>
                                     </fileset>
                                 </copy>
                                 <copy todir="${project.basedir}/src/main/resources/plugins" flatten="true">
-                                    <fileset dir="${project.build.directory}/dependency-resources/selfdiagnose">
+                                    <fileset dir="${project.build.directory}/dependency-resources/selfdiagnose/">
                                         <include name="**/*.properties"/>
                                     </fileset>
                                 </copy>
@@ -97,6 +165,37 @@
                         <goals>
                             <goal>run</goal>
                         </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.3</version>
+                <configuration>
+                    <includes>
+                        <include>**/*.class</include>
+                    </includes>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>1.7</version>
+                <executions>
+                    <execution>
+                        <id>add-source-to-jar</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${project.basedir}/src/main/generated-sources</source>
+                            </sources>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

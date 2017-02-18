@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 public class ActivityScanner {
     private final AbstractCommonConfiguration commonConfiguration;
 
-    public List<Class> scan() {
+    public List<Class<?>> scan() {
         final String packageName = commonConfiguration.getPackageName();
 
         return getStringAbstractActivityMap(packageName).stream()

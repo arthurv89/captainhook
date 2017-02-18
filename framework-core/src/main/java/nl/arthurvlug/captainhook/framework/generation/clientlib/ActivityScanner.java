@@ -1,4 +1,4 @@
-package nl.arthurvlug.captainhook.framework.server.generateClasses;
+package nl.arthurvlug.captainhook.framework.generation.clientlib;
 
 import nl.arthurvlug.captainhook.framework.server.Input;
 import org.reflections.Reflections;

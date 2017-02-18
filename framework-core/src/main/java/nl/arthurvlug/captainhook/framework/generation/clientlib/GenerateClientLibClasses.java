@@ -1,5 +1,6 @@
-package nl.arthurvlug.captainhook.framework.server.generateClasses;
+package nl.arthurvlug.captainhook.framework.generation.clientlib;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Throwables;
 import lombok.AllArgsConstructor;
 import org.apache.commons.io.FileUtils;
@@ -13,7 +14,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class GenerateClasses {
+public class GenerateClientLibClasses {
     public static final String TEMPLATE_BASE_PACKAGE = "com.arthurvlug";
     public static final String TEMPLATE_SERVICE_NAME = "_service";
 
@@ -45,6 +46,11 @@ public class GenerateClasses {
         // Copy _service folder to the generated folder
         final File _serviceFolder = new File(from, packageDirectory());
         FileUtils.copyDirectory(_serviceFolder, newTarget);
+
+        // Only copy common and client
+//        final File _serviceFolder = new File(from, packageDirectory());
+//        FileUtils.copyDirectory(new File(_serviceFolder, "common"), new File(newTarget, "common"));
+//        FileUtils.copyDirectory(new File(_serviceFolder, "client"), new File(newTarget, "client"));
     }
 
 
@@ -60,6 +66,10 @@ public class GenerateClasses {
 
     private static void replaceFiles(final String basePackage, final String serviceName, final File temp) throws IOException {
         final Set<String> activities = ActivityScanner.run(basePackage + "." + serviceName);
+        final List<String> clientClassPackages = ClientScanner.run(basePackage + "." + serviceName)
+                .stream()
+                .map(c -> c.getName())
+                .collect(Collectors.toList());
 
         Files.walk(Paths.get(temp.toURI()))
                 .parallel()
@@ -68,7 +78,7 @@ public class GenerateClasses {
                     try {
                         final File file = path.toFile();
                         final String contents = FileUtils.readFileToString(file, Charset.defaultCharset());
-                        final String newContents = replace(contents, basePackage, serviceName, activities);
+                        final String newContents = replace(contents, basePackage, serviceName, activities, clientClassPackages);
                         FileUtils.write(file, newContents, Charset.defaultCharset());
                     } catch (IOException e) {
                         Throwables.propagate(e);
@@ -76,8 +86,11 @@ public class GenerateClasses {
                 });
     }
 
-    private static String replace(final String contents, final String basePackage, final String serviceName, final Set<String> activities) {
-        final EntryConfig entryPrototype = new EntryConfig(TEMPLATE_BASE_PACKAGE, TEMPLATE_SERVICE_NAME, "_Endpoint");
+    private static String replace(final String contents, final String basePackage, final String serviceName, final Set<String> activities, final List<String> clientClassPackageList) {
+        final EntryConfig entryPrototype = new EntryConfig(TEMPLATE_BASE_PACKAGE,
+                                                           TEMPLATE_SERVICE_NAME,
+                                                           "_Endpoint"
+        );
         final List<EntryConfig> endpointConfigs = activities.stream()
                 .map(activity -> new EntryConfig(basePackage, serviceName, activity))
                 .collect(Collectors.toList());
@@ -95,17 +108,20 @@ public class GenerateClasses {
                 .map(c -> serviceMethod(c))
                 .collect(Collectors.joining("\n\n    "));
 
+        String clientClassPackagesString = Joiner.on(", ").join(clientClassPackageList);
 
         final String prototypeEndpoint = endpoint(entryPrototype);
         final String prototypeEntry = entry(entryPrototype);
         final String prototypeServiceMethod = serviceMethod(entryPrototype);
         final String prototypePackage = entryPrototype.getPackage();
+        final String prototypeClientClasses = TEMPLATE_BASE_PACKAGE + "." + TEMPLATE_SERVICE_NAME + ".client.Client.class";
 
         final String replace1 = contents.replace(prototypeEndpoint, endpointDeclarations);
         final String replace2 = replace1.replace(prototypeEntry, entryDeclarations);
         final String replace3 = replace2.replace(prototypeServiceMethod, serviceMethodDeclarations);
         final String replace4 = replace3.replace(prototypePackage, getPackage(basePackage, serviceName));
-        final String replace7 = replace4.replace("_Endpoint", serviceName);
+        final String replace5 = replace4.replace(prototypeClientClasses, clientClassPackagesString);
+        final String replace7 = replace5.replace("_Endpoint", serviceName);
         return replace7;
     }
 
@@ -116,7 +132,7 @@ public class GenerateClasses {
         private final String endpointName;
 
         private String getPackage() {
-            return GenerateClasses.getPackage(basePackage, serviceName);
+            return GenerateClientLibClasses.getPackage(basePackage, serviceName);
         }
     }
 

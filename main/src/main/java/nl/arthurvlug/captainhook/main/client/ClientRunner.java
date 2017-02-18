@@ -63,7 +63,7 @@ public class ClientRunner extends AbstractClientRunner {
         if (e.getCause() instanceof DependencyException) {
             log.error("Iteration " + iterationNo + ": Dependency threw an exception: " + e.getCause().getClass().getName() + ": " + e.getCause().getMessage());
         } else {
-            log.error("Iteration " + iterationNo + ": Unexpected exception: " + e.getCause().getClass().getName() + ": " + e.getCause().getMessage());
+            log.error("Iteration " + iterationNo + ": Unexpected exception: " + e);
         }
     }
 }

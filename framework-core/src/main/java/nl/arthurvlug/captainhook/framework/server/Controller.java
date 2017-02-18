@@ -1,6 +1,8 @@
 package nl.arthurvlug.captainhook.framework.server;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Throwables;
+import com.google.common.collect.ImmutableList;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import nl.arthurvlug.captainhook.framework.common.response.FailureResponse;
@@ -9,6 +11,7 @@ import nl.arthurvlug.captainhook.framework.common.response.Response;
 import nl.arthurvlug.captainhook.framework.common.serialization.Serializer;
 import nl.arthurvlug.captainhook.framework.common.serialization.SerializerTypes;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpEntity;
@@ -21,6 +24,7 @@ import rx.Observable;
 
 import javax.annotation.PostConstruct;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @EnableAutoConfiguration
@@ -28,20 +32,10 @@ import java.util.Map;
 @Slf4j
 public class Controller {
     @Autowired
-    ApplicationContext applicationContext;
-
-    @Autowired
     ServerActivityPool serverActivityPool;
 
-    @PostConstruct
-    public void postConstruct() {
-        applicationContext.getBeansWithAnnotation(Activity.class)
-                .values()
-                .stream()
-                .map(x -> (AbstractActivity) x)
-                .forEach(activity -> serverActivityPool.registerActivity(activity));
-    }
-
+    @Autowired
+    ApplicationContext applicationContext;
 
     @RequestMapping("/")
     public String index() {
@@ -127,5 +121,42 @@ public class Controller {
     private void setTimeSpentTime(final Map<String, Object> map) {
         final long timeSpent = (long) map.get("endTime") - (long) map.get("startTime");
         map.put("timeSpent", timeSpent);
+    }
+
+    public static void run(Class<? extends AbstractServerSpringComponentsImporter> serverSpringComponentsImporterClass, final String[] args) {
+        final AbstractServerSpringComponentsImporter x;
+        try {
+            x = serverSpringComponentsImporterClass.newInstance();
+        } catch (InstantiationException | IllegalAccessException e) {
+            throw Throwables.propagate(e);
+        }
+        final AbstractCommonConfiguration commonConfiguration = x.getCommonConfiguration();
+
+
+        final List<Class<?>> activityClasses = new ActivityScanner(commonConfiguration)
+                .scan();
+        final ImmutableList<Class<?>> classes = ImmutableList.<Class<?>>builder()
+                .add(serverSpringComponentsImporterClass)
+                .addAll(activityClasses)
+                .build();
+
+        SpringApplication.run(classes(classes), args);
+    }
+
+    private static Class<?>[] classes(final List<Class<?>> classes) {
+        return ImmutableList.<Class>builder()
+                .add(Controller.class)
+                .addAll(classes)
+                .build()
+                .toArray(new Class[classes.size() + 1]);
+    }
+
+    @PostConstruct
+    public void postConstruct() {
+        applicationContext.getBeansWithAnnotation(Activity.class)
+                .values()
+                .stream()
+                .map(x -> (AbstractActivity) x)
+                .forEach(activity -> serverActivityPool.registerActivity(activity));
     }
 }

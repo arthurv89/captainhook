@@ -29,10 +29,10 @@ public class MergeActivity extends AbstractExampleActivity<MergeInput, MergeOutp
     @Override
     public Observable<MergeOutput> enact(MergeInput mergeInput) {
         final HelloWorldInput input1 = HelloWorldInput.builder()
-                .name(mergeInput.getName() + " [1]")
+                .name(mergeInput.getName())
                 .build();
         final nl.arthurvlug.captainhook.exampleservice2.activity.helloworld.HelloWorldInput input2 = nl.arthurvlug.captainhook.exampleservice2.activity.helloworld.HelloWorldInput.builder()
-                .name(mergeInput.getName() + " [2]")
+                .name(mergeInput.getName())
                 .build();
 
         final Observable<HelloWorldOutput> call1 = exampleServiceClient.helloWorldCall(input1);

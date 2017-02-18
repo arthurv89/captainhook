@@ -1,12 +1,15 @@
 package com.arthurvlug._service.client;
 
 import com.arthurvlug._service.common.ActivityConfiguration;
+import nl.arthurvlug.captainhook.framework.server.AbstractClientSpringComponents;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
 @Configuration
-public class ClientSpringComponents {
+@Component
+public class ClientSpringComponents extends AbstractClientSpringComponents {
     @Bean(name = "_EndpointClient")
     public Client getClient(@Qualifier("_EndpointClientActivityPool") final ClientActivityPool clientActivityPool,
                      @Qualifier("_EndpointClientConfigurationComponent") final ClientConfigurationComponent clientConfigurationComponent) {

@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
-//@Component("_EndpointActivityConfiguration")
 @NoArgsConstructor
 public class ActivityConfiguration extends AbstractActivityConfiguration {
     public static final String _EndpointEndpoint = "_Endpoint";

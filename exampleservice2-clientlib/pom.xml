@@ -75,7 +75,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <mainClass>nl.arthurvlug.captainhook.framework.server.generateClasses.GenerateClasses</mainClass>
+                    <mainClass>nl.arthurvlug.captainhook.framework.generation.clientlib.GenerateClientLibClasses</mainClass>
                     <arguments>
                         <argument>${project.artifactId}</argument>
                         <argument>${project.groupId}</argument>
