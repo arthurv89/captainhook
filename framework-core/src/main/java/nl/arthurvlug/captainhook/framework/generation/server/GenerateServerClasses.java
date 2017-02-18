@@ -46,7 +46,6 @@ public class GenerateServerClasses {
         FileUtils.forceMkdir(newTarget);
 
         final File _serviceFolder = new File(from, packageDirectory());
-        FileUtils.copyDirectory(new File(_serviceFolder, "common"), new File(newTarget, "common"));
         FileUtils.copyDirectory(new File(_serviceFolder, "server"), new File(newTarget, "server"));
     }
 

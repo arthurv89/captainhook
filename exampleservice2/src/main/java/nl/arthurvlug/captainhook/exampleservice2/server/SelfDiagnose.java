@@ -2,7 +2,7 @@ package nl.arthurvlug.captainhook.exampleservice2.server;
 
 import com.google.common.collect.ImmutableList;
 import lombok.Getter;
-import nl.arthurvlug.captainhook.exampleservice2.ServiceConfiguration;
+import nl.arthurvlug.captainhook.exampleservice2.common.ServiceConfiguration;
 import nl.arthurvlug.captainhook.framework.server.plugins.selfdiagnose.AbstractSelfDiagnose;
 import nl.arthurvlug.captainhook.framework.server.plugins.selfdiagnose.SelfDiagnoseItem;
 import nl.arthurvlug.captainhook.framework.server.plugins.selfdiagnose.SelfDiagnoseItemValue;

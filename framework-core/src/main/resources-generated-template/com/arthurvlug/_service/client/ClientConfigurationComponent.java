@@ -1,6 +1,6 @@
 package com.arthurvlug._service.client;
 
-import com.arthurvlug._service.ServiceConfiguration;
+import com.arthurvlug._service.common.ServiceConfiguration;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import nl.arthurvlug.captainhook.framework.client.AbstractClientConfiguration;

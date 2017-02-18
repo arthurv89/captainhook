@@ -132,6 +132,8 @@ public class Controller {
         }
         final AbstractCommonConfiguration commonConfiguration = x.getCommonConfiguration();
 
+        System.setProperty("server.port", String.valueOf(commonConfiguration.getPort()));
+
 
         final List<Class<?>> activityClasses = new ActivityScanner(commonConfiguration)
                 .scan();

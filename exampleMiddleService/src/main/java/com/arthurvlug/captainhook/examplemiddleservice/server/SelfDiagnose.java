@@ -1,8 +1,8 @@
 package com.arthurvlug.captainhook.examplemiddleservice.server;
 
+import com.arthurvlug.captainhook.examplemiddleservice.common.ServiceConfiguration;
 import com.google.common.collect.ImmutableList;
 import lombok.Getter;
-import nl.arthurvlug.captainhook.exampleservice.ServiceConfiguration;
 import nl.arthurvlug.captainhook.framework.server.plugins.selfdiagnose.AbstractSelfDiagnose;
 import nl.arthurvlug.captainhook.framework.server.plugins.selfdiagnose.SelfDiagnoseItem;
 import nl.arthurvlug.captainhook.framework.server.plugins.selfdiagnose.SelfDiagnoseLayout;

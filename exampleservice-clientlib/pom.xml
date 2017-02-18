@@ -15,6 +15,9 @@
     <build>
         <resources>
             <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+            <resource>
                 <directory>src/main/generated-sources</directory>
                 <includes>
                     <include>**/*.class</include>
@@ -91,6 +94,7 @@
                 <configuration>
                     <includes>
                         <include>**/*.class</include>
+                        <include>**/*.properties</include>
                     </includes>
                 </configuration>
             </plugin>
