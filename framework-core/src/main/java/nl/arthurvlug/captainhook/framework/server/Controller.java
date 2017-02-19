@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
 import rx.Observable;
+import rx.functions.Func1;
 
 import javax.annotation.PostConstruct;
 import java.util.HashMap;
@@ -33,6 +34,9 @@ import java.util.Map;
 public class Controller {
     @Autowired
     ServerActivityPool serverActivityPool;
+
+    @Autowired
+    AbstractCommonConfiguration commonConfiguration;
 
     @Autowired
     ApplicationContext applicationContext;
@@ -49,8 +53,7 @@ public class Controller {
                                             final HttpEntity<byte[]> requestEntity) {
         // Create a result that will be populated asynchronously
         final DeferredResult<byte[]> deferredResult = new DeferredResult<>();
-        getResponse(activityName, encoding, requestEntity)
-                .subscribe(bytes -> deferredResult.setResult(bytes));
+        getResponse(activityName, encoding, requestEntity).subscribe(bytes -> deferredResult.setResult(bytes));
         return deferredResult;
     }
 
@@ -60,29 +63,32 @@ public class Controller {
         final Map<String, Object> metadata = new HashMap<>();
         setStartTime(metadata);
         final Serializer serializer = SerializerTypes.getByName(encoding);
-        return activityResult(activityName, requestEntity, serializer, metadata)
-                .onErrorReturn(t -> failure(t, metadata))
-                .map(response -> {
-                    setEndTime(metadata);
-                    setTimeSpentTime(metadata);
-                    byte[] bytes = serializer.serialize(response);
+        return runActivity(activityName, requestEntity, serializer, metadata)
+                .onErrorReturn(t -> failure(t, metadata, activityName))
+                .map(new Func1<Response<Output>, byte[]>() { // Can't convert to lamda: compiler will complain about incompatible types
+                    @Override
+                    public byte[] call(final Response<Output> response) {
+                        Controller.this.setEndTime(metadata);
+                        Controller.this.setTimeSpentTime(metadata);
+                        byte[] bytes = serializer.serialize(response);
 
-                    log.info("Response: {}", response);
-
-                    return bytes;
+                        Controller.this.logResponse(response);
+                        return bytes;
+                    }
                 });
     }
 
-    private FailureResponse failure(final Throwable t, final Map<String, Object> metadata) {
-        return Response.failure(t, metadata);
+    private void logResponse(final Response<Output> response) {
+        if(response.getExceptionResult() == null) {
+            log.info("Success Response: {}", response);
+        } else {
+            final Throwable throwable = response.getExceptionResult().convertToThrowable();
+            log.error("Something went wrong", throwable);
+        }
     }
 
-    private <O extends Output> Observable<Response<O>> activityResult(final String activityName, final HttpEntity<byte[]> requestEntity, final Serializer serializer, final Map<String, Object> metadata) {
-        try {
-            return runActivity(activityName, requestEntity, serializer, metadata);
-        } catch (Throwable e) {
-            return Observable.error(e);
-        }
+    private FailureResponse failure(final Throwable t, final Map<String, Object> metadata, final String activityName) {
+        return Response.failure(new RuntimeException("Activity " + activityName + " in server " + commonConfiguration.getServerName() + " threw an exception", t), metadata);
     }
 
     private <I extends Input, O extends Output, RC extends AbstractRequestContext> Observable<Response<O>> runActivity(
@@ -103,7 +109,7 @@ public class Controller {
     private <I extends Input, O extends Output, RC extends AbstractRequestContext> Observable<Response<O>> enactActivity(final AbstractActivity<I, O, RC> activity, final Request<I> request, final Map<String, Object> metadata) {
         final I input = request.getInput();
         final RC requestContext = activity.preActivity(input);
-        final Observable<O> activityResult = activity.enact(input);
+        final Observable<O> activityResult = Observable.defer(() -> activity.enact(input));
         return activityResult.map(output -> {
             activity.postActivity(output, requestContext);
             return Response.success(output, metadata);

@@ -10,5 +10,8 @@ public class CommonConfiguration extends AbstractCommonConfiguration {
     private final String packageName = ServiceConfiguration.PACKAGE_NAME;
 
     @Getter
+    private final String serverName = ServiceConfiguration.name;
+
+    @Getter
     private final int port = Integer.parseInt(ServiceConfiguration.port);
 }

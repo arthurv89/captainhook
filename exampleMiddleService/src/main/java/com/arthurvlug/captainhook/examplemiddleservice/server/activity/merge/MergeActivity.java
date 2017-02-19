@@ -54,6 +54,7 @@ public class MergeActivity extends AbstractExampleActivity<MergeInput, MergeOutp
 
     private Observable<CombinedValue> combine(final Observable<HelloWorldOutput> helloworld,
                                               final Observable<nl.arthurvlug.captainhook.exampleservice2.activity.helloworld.HelloWorldOutput> helloWorld2) {
-        return helloworld.flatMap(helloWorldOutput -> helloWorld2.map(helloWorld2Output -> new CombinedValue(helloWorldOutput, helloWorld2Output)));
+        return helloworld.flatMap(helloWorldOutput -> helloWorld2.map(helloWorld2Output ->
+                new CombinedValue(helloWorldOutput, helloWorld2Output)));
     }
 }

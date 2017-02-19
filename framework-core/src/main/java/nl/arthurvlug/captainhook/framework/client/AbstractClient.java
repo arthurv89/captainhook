@@ -1,8 +1,6 @@
 package nl.arthurvlug.captainhook.framework.client;
 
 import com.google.gson.reflect.TypeToken;
-import nl.arthurvlug.captainhook.framework.common.response.DependencyException;
-import nl.arthurvlug.captainhook.framework.common.response.ExceptionResult;
 import nl.arthurvlug.captainhook.framework.common.response.Output;
 import nl.arthurvlug.captainhook.framework.common.response.Response;
 import nl.arthurvlug.captainhook.framework.common.serialization.Serializer;
@@ -14,10 +12,7 @@ import org.asynchttpclient.DefaultAsyncHttpClient;
 import org.asynchttpclient.ListenableFuture;
 import rx.Observable;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.lang.reflect.InvocationTargetException;
 
 public abstract class AbstractClient {
     private static final Serializer SERIALIZER = SerializerTypes.JSON.getSerializer();
@@ -44,9 +39,8 @@ public abstract class AbstractClient {
                     if (response.getExceptionResult() == null) {
                         return Observable.just(response.getValue());
                     } else {
-                        final ExceptionResult exceptionResult = response.getExceptionResult();
-                        final Exception e = createException(exceptionResult);
-                        return Observable.error(dependencyException(e));
+                        final Throwable throwable = response.getExceptionResult().convertToThrowable();
+                        return Observable.error(throwable);
                     }
                 } catch (Exception e) {
                     return Observable.error(e);
@@ -63,24 +57,6 @@ public abstract class AbstractClient {
         return inputOutputClientActivityConfig.getResponseTypeToken();
     }
 
-    private Exception createException(final ExceptionResult exceptionResult) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException, IOException {
-        final Exception exception = getExceptionClass(exceptionResult)
-                .getConstructor(String.class)
-                .newInstance(exceptionResult.getMessage());
-        exception.setStackTrace(getStackTrace(exceptionResult));
-        return exception;
-    }
-
-    @SuppressWarnings("unchecked")
-    public <T extends Exception> Class<T> getExceptionClass(final ExceptionResult exceptionResult) throws ClassNotFoundException {
-        return (Class<T>) Class.forName(exceptionResult.getClassName());
-    }
-
-    public StackTraceElement[] getStackTrace(final ExceptionResult exceptionResult) throws IOException, ClassNotFoundException {
-        final ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(exceptionResult.getStackTrace()));
-        return (StackTraceElement[]) ois.readObject();
-    }
-
     private <I extends Input> Observable<byte[]> readBytes(final String activity, final I input) throws IOException {
         final Request<I> request = new Request<>(input);
         final byte[] payload = SERIALIZER.serialize(request);
@@ -92,10 +68,6 @@ public abstract class AbstractClient {
                 .execute();
         final Observable<org.asynchttpclient.Response> obs = Observable.from(response);
         return obs.map(x -> x.getResponseBodyAsBytes());
-    }
-
-    private DependencyException dependencyException(final Exception e) {
-        return new DependencyException(e, "Server " + getName() + "  threw an exception");
     }
 
     protected abstract String getName();

@@ -1,30 +1,17 @@
 package nl.arthurvlug.captainhook.framework.common.response;
 
 import lombok.Value;
-
-import java.io.*;
+import org.springframework.util.SerializationUtils;
 
 @Value
 public class ExceptionResult {
-    private final String className;
-    private final String message;
-    private final byte[] stackTrace;
+    private final byte[] bytes;
 
-    public ExceptionResult(final Throwable e) {
-        this.className = e.getClass().getName();
-        this.message = e.getMessage();
-        this.stackTrace = serializeStackTrace(e);
+    public ExceptionResult(final Throwable throwable) {
+        bytes = SerializationUtils.serialize(throwable);
     }
 
-    private byte[] serializeStackTrace(final Throwable throwable) {
-        ObjectOutputStream objectOutputStream;
-        try {
-            final ByteArrayOutputStream out = new ByteArrayOutputStream();
-            objectOutputStream = new ObjectOutputStream(out);
-            objectOutputStream.writeObject(throwable.getStackTrace());
-            return out.toByteArray();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    public Throwable convertToThrowable() {
+        return (Throwable) SerializationUtils.deserialize(bytes);
     }
 }
