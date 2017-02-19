@@ -78,7 +78,7 @@
                 <version>3.0.0</version>
                 <executions>
                     <execution>
-                        <id>unpack</id>
+                        <id>copy-dependency-resources-to-target-folder-selfdiagnose</id>
                         <phase>package</phase>
                         <goals>
                             <goal>unpack</goal>
@@ -98,7 +98,7 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>copy-dependency-resources-to-target-folder</id>
+                        <id>copy-dependency-resources-to-target-folder-framework-core</id>
                         <phase>validate</phase>
                         <goals>
                             <goal>unpack</goal>

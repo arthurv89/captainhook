@@ -21,6 +21,9 @@ public class GenerateServerClasses {
     public static final String TEMPLATE_SERVICE_NAME = "_service";
 
     public static void main(String[] args) throws IOException {
+        if(args[0].equals("framework-core-server")) {
+            return;
+        }
         final String serviceName = args[0];
         final String basePackage = args[1];
 
