@@ -8,7 +8,7 @@ import nl.arthurvlug.captainhook.framework.server.Activity;
 import org.springframework.stereotype.Component;
 import rx.Observable;
 
-import java.util.Calendar;
+import java.time.Instant;
 
 @Activity
 @Component
@@ -26,7 +26,7 @@ public class HelloWorldActivity extends AbstractExampleActivity<HelloWorldInput,
         }
         final HelloWorldOutput output = HelloWorldOutput.builder()
                 .message("[HelloWorld (slept: " + sleepTime + "ms): Hello, " + helloWorldInput.getName() + "!]")
-                .respondingTime(Calendar.getInstance())
+                .respondingTime(Instant.now())
                 .build();
         return Observable.just(output);
     }

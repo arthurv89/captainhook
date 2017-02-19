@@ -5,12 +5,12 @@ import lombok.EqualsAndHashCode;
 import lombok.Value;
 import nl.arthurvlug.captainhook.framework.common.response.Output;
 
-import java.util.Calendar;
+import java.time.Instant;
 
 @Builder
 @Value
 @EqualsAndHashCode(callSuper = false)
 public class MergeOutput extends Output {
     private String message;
-    private Calendar respondingTime;
+    private Instant respondingTime;
 }

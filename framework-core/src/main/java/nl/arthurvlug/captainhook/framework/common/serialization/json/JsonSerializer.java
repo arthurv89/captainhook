@@ -5,10 +5,12 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import nl.arthurvlug.captainhook.framework.common.serialization.Serializer;
 
+import java.time.Instant;
 import java.util.Calendar;
 
 public class JsonSerializer extends Serializer {
     private final Gson gson = new GsonBuilder()
+        .registerTypeHierarchyAdapter(Instant.class, new InstantSerializer())
         .registerTypeHierarchyAdapter(Calendar.class, new CalendarSerializer())
         .create();
 

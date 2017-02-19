@@ -11,9 +11,20 @@ import org.springframework.stereotype.Component;
 import rx.Subscriber;
 import rx.schedulers.Schedulers;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.util.Locale;
+
 @Slf4j
 @Component
 public class ClientRunner extends AbstractClientRunner {
+    private static final DateTimeFormatter formatterOutput = DateTimeFormatter
+            .ofLocalizedDateTime(FormatStyle.MEDIUM)
+            .withLocale(Locale.getDefault())
+            .withZone(ZoneId.systemDefault());
+
     @Autowired
     @Qualifier("examplemiddleserviceClient")
     private com.arthurvlug.captainhook.examplemiddleservice.client.Client exampleMiddleService;
@@ -38,7 +49,9 @@ public class ClientRunner extends AbstractClientRunner {
 
                     @Override
                     public void onNext(final MergeOutput mergeOutput) {
-                        log.info("Iteration " + iterationNo + ": " + String.valueOf(mergeOutput));
+                        final String outputString = "Message: " + mergeOutput.getMessage() + ",\n"
+                                + "Responding time: " + formatterOutput.format(mergeOutput.getRespondingTime());
+                        log.info("Iteration " + iterationNo + ": " + outputString);
                     }
 
                     @Override

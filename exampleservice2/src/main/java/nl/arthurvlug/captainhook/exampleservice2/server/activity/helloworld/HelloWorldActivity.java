@@ -1,14 +1,14 @@
 package nl.arthurvlug.captainhook.exampleservice2.server.activity.helloworld;
 
 import com.google.common.base.Throwables;
-import nl.arthurvlug.captainhook.exampleservice2.server.activity.AbstractExampleActivity;
 import nl.arthurvlug.captainhook.exampleservice2.activity.helloworld.HelloWorldInput;
 import nl.arthurvlug.captainhook.exampleservice2.activity.helloworld.HelloWorldOutput;
+import nl.arthurvlug.captainhook.exampleservice2.server.activity.AbstractExampleActivity;
 import nl.arthurvlug.captainhook.framework.server.Activity;
 import org.springframework.stereotype.Component;
 import rx.Observable;
 
-import java.util.Calendar;
+import java.time.Instant;
 
 @Activity
 @Component
@@ -26,7 +26,7 @@ public class HelloWorldActivity extends AbstractExampleActivity<HelloWorldInput,
         }
         final HelloWorldOutput output = HelloWorldOutput.builder()
                 .message("[HelloWorld 2 (slept: " + sleepTime + "ms): Hello, " + helloWorldInput.getName() + "!]")
-                .respondingTime(Calendar.getInstance())
+                .respondingTime(Instant.now())
                 .build();
         return Observable.just(output);
     }

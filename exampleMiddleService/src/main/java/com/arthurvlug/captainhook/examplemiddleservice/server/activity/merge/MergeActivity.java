@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import rx.Observable;
 
-import java.util.Calendar;
+import java.time.Instant;
 
 @Activity
 @Component
@@ -41,7 +41,7 @@ public class MergeActivity extends AbstractExampleActivity<MergeInput, MergeOutp
         return combine(call1, call2)
                 .map(combined -> MergeOutput.builder()
                         .message("[Combined: " + combined.getHelloWorldOutput().getMessage() + ", " + combined.getHelloWorld2Output().getMessage() + "]")
-                        .respondingTime(Calendar.getInstance())
+                        .respondingTime(Instant.now())
                         .build());
     }
 
