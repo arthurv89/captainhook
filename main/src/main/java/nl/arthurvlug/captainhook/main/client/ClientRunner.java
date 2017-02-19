@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 import rx.Subscriber;
 import rx.schedulers.Schedulers;
 
-import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
@@ -60,7 +59,7 @@ public class ClientRunner extends AbstractClientRunner {
                         log.debug("Completed");
                     }
                 });
-        log.info("Iteration " + iterationNo + ": Goint to sleep for 1000ms");
+        log.info("Iteration " + iterationNo + ": Going to sleep for 1000ms");
         sleep(1000);
     }
 
@@ -74,7 +73,7 @@ public class ClientRunner extends AbstractClientRunner {
 
     private void handleError(final Throwable e, final int iterationNo) {
         if (e.getCause() instanceof DependencyException) {
-            log.error("Iteration " + iterationNo + ": Dependency threw an exception: " + e.getCause().getClass().getName() + ": " + e.getCause().getMessage());
+            log.error("Iteration " + iterationNo + ": Dependency threw an exception: " + e.getCause().getMessage());
         } else {
             log.error("Iteration " + iterationNo + ": Unexpected exception: " + e);
         }
