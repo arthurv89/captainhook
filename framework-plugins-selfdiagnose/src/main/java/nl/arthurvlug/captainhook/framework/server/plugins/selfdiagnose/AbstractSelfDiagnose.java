@@ -2,7 +2,6 @@ package nl.arthurvlug.captainhook.framework.server.plugins.selfdiagnose;
 
 import lombok.Getter;
 
-import java.util.Calendar;
 import java.util.List;
 
 @Getter

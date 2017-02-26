@@ -15,7 +15,7 @@
     <build>
         <resources>
             <resource>
-                <directory>${project.basedir}/src/main/resources-generated-template</directory>
+                <directory>${project.basedir}/src/main/template</directory>
             </resource>
         </resources>
 

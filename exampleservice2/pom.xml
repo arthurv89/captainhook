@@ -4,18 +4,42 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>exampleservice2</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <packaging>jar</packaging>
     <name>exampleservice2</name>
 
     <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
         <project.mainClass>nl.arthurvlug.captainhook.exampleservice2.ServiceMain2</project.mainClass>
     </properties>
 
     <parent>
         <groupId>nl.arthurvlug.captainhook</groupId>
-        <artifactId>framework-core-server</artifactId>
+        <artifactId>framework-core-server-pom</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.5.1</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 
     <dependencies>
         <dependency>

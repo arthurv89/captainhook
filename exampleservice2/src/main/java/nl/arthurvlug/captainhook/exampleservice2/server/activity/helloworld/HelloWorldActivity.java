@@ -1,10 +1,10 @@
 package nl.arthurvlug.captainhook.exampleservice2.server.activity.helloworld;
 
 import com.google.common.base.Throwables;
-import nl.arthurvlug.captainhook.exampleservice2.activity.helloworld.HelloWorldInput;
-import nl.arthurvlug.captainhook.exampleservice2.activity.helloworld.HelloWorldOutput;
 import nl.arthurvlug.captainhook.exampleservice2.server.activity.AbstractExampleActivity;
 import nl.arthurvlug.captainhook.framework.server.Activity;
+import nl.arthurvlug.captainhook.exampleservice2.activity.helloworld.HelloWorldInput;
+import nl.arthurvlug.captainhook.exampleservice2.activity.helloworld.HelloWorldOutput;
 import org.springframework.stereotype.Component;
 import rx.Observable;
 

@@ -2,34 +2,40 @@ package nl.arthurvlug.captainhook.main.client;
 
 import com.arthurvlug.captainhook.examplemiddleservice.activity.merge.MergeInput;
 import com.arthurvlug.captainhook.examplemiddleservice.activity.merge.MergeOutput;
+import com.arthurvlug.captainhook.examplemiddleservice.clientlib.Client;
 import lombok.extern.slf4j.Slf4j;
-import nl.arthurvlug.captainhook.framework.client.AbstractClientRunner;
-import nl.arthurvlug.captainhook.framework.common.response.DependencyException;
-import org.springframework.beans.factory.annotation.Autowired;
+import nl.arthurvlug.framework.client.DependencyException;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.stereotype.Component;
 import rx.Subscriber;
 import rx.schedulers.Schedulers;
 
+import javax.annotation.PostConstruct;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.Locale;
 
+@SpringBootApplication
+@EnableAutoConfiguration
 @Slf4j
 @Component
-public class ClientRunner extends AbstractClientRunner {
+public class ClientRunner {
     private static final DateTimeFormatter formatterOutput = DateTimeFormatter
             .ofLocalizedDateTime(FormatStyle.MEDIUM)
             .withLocale(Locale.getDefault())
             .withZone(ZoneId.systemDefault());
 
-    @Autowired
-    @Qualifier("examplemiddleserviceClient")
-    private com.arthurvlug.captainhook.examplemiddleservice.client.Client exampleMiddleService;
+    private final Client exampleMiddleServiceClient;
 
-    @Override
-    public void run() {
+    public ClientRunner(@Qualifier("examplemiddleserviceClient") com.arthurvlug.captainhook.examplemiddleservice.clientlib.Client exampleMiddleServiceClient) {
+        this.exampleMiddleServiceClient = exampleMiddleServiceClient;
+    }
+
+    @PostConstruct
+    private void postConstruct() {
         for (int i = 1; ; i++) {
             doCall(i);
         }
@@ -37,7 +43,7 @@ public class ClientRunner extends AbstractClientRunner {
 
     private void doCall(final int iterationNo) {
         log.info("Iteration " + iterationNo + ": Started");
-        exampleMiddleService.mergeCall(MergeInput.builder().name("Iteration " + iterationNo).build())
+        exampleMiddleServiceClient.mergeCall(MergeInput.builder().name("Iteration " + iterationNo).build())
                 .observeOn(Schedulers.io())
                 .subscribeOn(Schedulers.io())
                 .subscribe(new Subscriber<MergeOutput>() {
