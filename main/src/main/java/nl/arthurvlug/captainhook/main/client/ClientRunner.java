@@ -3,9 +3,9 @@ package nl.arthurvlug.captainhook.main.client;
 import com.arthurvlug.captainhook.examplemiddleservice.activity.merge.MergeInput;
 import com.arthurvlug.captainhook.examplemiddleservice.activity.merge.MergeOutput;
 import com.arthurvlug.captainhook.examplemiddleservice.clientlib.Client;
+import com.arthurvlug.captainhook.examplemiddleservice.clientlib.ClientWrapperProvider;
 import lombok.extern.slf4j.Slf4j;
 import nl.arthurvlug.framework.client.DependencyException;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.stereotype.Component;
@@ -28,11 +28,7 @@ public class ClientRunner {
             .withLocale(Locale.getDefault())
             .withZone(ZoneId.systemDefault());
 
-    private final Client exampleMiddleServiceClient;
-
-    public ClientRunner(@Qualifier("examplemiddleserviceClient") com.arthurvlug.captainhook.examplemiddleservice.clientlib.Client exampleMiddleServiceClient) {
-        this.exampleMiddleServiceClient = exampleMiddleServiceClient;
-    }
+    private Client exampleMiddleServiceClient = ClientWrapperProvider.getExamplemiddleserviceClient();
 
     @PostConstruct
     private void postConstruct() {

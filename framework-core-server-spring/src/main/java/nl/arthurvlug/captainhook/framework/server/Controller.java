@@ -12,7 +12,6 @@ import nl.arthurvlug.captainhook.framework.common.response.Output;
 import nl.arthurvlug.captainhook.framework.common.response.Response;
 import nl.arthurvlug.captainhook.framework.common.serialization.Serializer;
 import nl.arthurvlug.captainhook.framework.common.serialization.SerializerTypes;
-import nl.arthurvlug.captainhook.framework.server.generation.AbstractServerSpringComponentsImporter;
 import nl.arthurvlug.captainhook.framework.server.generation.ActivityScanner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -37,13 +36,12 @@ import java.util.Map;
 @Slf4j
 public class Controller {
     @Inject
-    ServerActivityPool serverActivityPool;
-
-    @Inject
-    AbstractServiceConfiguration commonConfiguration;
+    AbstractServiceConfiguration serviceConfiguration;
 
     @Inject
     ApplicationContext applicationContext;
+
+    private ServerActivityPool serverActivityPool;
 
     @RequestMapping("/")
     public String index() {
@@ -92,7 +90,7 @@ public class Controller {
     }
 
     private FailureResponse failure(final Throwable t, final Map<String, Object> metadata, final String activityName) {
-        return Response.failure(new RuntimeException("Activity " + activityName + " in server " + commonConfiguration.getName() + " threw an exception", t), metadata);
+        return Response.failure(new RuntimeException("Activity " + activityName + " in server " + serviceConfiguration.getName() + " threw an exception", t), metadata);
     }
 
     private <I extends Input, O extends Output, RC extends AbstractRequestContext> Observable<Response<O>> runActivity(
@@ -134,25 +132,26 @@ public class Controller {
     }
 
     public static void run(Class<? extends AbstractServerSpringComponentsImporter> serverSpringComponentsImporterClass, final String[] args) {
+        final AbstractServiceConfiguration clientConfiguration = getServiceConfiguration(serverSpringComponentsImporterClass);
+
+        final List<Class<?>> activityClasses = new ActivityScanner(clientConfiguration).scan();
+        final ImmutableList<Class<?>> classes = ImmutableList.<Class<?>>builder()
+                .add(serverSpringComponentsImporterClass)
+                .addAll(activityClasses)
+                .build();
+
+        System.setProperty("server.port", String.valueOf(clientConfiguration.getPort()));
+        SpringApplication.run(classes(classes), args);
+    }
+
+    private static AbstractServiceConfiguration getServiceConfiguration(final Class<? extends AbstractServerSpringComponentsImporter> serverSpringComponentsImporterClass) {
         final AbstractServerSpringComponentsImporter importer;
         try {
             importer = serverSpringComponentsImporterClass.newInstance();
         } catch (InstantiationException | IllegalAccessException e) {
             throw Throwables.propagate(e);
         }
-        final AbstractServiceConfiguration clientConfiguration = importer.getServiceConfiguration();
-
-        System.setProperty("server.port", String.valueOf(clientConfiguration.getPort()));
-
-
-        final List<Class<?>> activityClasses = new ActivityScanner(clientConfiguration)
-                .scan();
-        final ImmutableList<Class<?>> classes = ImmutableList.<Class<?>>builder()
-                .add(serverSpringComponentsImporterClass)
-                .addAll(activityClasses)
-                .build();
-
-        SpringApplication.run(classes(classes), args);
+        return importer.getServiceConfiguration();
     }
 
     private static Class<?>[] classes(final List<Class<?>> classes) {
@@ -165,6 +164,7 @@ public class Controller {
 
     @PostConstruct
     public void postConstruct() {
+        serverActivityPool = new ServerActivityPool(serviceConfiguration);
         applicationContext.getBeansWithAnnotation(Activity.class)
                 .values()
                 .stream()

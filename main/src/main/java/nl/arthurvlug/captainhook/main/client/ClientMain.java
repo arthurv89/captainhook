@@ -1,12 +1,12 @@
 package nl.arthurvlug.captainhook.main.client;
 
-import com.arthurvlug.captainhook.examplemiddleservice.clientlib.ClientWrapperSpringComponents;
+import com.arthurvlug.captainhook.examplemiddleservice.clientlib.ClientWrapperProvider;
 import org.springframework.boot.SpringApplication;
 
 public class ClientMain {
     public static void main(final String[] args) {
         SpringApplication.run(new Class[]{
-                ClientWrapperSpringComponents.class,
+                ClientWrapperProvider.class,
                 ClientRunner.class
         }, args);
     }
