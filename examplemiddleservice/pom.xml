@@ -60,12 +60,5 @@
             <artifactId>exampleservice2-clientlib</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
-
-        <!-- Framework plugins -->
-        <dependency>
-            <groupId>nl.arthurvlug.captainhook</groupId>
-            <artifactId>framework-plugins-selfdiagnose</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
     </dependencies>
 </project>

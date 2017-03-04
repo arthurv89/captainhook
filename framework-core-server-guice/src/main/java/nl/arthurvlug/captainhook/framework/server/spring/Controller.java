@@ -1,4 +1,4 @@
-package nl.arthurvlug.captainhook.framework.server;
+package nl.arthurvlug.captainhook.framework.server.spring;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
@@ -12,6 +12,7 @@ import nl.arthurvlug.captainhook.framework.common.response.Output;
 import nl.arthurvlug.captainhook.framework.common.response.Response;
 import nl.arthurvlug.captainhook.framework.common.serialization.Serializer;
 import nl.arthurvlug.captainhook.framework.common.serialization.SerializerTypes;
+import nl.arthurvlug.captainhook.framework.server.*;
 import nl.arthurvlug.captainhook.framework.server.generation.ActivityScanner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
