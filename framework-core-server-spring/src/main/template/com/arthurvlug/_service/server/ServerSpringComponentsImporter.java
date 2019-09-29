@@ -2,14 +2,14 @@ package com.arthurvlug._service.server;
 
 import lombok.Getter;
 import nl.arthurvlug.captainhook.framework.common.AbstractClientWrapperProvider;
-import nl.arthurvlug.captainhook.framework.server.AbstractServerComponentsImporter;
+import nl.arthurvlug.captainhook.framework.server.AbstractServerSpringComponentsImporter;
 import org.springframework.context.annotation.Import;
 
 @Import({
         ServiceConfiguration.class,
         AbstractClientWrapperProvider.class
 })
-public class ServerSpringComponentsImporter implements AbstractServerComponentsImporter {
+public class ServerSpringComponentsImporter implements AbstractServerSpringComponentsImporter {
     @Getter
     private final ServiceConfiguration serviceConfiguration = new ServiceConfiguration();
 }
