@@ -13,7 +13,6 @@
 
         <!-- Required inherit properties -->
         <project.mainClass>You should define property project.mainClass in your child pom</project.mainClass>
-        <frameworkName>You should define property frameworkName the framework specific server-pom. I.e., you should property frameworkName in the pom of framework-core-server-pom-[[frameworkName]] (e.g.: spring, guice, etc.).</frameworkName>
     </properties>
 
     <build>
@@ -42,7 +41,6 @@
                     <arguments>
                         <argument>${project.artifactId}</argument>
                         <argument>${project.groupId}</argument>
-                        <argument>${frameworkName}</argument>
                     </arguments>
                 </configuration>
             </plugin>
@@ -155,26 +153,6 @@
                                         <type>jar</type>
                                         <overWrite>true</overWrite>
                                         <outputDirectory>${project.build.directory}/dependency-resources/framework-core/generation-template</outputDirectory>
-                                        <includes>**/*.java</includes>
-                                    </artifactItem>
-                                </artifactItems>
-                            </configuration>
-                        </execution>
-                        <execution>
-                            <id>copy-dependency-resources-to-target-folder-framework-core-server-${frameworkName}</id>
-                            <phase>validate</phase>
-                            <goals>
-                                <goal>unpack</goal>
-                            </goals>
-                            <configuration>
-                                <artifactItems>
-                                    <artifactItem>
-                                        <groupId>nl.arthurvlug.captainhook</groupId>
-                                        <artifactId>framework-core-server-${frameworkName}</artifactId>
-                                        <version>1.0-SNAPSHOT</version>
-                                        <type>jar</type>
-                                        <overWrite>true</overWrite>
-                                        <outputDirectory>${project.build.directory}/dependency-resources/framework-core-server-${frameworkName}/generation-template</outputDirectory>
                                         <includes>**/*.java</includes>
                                     </artifactItem>
                                 </artifactItems>

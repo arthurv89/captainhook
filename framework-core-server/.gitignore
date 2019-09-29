@@ -1,5 +1,5 @@
 *.iml
 src/main/generated-sources/
 target/
-.idea/
+*.idea
 src/
