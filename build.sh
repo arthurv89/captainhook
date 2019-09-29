@@ -19,12 +19,12 @@ e framework-core && \
 e framework-core-clientlib && \
 # e framework-core-clientlib-pom && \
 # e framework-core-server-pom && \
+e framework-plugins-selfdiagnose && \
 e framework-core-server && \
 # # e framework-core-server-guice-pom && \
 ##  e framework-core-server-guice && \
 # e framework-core-server-spring && \
 # e framework-core-server-spring-pom && \
-e framework-plugins-selfdiagnose && \
 e exampleservice-clientlib && \
 e exampleservice && \
 e exampleservice2-clientlib && \

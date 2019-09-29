@@ -9,7 +9,7 @@
     <name>examplemiddleservice-clientlib</name>
 
     <parent>
-        <groupId>nl.arthurvlug.captainhook</groupId>
+        <groupId>com.arthurvlug.captainhook</groupId>
         <artifactId>framework-core-clientlib</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>

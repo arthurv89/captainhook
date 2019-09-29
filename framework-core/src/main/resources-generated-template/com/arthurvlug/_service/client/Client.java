@@ -1,20 +1,28 @@
 package com.arthurvlug._service.client;
 
-import com.arthurvlug._service.common.ActivityConfiguration;
-import nl.arthurvlug.captainhook.framework.client.AbstractClient;
+import com.arthurvlug.captainhook.framework.client.AbstractClient;
+import com.arthurvlug.captainhook.framework.client.ClientActivityConfig;
+import com.arthurvlug.captainhook.framework.common.response.Output;
+import com.arthurvlug.captainhook.framework.server.Input;
+import lombok.Getter;
 import rx.Observable;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class Client extends AbstractClient {
-    public Client(final ClientActivityPool clientActivityPool,
-                   final ClientConfigurationComponent clientConfigurationComponent) {
-        super(clientActivityPool, clientConfigurationComponent);
+    @Getter
+    private static final int port = Integer.parseInt("[port]");
+
+    @Override
+    protected String getBaseUrl() {
+        return "http://localhost:" + port;
     }
+
+    @Getter
+    private final Map<String, ClientActivityConfig<Input, Output>> activities = new HashMap<>();
 
     public Observable<com.arthurvlug._service.activity._endpoint._EndpointOutput> _EndpointCall(final com.arthurvlug._service.activity._endpoint._EndpointInput input) {
-        return createCall(ActivityConfiguration._EndpointEndpoint, input);
-    }
-
-    protected String getName() {
-        return "_Endpoint";
+        return createCall("_Endpoint", input);
     }
 }
