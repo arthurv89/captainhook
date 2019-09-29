@@ -1,5 +1,7 @@
-SCRIPT_PATH=$(readlink -f $0)
-BASE_PATH=`dirname $SCRIPT_PATH`
+set -x
+
+BASE_PATH="$( cd "$(dirname "$0")" ; pwd -P )"
+echo "BASE_PATH: $BASE_PATH"
 
 function e {
 	printf "\n\n\n\n\n"
@@ -10,12 +12,18 @@ function e {
 	rm -rf $BASE_PATH/$folder/target && \
 	rm -rf $BASE_PATH/$folder/src/main/resources/plugins && \
 	rm -rf $BASE_PATH/$folder/src/main/webapp/WEB-INF/jsp/plugins && \
-	mvn compile clean install
+	mvn clean compile install
 }
 
 e framework-core && \
 e framework-core-clientlib && \
+# e framework-core-clientlib-pom && \
+# e framework-core-server-pom && \
 e framework-core-server && \
+# # e framework-core-server-guice-pom && \
+##  e framework-core-server-guice && \
+# e framework-core-server-spring && \
+# e framework-core-server-spring-pom && \
 e framework-plugins-selfdiagnose && \
 e exampleservice-clientlib && \
 e exampleservice && \
@@ -25,8 +33,5 @@ e exampleMiddleService-clientlib && \
 e exampleMiddleService && \
 e main && \
 printf "\n\n\n\n\n\n\n\n\n" && \
-echo "---------------------- Done successfully ----------------------"
-
-
+echo "---------------------- Done successfully ----------------------" && \
 printf "\n\n\n\n\n\n\n\n\n"
-

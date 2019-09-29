@@ -1,7 +1,7 @@
 package nl.arthurvlug.captainhook.main.client;
 
-import com.arthurvlug.captainhook.examplemiddleservice.activity.merge.MergeInput;
-import com.arthurvlug.captainhook.examplemiddleservice.activity.merge.MergeOutput;
+import nl.arthurvlug.captainhook.exampleservice.activity.helloworld.HelloWorldInput;
+import nl.arthurvlug.captainhook.exampleservice.activity.helloworld.HelloWorldOutput;
 import lombok.extern.slf4j.Slf4j;
 import nl.arthurvlug.captainhook.framework.client.AbstractClientRunner;
 import nl.arthurvlug.captainhook.framework.common.response.DependencyException;
@@ -25,8 +25,8 @@ public class ClientRunner extends AbstractClientRunner {
             .withZone(ZoneId.systemDefault());
 
     @Autowired
-    @Qualifier("examplemiddleserviceClient")
-    private com.arthurvlug.captainhook.examplemiddleservice.client.Client exampleMiddleService;
+    @Qualifier("exampleserviceClient")
+    private nl.arthurvlug.captainhook.exampleservice.client.Client exampleService;
 
     @Override
     public void run() {
@@ -37,19 +37,19 @@ public class ClientRunner extends AbstractClientRunner {
 
     private void doCall(final int iterationNo) {
         log.info("Iteration " + iterationNo + ": Started");
-        exampleMiddleService.mergeCall(MergeInput.builder().name("Iteration " + iterationNo).build())
+        exampleService.helloWorldCall(HelloWorldInput.builder().name("Iteration " + iterationNo).build())
                 .observeOn(Schedulers.io())
                 .subscribeOn(Schedulers.io())
-                .subscribe(new Subscriber<MergeOutput>() {
+                .subscribe(new Subscriber<HelloWorldOutput>() {
                     @Override
                     public void onError(final Throwable throwable) {
                         handleError(throwable, iterationNo);
                     }
 
                     @Override
-                    public void onNext(final MergeOutput mergeOutput) {
-                        final String outputString = "Message: " + mergeOutput.getMessage() + ",\n"
-                                + "Responding time: " + formatterOutput.format(mergeOutput.getRespondingTime());
+                    public void onNext(final HelloWorldOutput helloworldOutput) {
+                        final String outputString = "Message: " + helloworldOutput.getMessage() + ",\n"
+                                + "Responding time: " + formatterOutput.format(helloworldOutput.getRespondingTime());
                         log.info("Iteration " + iterationNo + ": " + outputString);
                     }
 
