@@ -1,9 +1,9 @@
 package nl.arthurvlug.captainhook.exampleservice.server.activity;
 
 import lombok.extern.slf4j.Slf4j;
-import nl.arthurvlug.captainhook.framework.common.Input;
 import nl.arthurvlug.captainhook.framework.common.response.Output;
 import nl.arthurvlug.captainhook.framework.server.AbstractActivity;
+import nl.arthurvlug.captainhook.framework.server.Input;
 
 @Slf4j
 public abstract class AbstractExampleActivity<I extends Input, O extends Output>

@@ -8,15 +8,15 @@
     <packaging>jar</packaging>
     <name>examplemiddleservice-clientlib</name>
 
+    <parent>
+        <groupId>nl.arthurvlug.captainhook</groupId>
+        <artifactId>framework-core-clientlib</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-
-    <parent>
-        <groupId>nl.arthurvlug.captainhook</groupId>
-        <artifactId>framework-core-clientlib-pom</artifactId>
-        <version>1.0-SNAPSHOT</version>
-    </parent>
 
     <build>
         <plugins>
@@ -28,11 +28,6 @@
                     <source>1.8</source>
                     <target>1.8</target>
                 </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
             </plugin>
         </plugins>
     </build>

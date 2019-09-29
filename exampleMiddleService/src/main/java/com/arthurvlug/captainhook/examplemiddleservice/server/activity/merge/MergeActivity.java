@@ -1,13 +1,13 @@
 package com.arthurvlug.captainhook.examplemiddleservice.server.activity.merge;
 
+import com.arthurvlug.captainhook.examplemiddleservice.activity.merge.MergeInput;
+import com.arthurvlug.captainhook.examplemiddleservice.activity.merge.MergeOutput;
+import com.arthurvlug.captainhook.examplemiddleservice.server.activity.AbstractExampleActivity;
 import lombok.AllArgsConstructor;
 import lombok.Value;
 import nl.arthurvlug.captainhook.exampleservice.activity.helloworld.HelloWorldInput;
 import nl.arthurvlug.captainhook.exampleservice.activity.helloworld.HelloWorldOutput;
 import nl.arthurvlug.captainhook.framework.server.Activity;
-import com.arthurvlug.captainhook.examplemiddleservice.activity.merge.MergeInput;
-import com.arthurvlug.captainhook.examplemiddleservice.activity.merge.MergeOutput;
-import com.arthurvlug.captainhook.examplemiddleservice.server.activity.AbstractExampleActivity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -20,11 +20,11 @@ import java.time.Instant;
 public class MergeActivity extends AbstractExampleActivity<MergeInput, MergeOutput> {
     @Autowired
     @Qualifier("exampleserviceClient")
-    private nl.arthurvlug.captainhook.exampleservice.clientlib.Client exampleServiceClient;
+    private nl.arthurvlug.captainhook.exampleservice.client.Client exampleServiceClient;
 
     @Autowired
     @Qualifier("exampleservice2Client")
-    private nl.arthurvlug.captainhook.exampleservice2.clientlib.Client exampleService2Client;
+    private nl.arthurvlug.captainhook.exampleservice2.client.Client exampleService2Client;
 
     @Override
     public Observable<MergeOutput> enact(MergeInput mergeInput) {

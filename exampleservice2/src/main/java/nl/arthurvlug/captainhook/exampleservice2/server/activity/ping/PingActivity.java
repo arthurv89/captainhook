@@ -1,10 +1,10 @@
 package nl.arthurvlug.captainhook.exampleservice2.server.activity.ping;
 
 import com.google.common.base.Throwables;
-import nl.arthurvlug.captainhook.exampleservice2.server.activity.AbstractExampleActivity;
-import nl.arthurvlug.captainhook.framework.server.Activity;
 import nl.arthurvlug.captainhook.exampleservice2.activity.ping.PingInput;
 import nl.arthurvlug.captainhook.exampleservice2.activity.ping.PingOutput;
+import nl.arthurvlug.captainhook.exampleservice2.server.activity.AbstractExampleActivity;
+import nl.arthurvlug.captainhook.framework.server.Activity;
 import org.springframework.stereotype.Component;
 import rx.Observable;
 
