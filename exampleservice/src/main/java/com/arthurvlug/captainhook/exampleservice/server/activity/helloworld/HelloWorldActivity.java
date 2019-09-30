@@ -1,6 +1,5 @@
 package com.arthurvlug.captainhook.exampleservice.server.activity.helloworld;
 
-import com.arthurvlug.captainhook.framework.server.DefaultRequestContext;
 import com.google.common.base.Throwables;
 import com.arthurvlug.captainhook.exampleservice.activity.helloworld.HelloWorldInput;
 import com.arthurvlug.captainhook.exampleservice.activity.helloworld.HelloWorldOutput;

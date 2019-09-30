@@ -94,6 +94,44 @@ With the clientlib in place, we can now move on to the server module.
 
 ### Step 2: Create a server module:
 
+Again, after creation of the server module, let's change the pom file:
+```xml
+    <properties>
+        <project.mainClass>com.arthurvlug.captainhook.exampleservice.ServiceMain</project.mainClass>
+    </properties>
+
+    <parent>
+        <groupId>com.arthurvlug.captainhook</groupId>
+        <artifactId>framework-core-server</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>2.1.8.RELEASE</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>${project.artifactId}-clientlib</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+```
+
 The service can be started similarly to how you can start a Spring Boot application.
 The main method of your ServiceMain class should call the run method on the Controller class.
 That method starts up the service.
@@ -119,28 +157,30 @@ public class ServiceMain {
 
 ```
 
+Now create an activity class that handles the request. 
 ```
+package com.arthurvlug.captainhook.exampleservice.server.activity.helloworld;
+
+import com.arthurvlug.captainhook.exampleservice.activity.helloworld.HelloWorldInput;
+import com.arthurvlug.captainhook.exampleservice.activity.helloworld.HelloWorldOutput;
+import com.arthurvlug.captainhook.framework.server.SimpleActivity;
+import com.arthurvlug.captainhook.framework.server.Activity;
+import org.springframework.stereotype.Component;
+import rx.Observable;
+
+import java.time.Instant;
 
 @Activity
 @Component
-public class HelloWorldActivity extends AbstractActivity<HelloWorldInput, HelloWorldOutput, DefaultRequestContext> {
-    @Override
-    protected DefaultRequestContext preActivity(final HelloWorldInput input) {
-        return new DefaultRequestContext(System.nanoTime());
-    }
-
+public class HelloWorldActivity extends SimpleActivity<HelloWorldInput, HelloWorldOutput> {
     @Override
     public Observable<HelloWorldOutput> enact(HelloWorldInput helloWorldInput) {
         final HelloWorldOutput output = HelloWorldOutput.builder()
                 .message("Hello world!")
                 .respondingTime(Instant.now())
                 .build();
-        return Observable.just(output);
-    }
 
-    @Override
-    protected void postActivity(final HelloWorldInput input, final HelloWorldOutput output, final DefaultRequestContext requestContext) {
-        log.info("[{}] Handled request", requestContext.getRequestId());
+        return Observable.just(output);
     }
 }
 ```
@@ -149,7 +189,8 @@ public class HelloWorldActivity extends AbstractActivity<HelloWorldInput, HelloW
 ```bash
 bash build.sh
 bash start-service.sh
-
-# In another terminal
-bash start-client.sh
 ```
+
+Now you have a running service!
+Other services can can now consume it's clientlib and call it without much effort.
+If those other services also implement the same model, their consumers can also easily call them.
