@@ -13,7 +13,7 @@ import java.util.List;
 @Component
 public class SelfDiagnose extends AbstractSelfDiagnose {
     @Getter
-    private final String name = ")(*&^%R$"; // ServiceConfiguration.name
+    private final String name = new ServerProperties().getServerName();
 
     @Getter
     private List<SelfDiagnoseItem> items = new ArrayList<>();

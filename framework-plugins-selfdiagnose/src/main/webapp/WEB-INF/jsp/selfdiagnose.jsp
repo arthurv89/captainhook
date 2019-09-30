@@ -11,7 +11,7 @@
 			}
 
 			th {
-				background-color: <c:out value="${statusOk ? '#4CAF50' : '#AF4C50'}"/>;
+				background-color: <c:out value="${statusOk ? '#4CAF50' : '#ACE'}"/>;
 				color: white;
 			}
 

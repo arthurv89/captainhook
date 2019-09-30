@@ -1,29 +1,32 @@
 package com.arthurvlug.captainhook.framework.server.plugins.selfdiagnose;
 
+import com.arthurvlug.captainhook.framework.server.PluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.util.Calendar;
-import java.util.Map;
 import java.util.Optional;
 
 @Controller
-public class SelfDiagnoseController {
+public class SelfDiagnoseController extends PluginController {
     @Autowired(required = false)
     private AbstractSelfDiagnose _selfDiagnose;
 
     @RequestMapping("/selfdiagnose")
-    public String welcome(Map<String, Object> model) {
+    public ModelAndView welcome() {
         final AbstractSelfDiagnose selfDiagnose = Optional.ofNullable(_selfDiagnose).orElse(new DefaultSelfDiagnose());
         selfDiagnose.refresh();
 
         final int failingChecks = failingChecks(selfDiagnose);
-        model.put("failingChecks", failingChecks);
-        model.put("statusOk", failingChecks > 0);
-        model.put("currentTime", Calendar.getInstance());
-        model.put("selfdiagnose", selfDiagnose);
-        return "plugins/selfdiagnose";
+
+        ModelAndView modelAndView = new ModelAndView("plugins/selfdiagnose");
+        modelAndView.addObject("failingChecks", failingChecks);
+        modelAndView.addObject("statusOk", failingChecks == 0);
+        modelAndView.addObject("currentTime", Calendar.getInstance());
+        modelAndView.addObject("selfdiagnose", selfDiagnose);
+        return modelAndView;
     }
 
     private int failingChecks(final AbstractSelfDiagnose selfDiagnose) {

@@ -13,7 +13,7 @@ import lombok.Getter;
 import java.util.Map;
 
 public class ServerProperties extends AbstractServerProperties {
-    public static final String _EndpointEndpoint = "_Endpoint";
+    private static final String _EndpointEndpoint = "_Endpoint";
 
     @Getter
     private final String packageName = "com.arthurvlug._service";
@@ -26,9 +26,9 @@ public class ServerProperties extends AbstractServerProperties {
 
 
     @Getter
-    protected Map<String, IOType<?, ?>> iOTypes = createMap();
+    protected Map<String, IOType<?, ?>> iOTypes = createIoTypesMap();
 
-    private ImmutableMap<String, IOType<? extends Input, ? extends Output>> createMap() {
+    private ImmutableMap<String, IOType<? extends Input, ? extends Output>> createIoTypesMap() {
         return ImmutableMap.<String, IOType<? extends Input, ? extends Output>>builder()
                 .put(_EndpointEndpoint, new IOType<>(new TypeToken<Request<com.arthurvlug._service.activity._endpoint._EndpointInput>>() {}, new TypeToken<Response<com.arthurvlug._service.activity._endpoint._EndpointOutput>>() {}))
                 .build();

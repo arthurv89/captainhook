@@ -7,6 +7,7 @@ import com.arthurvlug.captainhook.framework.common.serialization.Serializer;
 import com.arthurvlug.captainhook.framework.common.serialization.SerializerTypes;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -21,9 +22,9 @@ import org.springframework.web.context.request.async.DeferredResult;
 import rx.Observable;
 
 import javax.annotation.PostConstruct;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @EnableAutoConfiguration
 @RestController
@@ -120,7 +121,7 @@ public class Controller {
         map.put("timeSpent", timeSpent);
     }
 
-    private static Class<?>[] classes(final List<Class<?>> classes) {
+    private static Class<?>[] classes(final Collection<Class<?>> classes) {
         return ImmutableList.<Class>builder()
                 .add(Controller.class)
                 .addAll(classes)
@@ -129,18 +130,33 @@ public class Controller {
     }
 
     public static void run(final AbstractServerProperties serverProperties, final String[] args) {
+        run(serverProperties, ImmutableList.of(), args);
+    }
+
+    public static void run(final AbstractServerProperties serverProperties, Plugin pluginControllers, final String[] args) {
+        run(serverProperties, ImmutableList.of(pluginControllers), args);
+    }
+
+    public static void run(final AbstractServerProperties serverProperties, final List<Plugin> pluginControllers, final String[] args) {
         serverEndpointComponent = new ServerEndpointComponent(serverProperties);
 
         System.setProperty("server.port", String.valueOf(serverEndpointComponent.getServerProperties().getPort()));
 
+        SpringApplication.run(
+                getClasses(pluginControllers),
+                args);
+    }
 
+    private static Class<?>[] getClasses(final List<Plugin> pluginControllers) {
         final List<Class<?>> activityClasses = new ActivityScanner(serverEndpointComponent.getServerProperties())
                 .scan();
-        final ImmutableList<Class<?>> classes = ImmutableList.<Class<?>>builder()
+
+        final List<Class<?>> pluginClasses = pluginControllers.stream().flatMap(x -> x.getClasses().stream()).collect(Collectors.toList());
+        final Collection<Class<?>> classSet = ImmutableSet.<Class<?>>builder()
+                .addAll(pluginClasses)
                 .addAll(activityClasses)
                 .build();
-
-        SpringApplication.run(classes(classes), args);
+        return classes(classSet);
     }
 
     @PostConstruct

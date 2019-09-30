@@ -17,8 +17,6 @@ function e {
 
 e framework-core && \
 e framework-core-clientlib && \
-e framework-core-clientlib-pom && \
-e framework-core-server-pom && \
 e framework-plugins-selfdiagnose && \
 e framework-core-server && \
 e exampleservice-clientlib && \

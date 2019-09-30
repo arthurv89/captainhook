@@ -62,7 +62,7 @@ public class GenerateServerClasses extends Generator {
     }
 
     private String endpoint(final EntryConfig c) {
-        return String.format("public static final String %sEndpoint = \"%s\";", c.endpointName, c.endpointName);
+        return String.format("private static final String %sEndpoint = \"%s\";", c.endpointName, c.endpointName);
     }
 
     private String entry(final EntryConfig c) {

@@ -5,6 +5,7 @@ import lombok.Getter;
 import com.arthurvlug.captainhook.framework.server.plugins.selfdiagnose.AbstractSelfDiagnose;
 import com.arthurvlug.captainhook.framework.server.plugins.selfdiagnose.SelfDiagnoseItem;
 import com.arthurvlug.captainhook.framework.server.plugins.selfdiagnose.SelfDiagnoseLayout;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -12,12 +13,14 @@ import java.util.List;
 
 @Component
 public class SelfDiagnose extends AbstractSelfDiagnose {
+    private ServerProperties serverProperties = new ServerProperties();
+
     @Getter
     private final SelfDiagnoseLayout layout = new SelfDiagnoseLayout("#dddddd");
 
-    @Getter
-    private final String name = "S??S?S??S?S?S?S?S?S";
-//    ServiceConfiguration.name
+    public String getName() {
+        return serverProperties.getServerName();
+    }
 
     @Getter
     private List<SelfDiagnoseItem> items = new ArrayList<>();

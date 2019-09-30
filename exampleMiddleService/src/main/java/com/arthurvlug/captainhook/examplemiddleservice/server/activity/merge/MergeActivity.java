@@ -3,14 +3,11 @@ package com.arthurvlug.captainhook.examplemiddleservice.server.activity.merge;
 import com.arthurvlug.captainhook.examplemiddleservice.activity.merge.MergeInput;
 import com.arthurvlug.captainhook.examplemiddleservice.activity.merge.MergeOutput;
 import com.arthurvlug.captainhook.examplemiddleservice.server.activity.AbstractExampleActivity;
-import com.arthurvlug.captainhook.exampleservice.client.Client;
 import lombok.AllArgsConstructor;
 import lombok.Value;
 import com.arthurvlug.captainhook.exampleservice.activity.helloworld.HelloWorldInput;
 import com.arthurvlug.captainhook.exampleservice.activity.helloworld.HelloWorldOutput;
 import com.arthurvlug.captainhook.framework.server.Activity;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import rx.Observable;
 
