@@ -36,7 +36,7 @@ public class MergeActivity extends AbstractExampleActivity<MergeInput, MergeOutp
 
         return combine(call1, call2)
                 .map(combined -> MergeOutput.builder()
-                        .message("[Combined: " + combined.getHelloWorldOutput().getMessage() + ", " + combined.getHelloWorld2Output().getMessage() + "]")
+                        .message(String.format("[Combined: %s, %s]", combined.getHelloWorldOutput().getMessage(), combined.getHelloWorld2Output().getMessage()))
                         .respondingTime(Instant.now())
                         .build());
     }

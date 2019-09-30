@@ -22,10 +22,10 @@ public class HelloWorldActivity extends AbstractExampleActivity<HelloWorldInput,
             throw Throwables.propagate(e);
         }
         if(Math.random() < 0.1) {
-            throw new RuntimeException("Purposely thrown an exception after " + sleepTime + "ms");
+            throw new RuntimeException(String.format("Purposely thrown an exception after %dms", sleepTime));
         }
         final HelloWorldOutput output = HelloWorldOutput.builder()
-                .message("[HelloWorld 2 (slept: " + sleepTime + "ms): Hello, " + helloWorldInput.getName() + "!]")
+                .message(String.format("[HelloWorld 2 (slept: %dms): Hello, %s!]", sleepTime, helloWorldInput.getName()))
                 .respondingTime(Instant.now())
                 .build();
         return Observable.just(output);

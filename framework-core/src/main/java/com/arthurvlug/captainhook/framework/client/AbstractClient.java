@@ -44,7 +44,7 @@ public abstract class AbstractClient {
         final byte[] payload = SERIALIZER.serialize(request);
         final String baseUrl = getBaseUrl();
 
-        final String url = baseUrl + "/activity?activity=" + activity + "&encoding=" + SerializerTypes.JSON.name();
+        final String url = String.format("%s/activity?activity=%s&encoding=%s", baseUrl, activity, SerializerTypes.JSON.name());
         final ListenableFuture<org.asynchttpclient.Response> response = asyncHttpClient.preparePost(url)
                 .setBody(payload)
                 .execute();

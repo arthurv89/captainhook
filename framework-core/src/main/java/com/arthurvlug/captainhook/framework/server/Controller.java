@@ -79,7 +79,7 @@ public class Controller {
     }
 
     private FailureResponse failure(final Throwable t, final Map<String, Object> metadata, final String activityName) {
-        return Response.failure(new RuntimeException("Activity " + activityName + " in server " + serverEndpointComponent.getServerProperties().getServerName() + " threw an exception", t), metadata);
+        return Response.failure(new RuntimeException(String.format("Activity %s in server %s threw an exception", activityName, serverEndpointComponent.getServerProperties().getServerName()), t), metadata);
     }
 
     private <I extends Input, O extends Output, RC extends AbstractRequestContext> Observable<Response<O>> runActivity(
@@ -88,7 +88,7 @@ public class Controller {
                                  final Serializer serializer,
                                  final Map<String, Object> metadata) {
         final ServerActivityConfig<I, O, RC> activityConfig = serverEndpointComponent.get(activityName);
-        Preconditions.checkNotNull(activityConfig, "Activity " + activityName + " could not be found!");
+        Preconditions.checkNotNull(activityConfig, String.format("Activity %s could not be found!", activityName));
 
         final IOType<I, O> ioType = activityConfig.getIoType();
         final Request<I> request = serializer.deserialize(requestEntity.getBody(), ioType.getRequestType());

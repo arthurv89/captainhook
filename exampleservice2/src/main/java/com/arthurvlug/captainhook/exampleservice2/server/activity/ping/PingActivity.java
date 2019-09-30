@@ -20,7 +20,7 @@ public class PingActivity extends AbstractExampleActivity<PingInput, PingOutput>
             throw Throwables.propagate(e);
         }
         if(Math.random() < 0.1) {
-            throw new RuntimeException("Purposely thrown an exception after " + sleepTime + "ms");
+            throw new RuntimeException(String.format("Purposely thrown an exception after %dms", sleepTime));
         }
         final PingOutput output = PingOutput.builder()
                 .y("Pong!")

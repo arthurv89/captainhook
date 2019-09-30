@@ -38,7 +38,7 @@ public abstract class Generator {
     }
 
     protected String getPackage(final String basePackage, final String serviceName) {
-        return basePackage + "." + serviceName;
+        return String.format("%s.%s", basePackage, serviceName);
     }
 
     @AllArgsConstructor
@@ -71,7 +71,7 @@ public abstract class Generator {
         FileUtils.deleteDirectory(temp);
 
         // Create base/package (e.g. target/dependency-resources/framework-core/generated/nl/arthurvlug/captainhook/exampleservice)
-        final File newTarget = new File(temp, basePackage.replace(".", "/") + "/" + serviceName);
+        final File newTarget = new File(temp, String.format("%s/%s", basePackage.replace(".", "/"), serviceName));
         FileUtils.deleteDirectory(newTarget);
         FileUtils.forceMkdir(newTarget);
 
@@ -90,10 +90,10 @@ public abstract class Generator {
 
 
     private void replaceFileContents(final String basePackage, final String serviceName, final File temp, final Properties properties) throws IOException {
-        final Set<String> activities = ActivityScanner.run(basePackage + "." + serviceName);
-        final List<String> clientClassPackages = ClientScanner.run(basePackage + "." + serviceName)
+        final Set<String> activities = ActivityScanner.run(String.format("%s.%s", basePackage, serviceName));
+        final List<String> clientClassPackages = ClientScanner.run(String.format("%s.%s", basePackage, serviceName))
                 .stream()
-                .map(c -> c.getName() + ".class")
+                .map(c -> String.format("%s.class", c.getName()))
                 .collect(Collectors.toList());
 
         Files.walk(Paths.get(temp.toURI()))

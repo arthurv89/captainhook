@@ -35,15 +35,15 @@ public class ClientRunner extends AbstractClientRunner {
     }
 
     private void doCall(final int iterationNo) {
-        log.info("Iteration " + iterationNo + ": Started");
+        log.info(String.format("Iteration %d: Started", iterationNo));
         callMergeService(iterationNo);
 //        callService1(iterationNo);
-        log.info("Iteration " + iterationNo + ": Going to sleep for 1000ms");
+        log.info(String.format("Iteration %d: Going to sleep for 1000ms", iterationNo));
         sleep(1000);
     }
 
     private void callService1(final int iterationNo) {
-        HelloWorldInput input = HelloWorldInput.builder().name("Iteration " + iterationNo).build();
+        HelloWorldInput input = HelloWorldInput.builder().name(String.format("Iteration %d", iterationNo)).build();
         exampleService1Client.helloWorldCall(input)
                 .observeOn(Schedulers.io())
                 .subscribeOn(Schedulers.io())
@@ -55,9 +55,8 @@ public class ClientRunner extends AbstractClientRunner {
 
                     @Override
                     public void onNext(final HelloWorldOutput helloworldOutput) {
-                        final String outputString = "Message: " + helloworldOutput.getMessage() + ",\n"
-                                + "Responding time: " + formatterOutput.format(helloworldOutput.getRespondingTime());
-                        log.info("Iteration " + iterationNo + ": " + outputString);
+                        final String outputString = String.format("Message: %s,\nResponding time: %s", helloworldOutput.getMessage(), formatterOutput.format(helloworldOutput.getRespondingTime()));
+                        log.info(String.format("Iteration %d: %s", iterationNo, outputString));
                     }
 
                     @Override
@@ -70,7 +69,7 @@ public class ClientRunner extends AbstractClientRunner {
     }
 
     private void callMergeService(final int iterationNo) {
-        MergeInput input = MergeInput.builder().name("Iteration " + iterationNo).build();
+        MergeInput input = MergeInput.builder().name(String.format("Iteration %d", iterationNo)).build();
         mergeServiceClient.mergeCall(input)
                 .observeOn(Schedulers.io())
                 .subscribeOn(Schedulers.io())
@@ -82,9 +81,8 @@ public class ClientRunner extends AbstractClientRunner {
 
                     @Override
                     public void onNext(final MergeOutput helloworldOutput) {
-                        final String outputString = "Message: " + helloworldOutput.getMessage() + ",\n"
-                                + "Responding time: " + formatterOutput.format(helloworldOutput.getRespondingTime());
-                        log.info("Iteration " + iterationNo + ": " + outputString);
+                        final String outputString = String.format("Message: %s,\nResponding time: %s", helloworldOutput.getMessage(), formatterOutput.format(helloworldOutput.getRespondingTime()));
+                        log.info(String.format("Iteration %d: %s", iterationNo, outputString));
                     }
 
                     @Override
@@ -105,9 +103,9 @@ public class ClientRunner extends AbstractClientRunner {
 
     private void handleError(final Throwable e, final int iterationNo) {
         if (e.getCause() instanceof DependencyException) {
-            log.error("Iteration " + iterationNo + ": Dependency threw an exception: " + e.getCause().getMessage());
+            log.error(String.format("Iteration %d: Dependency threw an exception: %s", iterationNo, e.getCause().getMessage()));
         } else {
-            log.error("Iteration " + iterationNo + ": Unexpected exception: " + e);
+            log.error(String.format("Iteration %d: Unexpected exception: %s", iterationNo, e));
         }
     }
 }
