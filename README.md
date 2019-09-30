@@ -185,10 +185,16 @@ public class HelloWorldActivity extends SimpleActivity<HelloWorldInput, HelloWor
 }
 ```
 
-### Step 4: Run the application
+### Step 4: Build & run the application
+To generate the classes are necessary, you should simply run in both projects:
 ```bash
-bash build.sh
-bash start-service.sh
+mvn clean compile install
+```
+
+To run the service, run:
+```bash
+cd exampleService
+mvn -Prun exec:java
 ```
 
 Now you have a running service!
