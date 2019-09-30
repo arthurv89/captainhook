@@ -10,26 +10,25 @@ import java.util.Map;
 @AllArgsConstructor
 public class ServerEndpointComponent implements AbstractServerEndpointComponent {
     @Getter
-    private static final Map<String, ServerActivityConfig> serverActivityConfigMap = new HashMap<>();
+    private static final Map<String, ServerActivityConfig<? extends Input, ? extends Output, ? extends AbstractRequestContext>> serverActivityConfigMap = new HashMap<>();
 
     @Getter
     private final AbstractServerProperties serverProperties;
 
     @Override
     public <I extends Input, O extends Output, RC extends AbstractRequestContext> ServerActivityConfig<I, O, RC> get(final String activity) {
-        return serverActivityConfigMap.get(activity);
-    }
-
-    public IOType<Input, Output> getIOType(final String key) {
-        IOType<?, ?> ioType = serverProperties.getEndpointIOTypeMap().get(key);
-        return (IOType<Input, Output>) ioType;
+        return (ServerActivityConfig<I, O, RC>) serverActivityConfigMap.get(activity);
     }
 
     public <I extends Input, O extends Output, RC extends AbstractRequestContext> void registerActivity(final AbstractActivity<I, O, RC> activity) {
         final String activityName = activity.getClass().getSimpleName().replace("Activity", "");
-        final IOType<I, O> ioType = (IOType<I, O>) getIOType(activityName);
-        final ServerActivityConfig<I, O, RC> serverActivityConfig = new ServerActivityConfig<>(activity, ioType.getRequestTypeToken());
+        final IOType<I, O> ioType = getIoType(activityName);
+        final ServerActivityConfig<I, O, RC> serverActivityConfig = new ServerActivityConfig<>(activity, ioType);
 
         serverActivityConfigMap.put(activityName, serverActivityConfig);
+    }
+
+    private <I extends Input, O extends Output> IOType<I, O> getIoType(final String activityName) {
+        return (IOType<I, O>) serverProperties.getIOTypes().get(activityName);
     }
 }

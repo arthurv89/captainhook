@@ -7,7 +7,6 @@ import com.arthurvlug.captainhook.framework.common.serialization.Serializer;
 import com.arthurvlug.captainhook.framework.common.serialization.SerializerTypes;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -31,7 +30,7 @@ import java.util.Map;
 @Slf4j
 public class Controller {
     @Autowired
-    ApplicationContext applicationContext;
+    private ApplicationContext applicationContext;
 
     private static AbstractServerEndpointComponent serverEndpointComponent = null;
 
@@ -91,8 +90,8 @@ public class Controller {
         final ServerActivityConfig<I, O, RC> activityConfig = serverEndpointComponent.get(activityName);
         Preconditions.checkNotNull(activityConfig, "Activity " + activityName + " could not be found!");
 
-        final TypeToken<Request<I>> requestTypeToken = activityConfig.getRequestTypeToken();
-        final Request<I> request = serializer.deserialize(requestEntity.getBody(), requestTypeToken);
+        final IOType<I, O> ioType = activityConfig.getIoType();
+        final Request<I> request = serializer.deserialize(requestEntity.getBody(), ioType.getRequestType());
 
         final AbstractActivity<I, O, RC> activity = activityConfig.getActivity();
         return enactActivity(activity, request, metadata);
@@ -149,7 +148,7 @@ public class Controller {
         applicationContext.getBeansWithAnnotation(Activity.class)
                 .values()
                 .stream()
-                .map(x -> (AbstractActivity) x)
+                .map(x -> (AbstractActivity<?, ?, ?>) x)
                 .forEach(activity -> serverEndpointComponent.registerActivity(activity));
     }
 }
