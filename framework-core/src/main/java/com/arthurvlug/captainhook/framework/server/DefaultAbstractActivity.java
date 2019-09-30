@@ -9,5 +9,5 @@ public abstract class DefaultAbstractActivity<I extends Input, O extends Output>
         return new DefaultRequestContext();
     }
 
-    public void postActivity(final O output, final DefaultRequestContext requestContext) {}
+    public void postActivity(final I input, final O output, final DefaultRequestContext requestContext) {}
 }

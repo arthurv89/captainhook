@@ -103,7 +103,7 @@ public class Controller {
         final RC requestContext = activity.preActivity(input);
         final Observable<O> activityResult = Observable.defer(() -> activity.enact(input));
         return activityResult.map(output -> {
-            activity.postActivity(output, requestContext);
+            activity.postActivity(input, output, requestContext);
             return Response.success(output, metadata);
         });
     }

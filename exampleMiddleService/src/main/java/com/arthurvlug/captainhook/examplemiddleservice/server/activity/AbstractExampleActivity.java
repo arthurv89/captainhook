@@ -14,7 +14,7 @@ public abstract class AbstractExampleActivity<I extends Input, O extends Output>
     }
 
     @Override
-    protected void postActivity(final O output, final MiddleServiceRequestContext requestContext) {
+    protected void postActivity(final I input, final O output, final MiddleServiceRequestContext requestContext) {
         final long endTime = System.nanoTime();
         final long spentTime = endTime - requestContext.getStartingTime();
         log.info("[{}] Activity took {} ms", requestContext.getRequestId(), spentTime / 1000000);
