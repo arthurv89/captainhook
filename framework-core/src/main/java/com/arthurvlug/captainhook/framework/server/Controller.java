@@ -1,14 +1,14 @@
 package com.arthurvlug.captainhook.framework.server;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
-import com.google.gson.reflect.TypeToken;
-import lombok.extern.slf4j.Slf4j;
 import com.arthurvlug.captainhook.framework.common.response.FailureResponse;
 import com.arthurvlug.captainhook.framework.common.response.Output;
 import com.arthurvlug.captainhook.framework.common.response.Response;
 import com.arthurvlug.captainhook.framework.common.serialization.Serializer;
 import com.arthurvlug.captainhook.framework.common.serialization.SerializerTypes;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
+import com.google.gson.reflect.TypeToken;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
 import rx.Observable;
-import rx.functions.Func1;
 
 import javax.annotation.PostConstruct;
 import java.util.HashMap;
@@ -31,14 +30,10 @@ import java.util.Map;
 @RestController
 @Slf4j
 public class Controller {
-    final AbstractServerEndpointComponent serverEndpointComponent;
-
     @Autowired
     ApplicationContext applicationContext;
 
-    public Controller(final AbstractServerProperties serverActivityPool) {
-        this.serverEndpointComponent = new ServerEndpointComponent(serverActivityPool);
-    }
+    private static AbstractServerEndpointComponent serverEndpointComponent = null;
 
     @RequestMapping("/")
     public String index() {
@@ -70,7 +65,7 @@ public class Controller {
                     Controller.this.setTimeSpentTime(metadata);
                     byte[] bytes = serializer.serialize(response);
 
-                    Controller.this.logResponse(response);
+                    Controller.this.logResponse((Response<Output>) response);
                     return bytes;
                 });
     }
@@ -126,7 +121,17 @@ public class Controller {
         map.put("timeSpent", timeSpent);
     }
 
-    public void run(final String[] args) {
+    private static Class<?>[] classes(final List<Class<?>> classes) {
+        return ImmutableList.<Class>builder()
+                .add(Controller.class)
+                .addAll(classes)
+                .build()
+                .toArray(new Class[classes.size() + 1]);
+    }
+
+    public static void run(final AbstractServerProperties serverProperties, final String[] args) {
+        serverEndpointComponent = new ServerEndpointComponent(serverProperties);
+
         System.setProperty("server.port", String.valueOf(serverEndpointComponent.getServerProperties().getPort()));
 
 
@@ -137,14 +142,6 @@ public class Controller {
                 .build();
 
         SpringApplication.run(classes(classes), args);
-    }
-
-    private static Class<?>[] classes(final List<Class<?>> classes) {
-        return ImmutableList.<Class>builder()
-                .add(Controller.class)
-                .addAll(classes)
-                .build()
-                .toArray(new Class[classes.size() + 1]);
     }
 
     @PostConstruct

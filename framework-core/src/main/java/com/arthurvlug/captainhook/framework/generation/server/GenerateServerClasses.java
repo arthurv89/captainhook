@@ -1,5 +1,6 @@
 package com.arthurvlug.captainhook.framework.generation.server;
 
+import com.arthurvlug.captainhook.framework.generation.clientlib.GenerateClientLibClasses;
 import com.google.common.base.Joiner;
 import com.google.common.base.Throwables;
 import lombok.AllArgsConstructor;
@@ -13,6 +14,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -32,8 +34,11 @@ public class GenerateServerClasses {
         final File from = new File(workingDirectory, "/target/dependency-resources/framework-core/generated-template");
         final File temp = new File(workingDirectory, "/target/dependency-resources/framework-core/generated");
 
+        final Properties properties = new Properties();
+        properties.load(GenerateClientLibClasses.class.getClassLoader().getResourceAsStream("application.properties"));
+
         prepareFolders(from, temp, basePackage, serviceName);
-        replaceFiles(basePackage, serviceName, temp);
+        replaceFiles(basePackage, serviceName, temp, properties);
 
         final File to = new File(workingDirectory, "/src/main/generated-sources");
         FileUtils.deleteDirectory(to);
@@ -71,7 +76,7 @@ public class GenerateServerClasses {
 
 
 
-    private static void replaceFiles(final String basePackage, final String serviceName, final File temp) throws IOException {
+    private static void replaceFiles(final String basePackage, final String serviceName, final File temp, final Properties properties) throws IOException {
         final Set<String> activities = ActivityScanner.run(basePackage + "." + serviceName);
         final List<String> clientClassPackages = ClientScanner.run(basePackage + "." + serviceName)
                 .stream()
@@ -85,7 +90,8 @@ public class GenerateServerClasses {
                     try {
                         final File file = path.toFile();
                         final String contents = FileUtils.readFileToString(file, Charset.defaultCharset());
-                        final String newContents = replace(contents, basePackage, serviceName, activities, clientClassPackages);
+
+                        final String newContents = replace(contents, basePackage, serviceName, activities, clientClassPackages, properties);
                         FileUtils.write(file, newContents, Charset.defaultCharset());
                     } catch (IOException e) {
                         Throwables.propagate(e);
@@ -93,7 +99,12 @@ public class GenerateServerClasses {
                 });
     }
 
-    private static String replace(final String contents, final String basePackage, final String serviceName, final Set<String> activities, final List<String> clientClassPackageList) {
+    private static String replace(final String contents,
+                                  final String basePackage,
+                                  final String serviceName,
+                                  final Set<String> activities,
+                                  final List<String> clientClassPackageList,
+                                  final Properties properties) {
         final EntryConfig entryPrototype = new EntryConfig(TEMPLATE_BASE_PACKAGE,
                                                            TEMPLATE_SERVICE_NAME,
                                                            "_Endpoint"
@@ -116,12 +127,15 @@ public class GenerateServerClasses {
                 .collect(Collectors.joining("\n\n    "));
 
         String clientClassesString = Joiner.on(",\n        ").join(clientClassPackageList);
+        final String port = properties.getProperty("server.port", "8080");
+        final String name = properties.getProperty("name", TEMPLATE_SERVICE_NAME);
 
         final String prototypeEndpoint = endpoint(entryPrototype);
         final String prototypeEntry = entry(entryPrototype);
         final String prototypeServiceMethod = serviceMethod(entryPrototype);
         final String prototypePackage = entryPrototype.getPackage();
         final String prototypeClientClasses = "com.arthurvlug.captainhook.framework.server.AbstractClientSpringComponents.class";
+        final String prototypePort = "[port]";
 
         final String replace1 = contents.replace(prototypeEndpoint, endpointDeclarations);
         final String replace2 = replace1.replace(prototypeEntry, entryDeclarations);
@@ -129,7 +143,8 @@ public class GenerateServerClasses {
         final String replace4 = replace3.replace(prototypeClientClasses, clientClassesString);
 
         final String replace5 = replace4.replace(prototypePackage, getPackage(basePackage, serviceName));
-        final String replace7 = replace5.replace("_Endpoint", serviceName);
+        final String replace6 = replace5.replace(prototypePort, port);
+        final String replace7 = replace6.replace("_Endpoint", serviceName);
         return replace7;
     }
 

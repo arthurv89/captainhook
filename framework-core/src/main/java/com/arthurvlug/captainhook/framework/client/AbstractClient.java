@@ -12,20 +12,17 @@ import org.asynchttpclient.DefaultAsyncHttpClient;
 import org.asynchttpclient.ListenableFuture;
 import rx.Observable;
 
-import java.io.IOException;
-import java.util.Map;
-
 public abstract class AbstractClient {
     private static final Serializer SERIALIZER = SerializerTypes.JSON.getSerializer();
 
     private static final AsyncHttpClient asyncHttpClient = new DefaultAsyncHttpClient();
 
     protected <I extends Input, O extends Output> Observable<O> createCall(final String activity,
-                                                                           final I input) {
+                                                                           final I input,
+                                                                           final TypeToken<Response<O>> outputTypeToken) {
         try {
             return readBytes(activity, input).flatMap(bytes -> {
                 try {
-                    final TypeToken<Response<O>> outputTypeToken = getResponseTypeToken(activity);
                     final Response<O> response = SERIALIZER.deserialize(bytes, outputTypeToken);
                     if (response.getExceptionResult() == null) {
                         return Observable.just(response.getValue());
@@ -42,13 +39,7 @@ public abstract class AbstractClient {
         }
     }
 
-    private <I extends Input, O extends Output> TypeToken<Response<O>> getResponseTypeToken(final String activity) {
-        final Map<String, ClientActivityConfig<I, O>> activities = getActivities();
-        final ClientActivityConfig<I, O> inputOutputClientActivityConfig = activities.get(activity);
-        return inputOutputClientActivityConfig.getResponseTypeToken();
-    }
-
-    private <I extends Input> Observable<byte[]> readBytes(final String activity, final I input) throws IOException {
+    private <I extends Input> Observable<byte[]> readBytes(final String activity, final I input) {
         final Request<I> request = new Request<>(input);
         final byte[] payload = SERIALIZER.serialize(request);
         final String baseUrl = getBaseUrl();
@@ -62,6 +53,4 @@ public abstract class AbstractClient {
     }
 
     protected abstract String getBaseUrl();
-
-    protected abstract <O extends Output, I extends Input> Map<String, ClientActivityConfig<I, O>> getActivities();
 }

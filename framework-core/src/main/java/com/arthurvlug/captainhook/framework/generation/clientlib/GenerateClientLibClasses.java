@@ -176,12 +176,13 @@ public class GenerateClientLibClasses {
     private static String serviceMethod(final EntryConfig c) {
         return String.format(
             "public Observable<%s> %sCall(final %s input) {\n" +
-            "        return createCall(\"%s\", input);\n" +
+            "        return createCall(\"%s\", input, new TypeToken<Response<%s>>() {});\n" +
             "    }",
             outputClass(c),
             lowerFirst(c.endpointName),
             inputClass(c),
-            c.endpointName);
+            c.endpointName,
+            outputClass(c));
     }
 
     private static String outputClass(final EntryConfig c) {

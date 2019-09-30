@@ -5,6 +5,6 @@ import com.arthurvlug.captainhook.framework.server.Controller;
 
 public class MiddleServiceMain {
     public static void main(String[] args) {
-        new Controller(new ServerProperties()).run(args);
+        Controller.run(new ServerProperties(), args);
     }
 }

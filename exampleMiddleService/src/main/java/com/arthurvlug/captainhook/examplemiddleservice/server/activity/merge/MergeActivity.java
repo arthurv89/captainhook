@@ -3,6 +3,7 @@ package com.arthurvlug.captainhook.examplemiddleservice.server.activity.merge;
 import com.arthurvlug.captainhook.examplemiddleservice.activity.merge.MergeInput;
 import com.arthurvlug.captainhook.examplemiddleservice.activity.merge.MergeOutput;
 import com.arthurvlug.captainhook.examplemiddleservice.server.activity.AbstractExampleActivity;
+import com.arthurvlug.captainhook.exampleservice.client.Client;
 import lombok.AllArgsConstructor;
 import lombok.Value;
 import com.arthurvlug.captainhook.exampleservice.activity.helloworld.HelloWorldInput;
@@ -18,13 +19,8 @@ import java.time.Instant;
 @Activity
 @Component
 public class MergeActivity extends AbstractExampleActivity<MergeInput, MergeOutput> {
-    @Autowired
-    @Qualifier("exampleserviceClient")
-    private com.arthurvlug.captainhook.exampleservice.client.Client exampleServiceClient;
-
-    @Autowired
-    @Qualifier("exampleservice2Client")
-    private com.arthurvlug.captainhook.exampleservice2.client.Client exampleService2Client;
+    private com.arthurvlug.captainhook.exampleservice.client.Client exampleServiceClient = new com.arthurvlug.captainhook.exampleservice.client.Client();
+    private com.arthurvlug.captainhook.exampleservice2.client.Client exampleService2Client = new com.arthurvlug.captainhook.exampleservice2.client.Client();
 
     @Override
     public Observable<MergeOutput> enact(MergeInput mergeInput) {
