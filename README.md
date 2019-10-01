@@ -16,22 +16,6 @@ Because the server knows the domain model, the helper classes not only take care
 
 ## Project structure and responsibilities
 
-First check out the git project ...
-```
-export captainHookProject=~/workspace/captainhook-tutorial
-mkdir -p $captainHookProject
-cd $captainHookProject
-git clone git@github.com:arthurv89/captainhook.git
-```
-
-and then build the framework:
-```
-cd $captainHookProject/captainhook/framework/framework-core && mvn clean install
-cd $captainHookProject/captainhook/framework/framework-core-clientlib && mvn clean install
-cd $captainHookProject/captainhook/framework/framework-plugins-selfdiagnose && mvn clean install
-cd $captainHookProject/captainhook/framework/framework-core-server && mvn clean install
-```
-
 For each service we need 2 modules: a "server" and a "clientlib".
 Let's see what their responsibilities are
 
@@ -53,6 +37,23 @@ These classes are enough to make type-checked calls to a server without needing 
 <a name="howtogetstarted"/>
 
 ## How to get started
+
+First check out the git project ...
+```
+export captainHookProject=~/workspace/captainhook-tutorial
+mkdir -p $captainHookProject
+cd $captainHookProject
+git clone git@github.com:arthurv89/captainhook.git
+```
+
+and then build the framework:
+```
+cd $captainHookProject/captainhook/framework/framework-core && mvn clean install
+cd $captainHookProject/captainhook/framework/framework-core-clientlib && mvn clean install
+cd $captainHookProject/captainhook/framework/framework-plugins-selfdiagnose && mvn clean install
+cd $captainHookProject/captainhook/framework/framework-core-server && mvn clean install
+```
+
 It's easiest to start with the clientlib module.
 
 ### Step 1: Create a clientlib module:
@@ -286,7 +287,7 @@ mvn -Prun exec:java
 
 Now you have a running service!
 When you go to http://localhost:8080/ , it should say: "The server is online!".
-When you go to http://localhost:8081/activity?activity=HelloWorld&encoding=JSON&payload=%7B%22name%22%3A%22Captain%22Hook%22%7D, it will show the response from the server.
+When you go to http://localhost:8080/activity?activity=HelloWorld&encoding=JSON&payload=%7B%22name%22%3A%22Captain%22Hook%22%7D, it will show the response from the server.
 
 Other services can can now consume it's clientlib and call it without much effort.
 If those other services also implement the same model, their consumers can also easily call them.
