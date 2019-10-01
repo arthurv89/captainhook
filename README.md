@@ -54,6 +54,9 @@ cd $captainHookProject/captainhook/framework/framework-plugins-selfdiagnose && m
 cd $captainHookProject/captainhook/framework/framework-core-server && mvn clean install
 ```
 
+Now we have the framework in our local Maven repository.
+
+Now let's create our project.
 It's easiest to start with the clientlib module.
 
 ### Step 1: Create a clientlib module:
