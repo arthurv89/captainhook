@@ -44,21 +44,28 @@ public class Controller {
     @ResponseBody
     private DeferredResult<byte[]> endpoint(final @RequestParam(name = "activity") String activityName,
                                             final @RequestParam(name = "encoding") String encoding,
+                                            final @RequestParam(name = "payload", required = false) String payload,
                                             final HttpEntity<byte[]> requestEntity) {
         // Create a result that will be populated asynchronously
         final DeferredResult<byte[]> deferredResult = new DeferredResult<>();
-        getResponse(activityName, encoding, requestEntity).subscribe(bytes -> deferredResult.setResult(bytes));
+        getResponse(activityName, encoding, payload, requestEntity).subscribe(bytes -> deferredResult.setResult(bytes));
         return deferredResult;
     }
 
-    private Observable<byte[]> getResponse(final @RequestParam(name = "activity") String activityName,
-                               final @RequestParam(name = "encoding") String encoding,
-                               final HttpEntity<byte[]> requestEntity) {
+    private Observable<byte[]> getResponse(
+            final @RequestParam(name = "activity") String activityName,
+            final @RequestParam(name = "encoding") String encoding,
+            final @RequestParam(name = "payload", required = false) String payload,
+            final HttpEntity<byte[]> requestEntity) {
         final Map<String, Object> metadata = new HashMap<>();
         setStartTime(metadata);
         final Serializer serializer = SerializerTypes.getByName(encoding);
-        // Can't convert to lamda: compiler will complain about incompatible types
-        return runActivity(activityName, requestEntity, serializer, metadata)
+        final Optional<byte[]> getParamBytes = Optional.ofNullable(payload)
+                .map(x -> String.format("{\"input\":%s}", x).getBytes());
+        final Optional<byte[]> postParamBytes = Optional.ofNullable(requestEntity.getBody());
+        final byte[] payloadBytes = getParamBytes.orElse(postParamBytes.orElse("{}".getBytes()));
+        // Can't convert to lambda: compiler will complain about incompatible types
+        return runActivity(activityName, payloadBytes, serializer, metadata)
                 .onErrorReturn(t -> failure(t, metadata, activityName))
                 .map(response -> {
                     Controller.this.setEndTime(metadata);
@@ -85,14 +92,14 @@ public class Controller {
 
     private <I extends Input, O extends Output, RC extends AbstractRequestContext> Observable<Response<O>> runActivity(
                                  final String activityName,
-                                 final HttpEntity<byte[]> requestEntity,
+                                 final byte[] payload,
                                  final Serializer serializer,
                                  final Map<String, Object> metadata) {
         final ServerActivityConfig<I, O, RC> activityConfig = serverEndpointComponent.get(activityName);
         Preconditions.checkNotNull(activityConfig, String.format("Activity %s could not be found!", activityName));
 
         final IOType<I, O> ioType = activityConfig.getIoType();
-        final Request<I> request = serializer.deserialize(requestEntity.getBody(), ioType.getRequestType());
+        final Request<I> request = serializer.deserialize(payload, ioType.getRequestType());
 
         final AbstractActivity<I, O, RC> activity = activityConfig.getActivity();
         return enactActivity(activity, request, metadata);

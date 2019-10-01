@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="maven-antrun-" default="main"  >
+<target name="main">
+  <delete dir="/Users/arthur/workspace/captainhook-tutorial/captainhook/tutorial/helloWorldService/src/main/webapp/WEB-INF/jsp/plugins"/>
+  <copy flatten="true" todir="/Users/arthur/workspace/captainhook-tutorial/captainhook/tutorial/helloWorldService/src/main/webapp/WEB-INF/jsp/plugins">
+    <fileset dir="/Users/arthur/workspace/captainhook-tutorial/captainhook/tutorial/helloWorldService/target/dependency-resources/selfdiagnose/">
+      <include name="**/*.jsp"/>
+    </fileset>
+  </copy>
+  <copy flatten="true" todir="/Users/arthur/workspace/captainhook-tutorial/captainhook/tutorial/helloWorldService/src/main/resources/plugins">
+    <fileset dir="/Users/arthur/workspace/captainhook-tutorial/captainhook/tutorial/helloWorldService/target/dependency-resources/selfdiagnose/">
+      <include name="**/*.properties"/>
+    </fileset>
+  </copy>
+</target>
+</project>

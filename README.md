@@ -10,7 +10,7 @@ Because the server knows the domain model, the helper classes not only take care
 ## Project structure and responabilities
 
 First check out the git project:
-```bash
+```
 export captainHookProject=~/workspace/captainhook-tutorial
 mkdir -p $captainHookProject
 git clone git@github.com:arthurv89/captainhook.git
@@ -41,7 +41,7 @@ In this document we are going to create a service called HelloWorldService
 
 ### Add parent in pom.xml
 First, create a clientlib project and add the following parent:
-```bash
+```
 mkdir -p $captainHookProject/captainhook/tutorial/helloWorldServiceClientLib
 touch $captainHookProject/captainhook/tutorial/helloWorldServiceClientLib/pom.xml
 ```
@@ -88,7 +88,7 @@ Enter the following:
 The Activity input class can be anything you want, as long as it inherits from the Input class.
 
 In the example below, we used Lombok to add getters and a builder to generate this object in a clean way, and to get it's parameters without creating the getter methods ourselves.
-```bash
+```
 mkdir -p $captainHookProject/captainhook/tutorial/helloWorldServiceClientLib/src/main/java/com/arthurvlug/captainhook/tutorial/helloworldservice/activity/helloworld
 touch $captainHookProject/captainhook/tutorial/helloWorldServiceClientLib/src/main/java/com/arthurvlug/captainhook/tutorial/helloworldservice/activity/helloworld/HelloWorldInput.java
 ```
@@ -109,8 +109,8 @@ public class HelloWorldInput extends Input {
 ```
 
 The Activity output class is similar to the input class: you have all the freedom define it, as long as you set it's parent class: to Output.
- 
-```bash
+
+```
 touch $captainHookProject/captainhook/tutorial/helloWorldServiceClientLib/src/main/java/com/arthurvlug/captainhook/tutorial/helloworldservice/activity/helloworld/HelloWorldOutput.java
 ```
 
@@ -136,7 +136,7 @@ public class HelloWorldOutput extends Output {
 
 Lastly, in the resources folder, create a file called application.properties and add the following lines:
 
-```bash
+```
 mkdir -p $captainHookProject/captainhook/tutorial/helloWorldServiceClientLib/src/main/resources
 touch $captainHookProject/captainhook/tutorial/helloWorldServiceClientLib/src/main/resources/application.properties
 ```
@@ -152,7 +152,7 @@ With the clientlib in place, we can now move on to the server module.
 
 ### Step 2: Create a server module:
 
-```bash
+```
 mkdir -p $captainHookProject/captainhook/tutorial/helloWorldService
 touch $captainHookProject/captainhook/tutorial/helloWorldService/pom.xml
 ```
@@ -216,7 +216,7 @@ public class ServiceMain {
 }
 ```
 
-Now create an activity class that handles the request. 
+Now create an activity class that handles the request.
 
 ```bash
 mkdir -p $captainHookProject/captainhook/tutorial/helloWorldService/src/main/java/com/arthurvlug/captainhook/tutorial/helloworldservice/server/activity/helloworld/
@@ -241,7 +241,7 @@ public class HelloWorldActivity extends SimpleActivity<HelloWorldInput, HelloWor
     @Override
     public Observable<HelloWorldOutput> enact(HelloWorldInput helloWorldInput) {
         final HelloWorldOutput output = HelloWorldOutput.builder()
-                .message("Hello world!")
+                .message(String.format("HelloMoonService received HelloWorldInput with name property: \"%s\"", helloWorldInput.getName()))
                 .respondingTime(Instant.now())
                 .build();
 
@@ -252,7 +252,7 @@ public class HelloWorldActivity extends SimpleActivity<HelloWorldInput, HelloWor
 
 ### Step 4: Build & run the application
 To generate the classes are necessary, you should simply run in both projects:
-```bash
+```
 cd $captainHookProject/captainhook/tutorial/helloWorldServiceClientLib
 mvn clean compile install
 cd $captainHookProject/captainhook/tutorial/helloWorldService
@@ -260,27 +260,72 @@ mvn clean compile install
 ```
 
 To run the service, run:
-```bash
+```
 cd $captainHookProject/captainhook/tutorial/helloWorldService
 mvn -Prun exec:java
 ```
 
 Now you have a running service!
 When you go to http://localhost:8080/ , it should say: "The server is online!".
+When you go to http://localhost:8081/activity?activity=HelloWorld&encoding=JSON&payload=%7B%22name%22%3A%22Captain%22Hook%22%7D, it will show the response from the server.
 
 Other services can can now consume it's clientlib and call it without much effort.
 If those other services also implement the same model, their consumers can also easily call them.
 Let's do that!
 
-### Step 5: Create a second Captain Hook service
-In this last step we're going to make a service that calls the service that we have created previously.
+### Step 5: Create a second Captain Hook service: HelloMoonService
+In this last step we're going to make a service called HelloMoonService that calls the HelloWorldService that we have created previously.
 
-```bash 
-cp -r $captainHookProject/captainhook/tutorial/helloWorldService $captainHookProject/captainhook/tutorial/helloMoonService
-cp -r $captainHookProject/captainhook/tutorial/helloWorldServiceClientLib $captainHookProject/captainhook/tutorial/helloMoonServiceClientLib
-
-perl -p -i -e 's/helloworldservice/hellomoonservice/g' `find $captainHookProject/captainhook/tutorial/helloMoonService/ -name *.*`
-
-
-
+Execute the following script to create the HelloMoonService:
 ```
+bash $captainHookProject/captainhook/tutorial/cloneAndReplace.sh
+```
+
+Both services are now in place. They are configured to run on different ports: HelloWorldService runs on port 8080 and HelloMoonService runs on port 8081.
+However, before we run it, let's configure the HelloMoonService to call HelloWorldService.
+
+Add the following dependency to HelloMoonService's pom.xml
+```xml
+<dependencies>
+    [...]
+    <dependency>
+        <groupId>com.arthurvlug.captainhook.tutorial</groupId>
+        <artifactId>helloworldservice-clientlib</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </dependency>
+    [...]
+</dependencies>
+```
+
+Now simply change the enact method in HelloMoonActivity to call the Client class that the HelloWorldService Clientlib exposed:
+```
+[...]
+import com.arthurvlug.captainhook.tutorial.helloworldservice.activity.helloworld.HelloWorldInput;
+import com.arthurvlug.captainhook.tutorial.helloworldservice.client.Client;
+[...]
+public class HelloMoonActivity extends SimpleActivity<HelloMoonInput, HelloMoonOutput> {
+    @Override
+    public Observable<HelloMoonOutput> enact(HelloMoonInput helloMoonInput) {
+        final HelloWorldInput helloWorldInput = HelloWorldInput.builder().name(helloMoonInput.getName()).build();
+        return new Client().helloWorldCall(helloWorldInput)
+                .map(response -> HelloMoonOutput.builder()
+                        .message(String.format("HelloMoonService received response from HelloWorldService: \"%s\"", response.getMessage()))
+                        .respondingTime(Instant.now())
+                        .build());
+    }
+}
+```
+
+After build the HelloMoon projects we will be able to run the HelloMoonService
+```
+cd $captainHookProject/captainhook/tutorial/helloMoonServiceClientLib
+mvn clean compile install
+cd $captainHookProject/captainhook/tutorial/helloMoonService
+mvn clean compile install
+
+
+cd $captainHookProject/captainhook/tutorial/helloMoonService
+mvn -Prun exec:java
+```
+
+When you go to http://localhost:8081/activity?activity=HelloMoon&encoding=JSON&payload=%7B%22name%22%3A%22Captain%22Hook%22%7D, it will show the response from the HelloMoonService which shows that inside it has called the HelloWorldService.
