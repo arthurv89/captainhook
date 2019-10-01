@@ -7,16 +7,26 @@ The server generates helper classes so clients can use that to do calls to the s
 Because the server knows the domain model, the helper classes not only take care of calling the server but also take care of serializing/deserializing the objects so the client doesn't have to do that.
 
 
-## Project structure and responabilities
+## Project structure and responsibilities
 
-First check out the git project:
+First check out the git project ...
 ```
 export captainHookProject=~/workspace/captainhook-tutorial
 mkdir -p $captainHookProject
+cd $captainHookProject
 git clone git@github.com:arthurv89/captainhook.git
 ```
 
+and then build the framework:
+```
+cd $captainHookProject/captainhook/framework/framework-core && mvn clean install
+cd $captainHookProject/captainhook/framework/framework-core-clientlib && mvn clean install
+cd $captainHookProject/captainhook/framework/framework-plugins-selfdiagnose && mvn clean install
+cd $captainHookProject/captainhook/framework/framework-core-server && mvn clean install
+```
+
 For each service we need 2 modules: a "server" and a "clientlib".
+Let's see what their responsibilities are
 
 ### The server module
 The server module implements all the necessary functionalities for that service.
@@ -42,8 +52,8 @@ In this document we are going to create a service called HelloWorldService
 ### Add parent in pom.xml
 First, create a clientlib project and add the following parent:
 ```
-mkdir -p $captainHookProject/captainhook/tutorial/helloWorldServiceClientLib
-touch $captainHookProject/captainhook/tutorial/helloWorldServiceClientLib/pom.xml
+mkdir -p $captainHookProject/captainhook/tutorial/helloworldservice-clientlib
+touch $captainHookProject/captainhook/tutorial/helloworldservice-clientlib/pom.xml
 ```
 
 Enter the following:
@@ -89,8 +99,8 @@ The Activity input class can be anything you want, as long as it inherits from t
 
 In the example below, we used Lombok to add getters and a builder to generate this object in a clean way, and to get it's parameters without creating the getter methods ourselves.
 ```
-mkdir -p $captainHookProject/captainhook/tutorial/helloWorldServiceClientLib/src/main/java/com/arthurvlug/captainhook/tutorial/helloworldservice/activity/helloworld
-touch $captainHookProject/captainhook/tutorial/helloWorldServiceClientLib/src/main/java/com/arthurvlug/captainhook/tutorial/helloworldservice/activity/helloworld/HelloWorldInput.java
+mkdir -p $captainHookProject/captainhook/tutorial/helloworldservice-clientlib/src/main/java/com/arthurvlug/captainhook/tutorial/helloworldservice/activity/helloworld
+touch $captainHookProject/captainhook/tutorial/helloworldservice-clientlib/src/main/java/com/arthurvlug/captainhook/tutorial/helloworldservice/activity/helloworld/HelloWorldInput.java
 ```
 
 Edit the file with the following contents:
@@ -111,7 +121,7 @@ public class HelloWorldInput extends Input {
 The Activity output class is similar to the input class: you have all the freedom define it, as long as you set it's parent class: to Output.
 
 ```
-touch $captainHookProject/captainhook/tutorial/helloWorldServiceClientLib/src/main/java/com/arthurvlug/captainhook/tutorial/helloworldservice/activity/helloworld/HelloWorldOutput.java
+touch $captainHookProject/captainhook/tutorial/helloworldservice-clientlib/src/main/java/com/arthurvlug/captainhook/tutorial/helloworldservice/activity/helloworld/HelloWorldOutput.java
 ```
 
 Edit the file with the following contents:
@@ -137,8 +147,8 @@ public class HelloWorldOutput extends Output {
 Lastly, in the resources folder, create a file called application.properties and add the following lines:
 
 ```
-mkdir -p $captainHookProject/captainhook/tutorial/helloWorldServiceClientLib/src/main/resources
-touch $captainHookProject/captainhook/tutorial/helloWorldServiceClientLib/src/main/resources/application.properties
+mkdir -p $captainHookProject/captainhook/tutorial/helloworldservice-clientlib/src/main/resources
+touch $captainHookProject/captainhook/tutorial/helloworldservice-clientlib/src/main/resources/application.properties
 ```
 
 Edit the file with the following contents:
@@ -153,8 +163,8 @@ With the clientlib in place, we can now move on to the server module.
 ### Step 2: Create a server module:
 
 ```
-mkdir -p $captainHookProject/captainhook/tutorial/helloWorldService
-touch $captainHookProject/captainhook/tutorial/helloWorldService/pom.xml
+mkdir -p $captainHookProject/captainhook/tutorial/helloworldservice
+touch $captainHookProject/captainhook/tutorial/helloworldservice/pom.xml
 ```
 
 Again, after creation of the server module, let's change the pom.xml file:
@@ -196,9 +206,9 @@ That method starts up the service.
 The parameters are a ServerProperties (which will be generated when you first build the application), followed by a list of plugins (however, this is optional).
 Lastly, it will also receive an array of String arguments, which can be used to configure plugins or internals of the framework.
 
-```bash
-mkdir -p $captainHookProject/captainhook/tutorial/helloWorldService/src/main/java/com/arthurvlug/captainhook/tutorial/helloworldservice
-touch $captainHookProject/captainhook/tutorial/helloWorldService/src/main/java/com/arthurvlug/captainhook/tutorial/helloworldservice/ServiceMain.java
+```
+mkdir -p $captainHookProject/captainhook/tutorial/helloworldservice/src/main/java/com/arthurvlug/captainhook/tutorial/helloworldservice
+touch $captainHookProject/captainhook/tutorial/helloworldservice/src/main/java/com/arthurvlug/captainhook/tutorial/helloworldservice/ServiceMain.java
 ```
 
 ```java
@@ -218,9 +228,9 @@ public class ServiceMain {
 
 Now create an activity class that handles the request.
 
-```bash
-mkdir -p $captainHookProject/captainhook/tutorial/helloWorldService/src/main/java/com/arthurvlug/captainhook/tutorial/helloworldservice/server/activity/helloworld/
-touch $captainHookProject/captainhook/tutorial/helloWorldService/src/main/java/com/arthurvlug/captainhook/tutorial/helloworldservice/server/activity/helloworld/HelloWorldActivity.java
+```
+mkdir -p $captainHookProject/captainhook/tutorial/helloworldservice/src/main/java/com/arthurvlug/captainhook/tutorial/helloworldservice/server/activity/helloworld/
+touch $captainHookProject/captainhook/tutorial/helloworldservice/src/main/java/com/arthurvlug/captainhook/tutorial/helloworldservice/server/activity/helloworld/HelloWorldActivity.java
 ```
 
 ```java
@@ -253,15 +263,15 @@ public class HelloWorldActivity extends SimpleActivity<HelloWorldInput, HelloWor
 ### Step 4: Build & run the application
 To generate the classes are necessary, you should simply run in both projects:
 ```
-cd $captainHookProject/captainhook/tutorial/helloWorldServiceClientLib
-mvn clean compile install
-cd $captainHookProject/captainhook/tutorial/helloWorldService
+cd $captainHookProject/captainhook/tutorial/helloworldservice-clientlib && \
+mvn clean compile install && \
+cd $captainHookProject/captainhook/tutorial/helloworldservice && \
 mvn clean compile install
 ```
 
 To run the service, run:
 ```
-cd $captainHookProject/captainhook/tutorial/helloWorldService
+cd $captainHookProject/captainhook/tutorial/helloworldservice
 mvn -Prun exec:java
 ```
 
@@ -276,8 +286,9 @@ Let's do that!
 ### Step 5: Create a second Captain Hook service: HelloMoonService
 In this last step we're going to make a service called HelloMoonService that calls the HelloWorldService that we have created previously.
 
-Execute the following script to create the HelloMoonService:
+Open a new tab and execute the following script to create the HelloMoonService:
 ```
+export captainHookProject=~/workspace/captainhook-tutorial
 bash $captainHookProject/captainhook/tutorial/cloneAndReplace.sh
 ```
 
