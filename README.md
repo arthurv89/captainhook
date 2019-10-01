@@ -1,11 +1,18 @@
 # Captain Hook
 
+[Introduction](#introduction)  
+[Project structure and responsibilities](#projectstructureandresponsibilities)  
+[How to get started](#howtogetstarted)
+
+<a name="introduction"/>
+
 ## Introduction
 
 Captain Hook is an API framework that makes sure the client and the server use the same contract to communicate.
 The server generates helper classes so clients can use that to do calls to the server without any configuration.
 Because the server knows the domain model, the helper classes not only take care of calling the server but also take care of serializing/deserializing the objects so the client doesn't have to do that.
 
+<a name="projectstructureandresponsibilities"/>
 
 ## Project structure and responsibilities
 
@@ -42,6 +49,8 @@ This is the reason it has to be split from the service' business logic: this way
 
 The module should expose a Client class and the service's domain classes.
 These classes are enough to make type-checked calls to a server without needing any configurations on the consumer side (apart from adding the clientlib as a dependency in the project).
+
+<a name="howtogetstarted"/>
 
 ## How to get started
 It's easiest to start with the clientlib module.
