@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.arthurvlug.captainhook</groupId>
+    <groupId>com.swipecrowd.captainhook</groupId>
     <artifactId>framework-core-server</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
@@ -86,7 +86,7 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>com.arthurvlug.captainhook</groupId>
+                                    <groupId>com.swipecrowd.captainhook</groupId>
                                     <artifactId>framework-plugins-selfdiagnose</artifactId>
                                     <version>1.0-SNAPSHOT</version>
                                     <type>jar</type>
@@ -106,7 +106,7 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>com.arthurvlug.captainhook</groupId>
+                                    <groupId>com.swipecrowd.captainhook</groupId>
                                     <artifactId>framework-core</artifactId>
                                     <version>1.0-SNAPSHOT</version>
                                     <type>jar</type>
@@ -134,7 +134,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <mainClass>com.arthurvlug.captainhook.framework.generation.server.GenerateServerClasses</mainClass>
+                    <mainClass>com.swipecrowd.captainhook.framework.generation.server.GenerateServerClasses</mainClass>
                     <arguments>
                         <argument>${project.artifactId}</argument>
                         <argument>${project.groupId}</argument>
@@ -215,7 +215,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.arthurvlug.captainhook</groupId>
+            <groupId>com.swipecrowd.captainhook</groupId>
             <artifactId>framework-core</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>

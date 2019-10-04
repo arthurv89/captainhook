@@ -1,9 +1,9 @@
-package com.arthurvlug._service.activity._endpoint;
+package com.swipecrowd._service.activity._endpoint;
 
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
-import com.arthurvlug.captainhook.framework.common.response.Output;
+import com.swipecrowd.captainhook.framework.common.response.Output;
 
 @Builder
 @Value

@@ -1,8 +1,8 @@
-package com.arthurvlug._service.activity._endpoint;
+package com.swipecrowd._service.activity._endpoint;
 
 import lombok.Builder;
 import lombok.Getter;
-import com.arthurvlug.captainhook.framework.server.Input;
+import com.swipecrowd.captainhook.framework.server.Input;
 
 @Builder
 @Getter
