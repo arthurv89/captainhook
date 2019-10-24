@@ -6,12 +6,17 @@ import com.swipecrowd.captainhook.framework.generation.clientlib.GenerateClientL
 import com.google.common.base.Throwables;
 import lombok.AllArgsConstructor;
 import org.apache.commons.io.FileUtils;
+import sun.applet.AppletClassLoader;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -119,7 +124,17 @@ public abstract class Generator {
         final File temp = new File(workingDirectory, "/target/dependency-resources/framework-core/generated");
 
         final Properties properties = new Properties();
-        properties.load(GenerateClientLibClasses.class.getClassLoader().getResourceAsStream("application.properties"));
+        final URLClassLoader classLoader = (URLClassLoader) GenerateClientLibClasses.class.getClassLoader();
+        final String propertiesFile = "application.properties";
+
+        //        System.out.println(getClass().getClassLoader().getResources())
+        System.out.println("Working dir " + workingDirectory);
+        System.out.println("getResource " + classLoader.getResource(propertiesFile));
+        System.out.println("URLs " + Arrays.asList(classLoader.getURLs()));
+        System.out.println("classLoader.findResource(propertiesFile) " + classLoader.findResource(propertiesFile));
+
+        final InputStream resourceAsStream = classLoader.getResourceAsStream(propertiesFile);
+        properties.load(resourceAsStream);
 
         prepareFolders(from, temp, basePackage, serviceName, folderName);
         replaceFileContents(basePackage, serviceName, temp, properties);
