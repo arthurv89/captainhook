@@ -3,7 +3,7 @@ set -x
 BASE_PATH="$( cd "$(dirname "$0")" ; pwd -P )"
 echo "BASE_PATH: $BASE_PATH"
 
-function e {
+function build_module {
 	printf "\n\n\n\n\n"
 
 	folder=$1
@@ -15,10 +15,10 @@ function e {
 	mvn clean compile install
 }
 
-e framework-core && \
-e framework-core-clientlib && \
-e framework-plugins-selfdiagnose && \
-e framework-core-server && \
+build_module framework-core && \
+build_module framework-core-clientlib && \
+build_module framework-plugins-selfdiagnose && \
+build_module framework-core-server && \
 printf "\n\n\n\n\n\n\n\n\n" && \
 echo "---------------------- Done successfully ----------------------" && \
 printf "\n\n\n\n\n\n\n\n\n"
