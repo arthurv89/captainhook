@@ -4,9 +4,17 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.swipecrowd.captainhook</groupId>
     <artifactId>framework-core-server</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.1.0</version>
     <packaging>pom</packaging>
     <name>framework-core-server</name>
+    <description>
+        Captainhook is a framework that helps developers create microservices.
+        Using a clientlib it's possible to create a typed datacontract
+        that can be shared amongs customers, hence reducing bugs and making
+        development easier and faster.
+    </description>
+    <url>https://www.github.com/arthurv89/captainhook</url>
+    
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
@@ -22,6 +30,20 @@
             <distribution>repo</distribution>
         </license>
     </licenses>
+
+    <developers>
+        <developer>
+            <id>arthurv89</id>
+            <name>Arthur V</name>
+            <email>arthur@swipecrowd.com</email>
+            <organization>Swipecrowd</organization>
+            <organizationUrl>http://www.swipecrowd.com/</organizationUrl>
+            <roles>
+                <role>architect</role>
+                <role>developer</role>
+            </roles>
+        </developer>
+    </developers>
 
     <scm>
       <connection>scm:git:git@github.com:/arthurv89/captainhook</connection>
@@ -202,7 +224,7 @@
                                 <artifactItem>
                                     <groupId>com.swipecrowd.captainhook</groupId>
                                     <artifactId>framework-plugins-selfdiagnose</artifactId>
-                                    <version>1.0-SNAPSHOT</version>
+                                    <version>0.1.0</version>
                                     <type>jar</type>
                                     <overWrite>true</overWrite>
                                     <outputDirectory>${project.build.directory}/dependency-resources/selfdiagnose</outputDirectory>
@@ -222,7 +244,7 @@
                                 <artifactItem>
                                     <groupId>com.swipecrowd.captainhook</groupId>
                                     <artifactId>framework-core</artifactId>
-                                    <version>1.0-SNAPSHOT</version>
+                                    <version>0.1.0</version>
                                     <type>jar</type>
                                     <overWrite>true</overWrite>
                                     <outputDirectory>${project.build.directory}/dependency-resources/framework-core/generated-template</outputDirectory>
@@ -312,7 +334,7 @@
         <dependency>
             <groupId>com.swipecrowd.captainhook</groupId>
             <artifactId>framework-core</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>0.1.0</version>
         </dependency>
 
         <dependency>
