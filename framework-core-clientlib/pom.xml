@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.swipecrowd.captainhook</groupId>
     <artifactId>framework-core-clientlib</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.1.0</version>
     <packaging>pom</packaging>
     <name>framework-core-clientlib</name>
 
@@ -21,7 +21,9 @@
     </licenses>
 
     <scm>
-        <url>https://github.com/arthurv89/captainhook</url>
+      <connection>scm:git:git@github.com:/arthurv89/captainhook</connection>
+      <developerConnection>scm:git:git@github.com:/arthurv89/captainhook</developerConnection>
+      <url>scm:git:git@github.com:/arthurv89/captainhook</url>
     </scm>
 
     <distributionManagement>
@@ -138,7 +140,7 @@
                                 <artifactItem>
                                     <groupId>com.swipecrowd.captainhook</groupId>
                                     <artifactId>framework-core</artifactId>
-                                    <version>1.0-SNAPSHOT</version>
+                                    <version>1.0</version>
                                     <type>jar</type>
                                     <overWrite>true</overWrite>
                                     <outputDirectory>${project.build.directory}/dependency-resources/framework-core/generated-template</outputDirectory>
@@ -217,7 +219,7 @@
         <dependency>
             <groupId>com.swipecrowd.captainhook</groupId>
             <artifactId>framework-core</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.0</version>
         </dependency>
     </dependencies>
 </project>
