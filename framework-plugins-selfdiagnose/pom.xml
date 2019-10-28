@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.swipecrowd.captainhook</groupId>
     <artifactId>framework-plugins-selfdiagnose</artifactId>
-    <version>0.1.0</version>
+    <version>0.1.1-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>framework-plugins-selfdiagnose</name>
     <description>
@@ -172,7 +172,7 @@
         <dependency>
             <groupId>com.swipecrowd.captainhook</groupId>
             <artifactId>framework-core</artifactId>
-            <version>0.1.0</version>
+            <version>0.1.1-SNAPSHOT</version>
         </dependency>
 
         <!-- JSTL for JSP -->

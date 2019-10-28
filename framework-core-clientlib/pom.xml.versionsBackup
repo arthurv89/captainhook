@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.swipecrowd.captainhook</groupId>
     <artifactId>framework-core-clientlib</artifactId>
-    <version>0.1.0</version>
+    <version>0.1.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>framework-core-clientlib</name>
 
@@ -154,7 +154,7 @@
                                 <artifactItem>
                                     <groupId>com.swipecrowd.captainhook</groupId>
                                     <artifactId>framework-core</artifactId>
-                                    <version>0.1.0</version>
+                                    <version>0.1.1-SNAPSHOT</version>
                                     <type>jar</type>
                                     <overWrite>true</overWrite>
                                     <outputDirectory>${project.build.directory}/dependency-resources/framework-core/generated-template</outputDirectory>
@@ -233,7 +233,7 @@
         <dependency>
             <groupId>com.swipecrowd.captainhook</groupId>
             <artifactId>framework-core</artifactId>
-            <version>0.1.0</version>
+            <version>0.1.1-SNAPSHOT</version>
         </dependency>
     </dependencies>
 </project>

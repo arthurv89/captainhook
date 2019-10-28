@@ -22,9 +22,9 @@ import org.springframework.web.context.request.async.DeferredResult;
 import rx.Observable;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpSession;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @EnableAutoConfiguration
 @RestController
@@ -45,18 +45,19 @@ public class Controller {
     private DeferredResult<byte[]> endpoint(final @RequestParam(name = "activity") String activityName,
                                             final @RequestParam(name = "encoding") String encoding,
                                             final @RequestParam(name = "payload", required = false) String payload,
+                                            final HttpSession session,
                                             final HttpEntity<byte[]> requestEntity) {
         // Create a result that will be populated asynchronously
         final DeferredResult<byte[]> deferredResult = new DeferredResult<>();
-        getResponse(activityName, encoding, payload, requestEntity).subscribe(bytes -> deferredResult.setResult(bytes));
+        getResponse(activityName, encoding, payload, requestEntity, session).subscribe(bytes -> deferredResult.setResult(bytes));
         return deferredResult;
     }
 
-    private Observable<byte[]> getResponse(
-            final @RequestParam(name = "activity") String activityName,
-            final @RequestParam(name = "encoding") String encoding,
-            final @RequestParam(name = "payload", required = false) String payload,
-            final HttpEntity<byte[]> requestEntity) {
+    private Observable<byte[]> getResponse(final String activityName,
+                                           final String encoding,
+                                           final String payload,
+                                           final HttpEntity<byte[]> requestEntity,
+                                           final HttpSession session) {
         final Map<String, Object> metadata = new HashMap<>();
         setStartTime(metadata);
         final Serializer serializer = SerializerTypes.getByName(encoding);
@@ -64,8 +65,9 @@ public class Controller {
                 .map(x -> String.format("{\"input\":%s}", x).getBytes());
         final Optional<byte[]> postParamBytes = Optional.ofNullable(requestEntity.getBody());
         final byte[] payloadBytes = getParamBytes.orElse(postParamBytes.orElse("{}".getBytes()));
+
         // Can't convert to lambda: compiler will complain about incompatible types
-        return runActivity(activityName, payloadBytes, serializer, metadata)
+        return runActivity(activityName, payloadBytes, serializer, metadata, session)
                 .onErrorReturn(t -> failure(t, metadata, activityName))
                 .map(response -> {
                     Controller.this.setEndTime(metadata);
@@ -91,10 +93,11 @@ public class Controller {
     }
 
     private <I extends Input, O extends Output, RC extends AbstractRequestContext> Observable<Response<O>> runActivity(
-                                 final String activityName,
-                                 final byte[] payload,
-                                 final Serializer serializer,
-                                 final Map<String, Object> metadata) {
+            final String activityName,
+            final byte[] payload,
+            final Serializer serializer,
+            final Map<String, Object> metadata,
+            final HttpSession session) {
         final ServerActivityConfig<I, O, RC> activityConfig = serverEndpointComponent.get(activityName);
         Preconditions.checkNotNull(activityConfig, String.format("Activity %s could not be found!", activityName));
 
@@ -102,13 +105,18 @@ public class Controller {
         final Request<I> request = serializer.deserialize(payload, ioType.getRequestType());
 
         final AbstractActivity<I, O, RC> activity = activityConfig.getActivity();
-        return enactActivity(activity, request, metadata);
+        return enactActivity(activity, request, metadata, session);
     }
 
-    private <I extends Input, O extends Output, RC extends AbstractRequestContext> Observable<Response<O>> enactActivity(final AbstractActivity<I, O, RC> activity, final Request<I> request, final Map<String, Object> metadata) {
+    private <I extends Input, O extends Output, RC extends AbstractRequestContext> Observable<Response<O>> enactActivity(
+            final AbstractActivity<I, O, RC> activity,
+            final Request<I> request,
+            final Map<String, Object> metadata,
+            final HttpSession session) {
         final I input = request.getInput();
         final RC requestContext = activity.preActivity(input);
-        final Observable<O> activityResult = Observable.defer(() -> activity.enact(input));
+        final ActivityRequest<I> activityRequest = new ActivityRequest<I>(input, session);
+        final Observable<O> activityResult = Observable.defer(() -> activity.handle(activityRequest));
         return activityResult.map(output -> {
             activity.postActivity(input, output, requestContext);
             return Response.success(output, metadata);
@@ -136,31 +144,29 @@ public class Controller {
                 .toArray(new Class[classes.size() + 1]);
     }
 
-    public static void run(final AbstractServerProperties serverProperties, final String[] args) {
-        run(serverProperties, ImmutableList.of(), args);
+    public static void run(final AbstractServerProperties serverProperties,
+                           final String[] args) {
+        run(serverProperties, DefaultServerConfiguration.class, args);
     }
 
-    public static void run(final AbstractServerProperties serverProperties, Plugin pluginControllers, final String[] args) {
-        run(serverProperties, ImmutableList.of(pluginControllers), args);
-    }
-
-    public static void run(final AbstractServerProperties serverProperties, final List<Plugin> pluginControllers, final String[] args) {
+    public static void run(final AbstractServerProperties serverProperties,
+                           final Class<? extends ServerConfiguration> serverConfiguration,
+                           final String[] args) {
         serverEndpointComponent = new ServerEndpointComponent(serverProperties);
 
         System.setProperty("server.port", String.valueOf(serverEndpointComponent.getServerProperties().getPort()));
 
         SpringApplication.run(
-                getClasses(pluginControllers),
+                getClasses(serverConfiguration),
                 args);
     }
 
-    private static Class<?>[] getClasses(final List<Plugin> pluginControllers) {
+    private static Class<?>[] getClasses(final Class<? extends ServerConfiguration> serverConfigurationClass) {
         final List<Class<?>> activityClasses = new ActivityScanner(serverEndpointComponent.getServerProperties())
                 .scan();
 
-        final List<Class<?>> pluginClasses = pluginControllers.stream().flatMap(x -> x.getClasses().stream()).collect(Collectors.toList());
         final Collection<Class<?>> classSet = ImmutableSet.<Class<?>>builder()
-                .addAll(pluginClasses)
+                .add(serverConfigurationClass)
                 .addAll(activityClasses)
                 .build();
         return classes(classSet);
