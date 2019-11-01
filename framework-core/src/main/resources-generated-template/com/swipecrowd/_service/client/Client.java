@@ -9,10 +9,11 @@ import rx.Observable;
 public class Client extends AbstractClient {
     @Getter
     private static final int port = Integer.parseInt("[port]");
+    private static final String host = "[host]";
 
     @Override
     protected String getBaseUrl() {
-        return "http://localhost:" + port;
+        return "http://" + host + ":" + port;
     }
 
     public Observable<com.swipecrowd._service.activity._endpoint._EndpointOutput> _EndpointCall(final com.swipecrowd._service.activity._endpoint._EndpointInput input) {

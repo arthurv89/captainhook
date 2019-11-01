@@ -30,17 +30,20 @@ public class GenerateClientLibClasses extends Generator {
         final EntryConfig entryPrototype = createTemplateEntryConfig();
         final String prototypeServiceMethod = serviceMethod(entryPrototype);
         final String prototypePackage = entryPrototype.getPackage();
+        final String prototypeHost = "[port]";
         final String prototypePort = "[port]";
 
         final List<EntryConfig> endpointConfigs = getEntryConfigs(basePackage, serviceName, activities);
         final String newServiceMethod = getServiceMethodDeclarations(endpointConfigs);
         final String newPackage = getPackage(basePackage, serviceName);
+        final String newHost = properties.getProperty("server.host", "10.0.2.2");
         final String newPort = properties.getProperty("server.port", "8080");
 
         String newContents = contents;
         newContents = doReplace(newContents, prototypeServiceMethod, newServiceMethod);
         newContents = doReplace(newContents, prototypePackage, newPackage);
         newContents = doReplace(newContents, prototypePort, newPort);
+        newContents = doReplace(newContents, prototypeHost, newHost);
         return newContents;
     }
 
