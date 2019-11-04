@@ -1,76 +1,27 @@
 package com.swipecrowd.captainhook.framework.generation;
 
-import com.swipecrowd.captainhook.framework.generation.clientlib.ActivityScanner;
-import com.swipecrowd.captainhook.framework.generation.clientlib.ClientScanner;
-import com.swipecrowd.captainhook.framework.generation.clientlib.GenerateClientLibClasses;
 import com.google.common.base.Throwables;
-import lombok.AllArgsConstructor;
+import com.swipecrowd.captainhook.framework.generation.clientlib.ActivityScanner;
+import com.swipecrowd.captainhook.framework.generation.clientlib.GenerateClientLibClasses;
 import org.apache.commons.io.FileUtils;
-import sun.applet.AppletClassLoader;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Properties;
 import java.util.Set;
-import java.util.stream.Collectors;
-
-import static com.swipecrowd.captainhook.framework.generation.server.GenerateServerClasses.TEMPLATE_ENDPOINT;
 
 public abstract class Generator {
     protected static final String TEMPLATE_BASE_PACKAGE = "com.swipecrowd";
-    protected static final String TEMPLATE_SERVICE_NAME = "_service";
-    protected static final String TEMPLATE_ENDPOINT = "_Endpoint";
-
-    protected String doReplace(final String contents, final String from, final String to) {
-        final String replacedString = contents.replace(from, to);
-        if(contents.equals(replacedString)) {
-            throw new RuntimeException(String.format("Nothing changed!\n\nFrom:\n%s\n\nTo:\n%s", from, to));
-        }
-        return replacedString;
-    }
+    public static final String TEMPLATE_SERVICE_NAME = "_service";
+    public static final String TEMPLATE_ENDPOINT = "_Endpoint";
 
 
-    private String templatePackageDirectory() {
-        return getPackage(TEMPLATE_BASE_PACKAGE, TEMPLATE_SERVICE_NAME).replace(".", "/");
-    }
-
-    protected String getPackage(final String basePackage, final String serviceName) {
-        return String.format("%s.%s", basePackage, serviceName);
-    }
-
-    @AllArgsConstructor
-    public class EntryConfig {
-        private final String basePackage;
-        private final String serviceName;
-        public final String endpointName;
-
-        public String getPackage() {
-            return Generator.this.getPackage(basePackage, serviceName);
-        }
-    }
-
-
-    protected static String outputClass(final EntryConfig c) {
-        return String.format("%s.activity.%s.%sOutput", c.getPackage(), c.endpointName.toLowerCase(), c.endpointName);
-    }
-
-    protected static String inputClass(final EntryConfig c) {
-        return String.format("%s.activity.%s.%sInput", c.getPackage(), c.endpointName.toLowerCase(), c.endpointName);
-    }
-
-    protected String lowerFirst(final String s) {
-        char[] c = s.toCharArray();
-        c[0] = Character.toLowerCase(c[0]);
-        return new String(c);
-    }
 
     private void prepareFolders(final File from, final File temp, final String basePackage, final String serviceName, final String name) throws IOException {
         FileUtils.deleteDirectory(temp);
@@ -92,16 +43,17 @@ public abstract class Generator {
         FileUtils.copyDirectory(serverFolder, newServerFolder);
     }
 
+    private String templatePackageDirectory() {
+        return getPackage(TEMPLATE_BASE_PACKAGE, TEMPLATE_SERVICE_NAME).replace(".", "/");
+    }
 
+    public static String getPackage(final String basePackage, final String serviceName) {
+        return String.format("%s.%s", basePackage, serviceName);
+    }
 
-    private void replaceFileContents(final String basePackage, final String serviceName, final File temp, final Properties properties) throws IOException {
+    private void replaceFileContents(final String basePackage, final String serviceName, final File tempFolder, final Properties properties) throws IOException {
         final Set<String> activities = ActivityScanner.run(String.format("%s.%s", basePackage, serviceName));
-        final List<String> clientClassPackages = ClientScanner.run(String.format("%s.%s", basePackage, serviceName))
-                .stream()
-                .map(c -> String.format("%s.class", c.getName()))
-                .collect(Collectors.toList());
-
-        Files.walk(Paths.get(temp.toURI()))
+        Files.walk(Paths.get(tempFolder.toURI()))
                 .parallel()
                 .filter(Files::isRegularFile)
                 .forEach(path -> {
@@ -109,7 +61,8 @@ public abstract class Generator {
                         final File file = path.toFile();
                         final String contents = FileUtils.readFileToString(file, Charset.defaultCharset());
 
-                        final String newContents = replace(contents, basePackage, serviceName, activities, properties);
+                        System.out.println(file.getName());
+                        final String newContents = ReplacerType.fromFileName(file.getName()).replace(contents, basePackage, serviceName, activities, properties);
                         FileUtils.write(file, newContents, Charset.defaultCharset());
                     } catch (IOException e) {
                         Throwables.propagate(e);
@@ -120,8 +73,8 @@ public abstract class Generator {
     protected void run(final String serviceName, final String basePackage, final String folderName) throws IOException {
         final String workingDirectory = new File("").getAbsolutePath();
 
-        final File from = new File(workingDirectory, "/target/dependency-resources/framework-core/generated-template");
-        final File temp = new File(workingDirectory, "/target/dependency-resources/framework-core/generated");
+        final File fromFolder = new File(workingDirectory, "/target/dependency-resources/framework-core/generated-template");
+        final File tempFolder = new File(workingDirectory, "/target/dependency-resources/framework-core/generated");
 
         final Properties properties = new Properties();
         final URLClassLoader classLoader = (URLClassLoader) GenerateClientLibClasses.class.getClassLoader();
@@ -136,27 +89,11 @@ public abstract class Generator {
         final InputStream resourceAsStream = classLoader.getResourceAsStream(propertiesFile);
         properties.load(resourceAsStream);
 
-        prepareFolders(from, temp, basePackage, serviceName, folderName);
-        replaceFileContents(basePackage, serviceName, temp, properties);
+        prepareFolders(fromFolder, tempFolder, basePackage, serviceName, folderName);
+        replaceFileContents(basePackage, serviceName, tempFolder, properties);
 
         final File to = new File(workingDirectory, "/src/main/generated-sources");
         FileUtils.deleteDirectory(to);
-        FileUtils.moveDirectory(temp, to);
+        FileUtils.moveDirectory(tempFolder, to);
     }
-
-    protected EntryConfig createTemplateEntryConfig() {
-        return new EntryConfig(
-                TEMPLATE_BASE_PACKAGE,
-                TEMPLATE_SERVICE_NAME,
-                TEMPLATE_ENDPOINT
-        );
-    }
-
-    protected List<EntryConfig> getEntryConfigs(final String basePackage, final String serviceName, final Set<String> activities) {
-        return activities.stream()
-                .map(activity -> new EntryConfig(basePackage, serviceName, activity))
-                .collect(Collectors.toList());
-    }
-
-    abstract protected String replace(final String contents, final String basePackage, final String serviceName, final Set<String> activities, final Properties properties);
 }

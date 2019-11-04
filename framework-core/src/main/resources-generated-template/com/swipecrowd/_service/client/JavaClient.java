@@ -6,7 +6,7 @@ import com.google.gson.reflect.TypeToken;
 import lombok.Getter;
 import rx.Observable;
 
-public class Client extends AbstractClient {
+public class JavaClient extends AbstractClient {
     @Getter
     private static final int port = Integer.parseInt("[port]");
     private static final String host = "[host]";

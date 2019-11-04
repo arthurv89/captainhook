@@ -165,7 +165,7 @@
                                     <type>jar</type>
                                     <overWrite>true</overWrite>
                                     <outputDirectory>${project.build.directory}/dependency-resources/framework-core/generated-template</outputDirectory>
-                                    <includes>**/*.java</includes>
+                                    <includes>**/*.java,**/*.js</includes>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>
