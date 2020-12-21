@@ -61,19 +61,19 @@
     <build>
         <resources>
             <resource>
-                <directory>${project.basedir}/src/main/resources</directory>
+                <directory>src/test/resources</directory>
                 <includes>
                     <include>**/*.properties</include>
                 </includes>
             </resource>
             <resource>
-                <directory>src/main/generated-sources</directory>
+                <directory>src/test/generated-sources</directory>
                 <includes>
                     <include>**/*.class</include>
                 </includes>
             </resource>
             <resource>
-                <directory>${project.basedir}/src/main/resources-generated-template</directory>
+                <directory>src/test/resources-generated-template</directory>
             </resource>
         </resources>
 

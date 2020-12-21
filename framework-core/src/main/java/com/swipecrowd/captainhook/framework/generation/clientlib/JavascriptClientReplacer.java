@@ -3,11 +3,8 @@ package com.swipecrowd.captainhook.framework.generation.clientlib;
 import com.swipecrowd.captainhook.framework.generation.DefaultReplacer;
 
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import static com.swipecrowd.captainhook.framework.generation.Generator.TEMPLATE_SERVICE_NAME;
 
 public class JavascriptClientReplacer extends DefaultReplacer {
     @Override
@@ -15,7 +12,8 @@ public class JavascriptClientReplacer extends DefaultReplacer {
                           final String basePackage,
                           final String serviceName,
                           final Set<String> activities,
-                          final Properties properties) {
+                          final String newHost,
+                          final String newPort) {
         final EntryConfig entryPrototype = createTemplateEntryConfig();
         final String prototypeHost = "[host]";
         final String prototypePort = "[port]";
@@ -23,8 +21,6 @@ public class JavascriptClientReplacer extends DefaultReplacer {
 
         final List<EntryConfig> endpointConfigs = getEntryConfigs(basePackage, serviceName, activities);
         final String newServiceMethod = getServiceMethodDeclarations(endpointConfigs);
-        final String newHost = properties.getProperty("server.host", "10.0.2.2");
-        final String newPort = properties.getProperty("server.port", "8080");
 
         String newContents = contents;
         newContents = doReplace(newContents, prototypeHost, newHost);

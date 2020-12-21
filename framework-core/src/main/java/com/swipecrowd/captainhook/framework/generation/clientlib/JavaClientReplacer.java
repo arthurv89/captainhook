@@ -3,7 +3,6 @@ package com.swipecrowd.captainhook.framework.generation.clientlib;
 import com.swipecrowd.captainhook.framework.generation.DefaultReplacer;
 
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -15,7 +14,8 @@ public class JavaClientReplacer extends DefaultReplacer {
                           final String basePackage,
                           final String serviceName,
                           final Set<String> activities,
-                          final Properties properties) {
+                          final String newHost,
+                          final String newPort) {
         final EntryConfig entryPrototype = createTemplateEntryConfig();
         final String prototypeServiceMethod = serviceMethod(entryPrototype);
         final String prototypePackage = entryPrototype.getPackage();
@@ -25,8 +25,6 @@ public class JavaClientReplacer extends DefaultReplacer {
         final List<EntryConfig> endpointConfigs = getEntryConfigs(basePackage, serviceName, activities);
         final String newServiceMethod = getServiceMethodDeclarations(endpointConfigs);
         final String newPackage = getPackage(basePackage, serviceName);
-        final String newHost = properties.getProperty("server.host", "10.0.2.2");
-        final String newPort = properties.getProperty("server.port", "8080");
 
         String newContents = contents;
         newContents = doReplace(newContents, prototypeServiceMethod, newServiceMethod);
@@ -44,9 +42,9 @@ public class JavaClientReplacer extends DefaultReplacer {
 
     private String serviceMethod(final EntryConfig c) {
         return String.format(
-                "public Observable<%s> %sCall(final %s input) {\n" +
-                        "        return createCall(\"%s\", input, new TypeToken<Response<%s>>() {});\n" +
-                        "    }",
+"    public Observable<%s> %sCall(final %s input) {\n" +
+"        return createCall(\"%s\", input, new TypeToken<Response<%s>>() {});\n" +
+"    }",
                 outputClass(c),
                 lowerFirst(c.endpointName),
                 inputClass(c),

@@ -3,7 +3,6 @@ package com.swipecrowd.captainhook.framework.generation;
 import lombok.AllArgsConstructor;
 
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -70,5 +69,5 @@ public abstract class DefaultReplacer implements Replacer {
                                    final String basePackage,
                                    final String serviceName,
                                    final Set<String> activities,
-                                   final Properties properties);
+                                   String newHost, String newPort);
 }

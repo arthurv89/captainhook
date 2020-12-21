@@ -17,9 +17,7 @@ public enum ReplacerType {
             .build();
 
     public static Replacer fromFileName(final String name) {
-        System.out.println(map);
-        final Replacer replacer = map.get(name);
-        final ServerPropertiesReplacer x = new ServerPropertiesReplacer();
-        return replacer;
+        System.out.println("Replacer map: " + map);
+        return map.get(name);
     }
 }
