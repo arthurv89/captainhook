@@ -22,7 +22,66 @@ public abstract class Generator {
     public static final String TEMPLATE_SERVICE_NAME = "_service";
     public static final String TEMPLATE_ENDPOINT = "_Endpoint";
 
+    protected void run(final String serviceName, final String basePackage, final String folderName) throws IOException {
+        final String workingDirectory = new File("").getAbsolutePath();
 
+        final File fromFolder = new File(workingDirectory, "/target/dependency-resources/framework-core/generated-template");
+        final File tempFolder = new File(workingDirectory, "/target/dependency-resources/framework-core/generated");
+
+        final Properties properties = parsePropertiesFile(workingDirectory);
+
+        String hostName = Optional.ofNullable(properties.getProperty("server.host")).orElseThrow(() -> new RuntimeException("We need a host IP or hostname"));
+        String hostPort = Optional.ofNullable(properties.getProperty("server.port")).orElseThrow(() -> new RuntimeException("We need a host port"));
+
+        System.out.println("Preparing folders");
+        prepareFolders(fromFolder, tempFolder, basePackage, serviceName, folderName);
+
+        System.out.println("Replace file contents");
+        replaceFileContents(basePackage, serviceName, tempFolder, hostName, hostPort);
+
+        final File to = new File(workingDirectory, "/src/main/generated-sources");
+        System.out.println("Copy over the results to " + to.getAbsolutePath());
+
+        FileUtils.deleteDirectory(to);
+        FileUtils.moveDirectory(tempFolder, to);
+    }
+
+    private Properties parsePropertiesFile(String workingDirectory) throws IOException {
+        final Properties properties = new Properties();
+
+        final URLClassLoader classLoader = (URLClassLoader) GenerateClientLibClasses.class.getClassLoader();
+        final String propertiesFile = "application.properties";
+
+        System.out.println("Working dir " + workingDirectory);
+        System.out.println("getResource " + classLoader.getResource(propertiesFile));
+        System.out.println("URLs " + Arrays.asList(classLoader.getURLs()));
+        System.out.println("classLoader.findResource(propertiesFile) " + classLoader.findResource(propertiesFile));
+
+        System.out.println("Loading properties");
+        final InputStream resourceAsStream = classLoader.getResourceAsStream(propertiesFile);
+        properties.load(resourceAsStream);
+        return properties;
+    }
+
+    private void replaceFileContents(final String basePackage, final String serviceName, final File tempFolder, String hostname, String port) throws IOException {
+        final Set<String> activities = ActivityScanner.run(String.format("%s.%s", basePackage, serviceName));
+        System.out.println("Temp folder: " + tempFolder);
+        Files.walk(Paths.get(tempFolder.toURI()))
+                .parallel()
+                .filter(Files::isRegularFile)
+                .forEach(path -> {
+                    try {
+                        final File file = path.toFile();
+                        final String contents = FileUtils.readFileToString(file, Charset.defaultCharset());
+
+                        System.out.println("Replace file " + file.getName());
+                        final String newContents = ReplacerType.fromFileName(file.getName()).replace(contents, basePackage, serviceName, activities, hostname, port);
+                        FileUtils.write(file, newContents, Charset.defaultCharset());
+                    } catch (IOException e) {
+                        Throwables.propagate(e);
+                    }
+                });
+    }
 
     private void prepareFolders(final File from, final File temp, final String basePackage, final String serviceName, final String name) throws IOException {
         FileUtils.deleteDirectory(temp);
@@ -50,60 +109,5 @@ public abstract class Generator {
 
     public static String getPackage(final String basePackage, final String serviceName) {
         return String.format("%s.%s", basePackage, serviceName);
-    }
-
-    private void replaceFileContents(final String basePackage, final String serviceName, final File tempFolder, String hostname, String port) throws IOException {
-        final Set<String> activities = ActivityScanner.run(String.format("%s.%s", basePackage, serviceName));
-        System.out.println("Temp folder: " + tempFolder);
-        Files.walk(Paths.get(tempFolder.toURI()))
-                .parallel()
-                .filter(Files::isRegularFile)
-                .forEach(path -> {
-                    try {
-                        final File file = path.toFile();
-                        final String contents = FileUtils.readFileToString(file, Charset.defaultCharset());
-
-                        System.out.println("Replace file " + file.getName());
-                        final String newContents = ReplacerType.fromFileName(file.getName()).replace(contents, basePackage, serviceName, activities, hostname, port);
-                        FileUtils.write(file, newContents, Charset.defaultCharset());
-                    } catch (IOException e) {
-                        Throwables.propagate(e);
-                    }
-                });
-    }
-
-    protected void run(final String serviceName, final String basePackage, final String folderName) throws IOException {
-        final String workingDirectory = new File("").getAbsolutePath();
-
-        final File fromFolder = new File(workingDirectory, "/target/dependency-resources/framework-core/generated-template");
-        final File tempFolder = new File(workingDirectory, "/target/dependency-resources/framework-core/generated");
-
-        final Properties properties = new Properties();
-
-        final URLClassLoader classLoader = (URLClassLoader) GenerateClientLibClasses.class.getClassLoader();
-        final String propertiesFile = "application.properties";
-
-        System.out.println("Working dir " + workingDirectory);
-        System.out.println("getResource " + classLoader.getResource(propertiesFile));
-        System.out.println("URLs " + Arrays.asList(classLoader.getURLs()));
-        System.out.println("classLoader.findResource(propertiesFile) " + classLoader.findResource(propertiesFile));
-
-        System.out.println("Loading properties");
-        final InputStream resourceAsStream = classLoader.getResourceAsStream(propertiesFile);
-        properties.load(resourceAsStream);
-
-        String hostName = Optional.ofNullable(properties.getProperty("server.host")).orElseThrow(() -> new RuntimeException("We need a host IP or hostname"));
-        String hostPort = Optional.ofNullable(properties.getProperty("server.port")).orElseThrow(() -> new RuntimeException("We need a host port"));
-
-        System.out.println("Preparing folders");
-        prepareFolders(fromFolder, tempFolder, basePackage, serviceName, folderName);
-
-        System.out.println("Replace file contents");
-        replaceFileContents(basePackage, serviceName, tempFolder, hostName, hostPort);
-
-        System.out.println("Copy over the results");
-        final File to = new File(workingDirectory, "/src/main/generated-sources");
-        FileUtils.deleteDirectory(to);
-        FileUtils.moveDirectory(tempFolder, to);
     }
 }

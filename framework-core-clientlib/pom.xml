@@ -59,13 +59,15 @@
     </distributionManagement>
 
     <build>
-        <resources>
-            <resource>
-                <directory>src/test/resources</directory>
+        <testResources>
+            <testResource>
+                <directory>{project.basedir}/src/test/resources</directory>
                 <includes>
                     <include>**/*.properties</include>
                 </includes>
-            </resource>
+            </testResource>
+        </testResources>
+        <resources>
             <resource>
                 <directory>src/test/generated-sources</directory>
                 <includes>
@@ -76,6 +78,7 @@
                 <directory>src/test/resources-generated-template</directory>
             </resource>
         </resources>
+
 
         <plugins>
             <plugin>
@@ -111,6 +114,7 @@
                     </execution>
                 </executions>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
@@ -220,6 +224,20 @@
                 <version>1.7</version>
                 <executions>
                     <execution>
+                        <id>add-test-resource</id>
+                        <phase>generate-test-sources</phase>
+                        <goals>
+                            <goal>add-test-resource</goal>
+                        </goals>
+                        <configuration>
+                            <resources>
+                                <resource>
+                                    <directory>src/test/resources</directory>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <id>add-source-to-jar</id>
                         <phase>generate-sources</phase>
                         <goals>
@@ -232,6 +250,11 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.19.1</version>
             </plugin>
         </plugins>
     </build>
