@@ -9,10 +9,12 @@ import com.swipecrowd.captainhook.framework.common.response.Response;
 import com.swipecrowd.captainhook.tutorial.testservice.ServiceMain;
 import com.swipecrowd.captainhook.tutorial.testservice.activity.helloworld.HelloWorldOutput;
 import org.apache.commons.io.IOUtils;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -25,6 +27,13 @@ public class IntegrationTest {
     public static void beforeAll() {
         String[] args = new String[0];
         ServiceMain.main(args);
+    }
+
+    @Test
+    public void testNoStatus() throws IOException {
+        Assertions.assertThrows(ConnectException.class, () -> {
+            getUrlContents("http://localhost:8888");
+        });
     }
 
     @Test
