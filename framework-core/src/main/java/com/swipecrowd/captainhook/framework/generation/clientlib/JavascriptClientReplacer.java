@@ -9,23 +9,17 @@ import java.util.stream.Collectors;
 public class JavascriptClientReplacer extends DefaultReplacer {
     @Override
     public String replace(final String contents,
-                          final String basePackage,
+                          final String servicePackage,
                           final String serviceName,
-                          final Set<String> activities,
-                          final String newHost,
-                          final String newPort) {
+                          final Set<String> activities) {
         final EntryConfig entryPrototype = createTemplateEntryConfig();
-        final String prototypeHost = "[host]";
-        final String prototypePort = "[port]";
         final String prototypeServiceMethod = serviceMethod(entryPrototype);
 
-        final List<EntryConfig> endpointConfigs = getEntryConfigs(basePackage, serviceName, activities);
+        final List<EntryConfig> endpointConfigs = getEntryConfigs(servicePackage, serviceName, activities);
         final String newServiceMethod = getServiceMethodDeclarations(endpointConfigs);
 
         String newContents = contents;
-        newContents = doReplace(newContents, prototypeHost, newHost);
-        newContents = doReplace(newContents, prototypePort, newPort);
-        newContents = doReplace(newContents, "_Service", upperFirst(serviceName));
+        newContents = doReplace(newContents, "Service__", upperFirst(serviceName));
         newContents = doReplace(newContents, prototypeServiceMethod, newServiceMethod);
         return newContents;
     }

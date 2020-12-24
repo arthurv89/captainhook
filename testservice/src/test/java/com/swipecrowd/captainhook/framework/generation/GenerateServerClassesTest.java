@@ -17,28 +17,30 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class GenerateServerClassesTest {
     private static final String URL = "/Users/arthur/workspace/captainhook-all/captainhook/testservice";
-    private static final String serviceName = "testservice";
-    private static final String basePackage = "com.swipecrowd.captainhook.tutorial";
-    public static final String SERVER_PACKAGE_PATH = "com/swipecrowd/captainhook/tutorial/testservice/server/";
-    public static final String EMPTY_FOLDER = "standard/";
+    private static final String serviceName = "TestService";
+    private static final String servicePackage = "com.swipecrowd.captainhook.test.testservice";
+    public static final String SERVER_PACKAGE_PATH = "com/swipecrowd/captainhook/test/testservice/server/";
+    public static final String STANDARD_FOLDER = "standard/";
 
     @Test
     public void testServerProperties() throws Exception {
-        final String fileName = "ServerProperties.java";
-        runTest(fileName, EMPTY_FOLDER);
+        final String fileName = "GeneratedServerProperties.java";
+        runTest(fileName);
     }
 
-    private void runTest(String fileName, String folder) throws Exception {
-        final String[] args = new String[] {serviceName, basePackage};
+    private void runTest(String fileName) throws Exception {
+        final String[] args = new String[] {servicePackage};
         GenerateServerClasses.main(args);
 
         final String generatedString = getGeneratedFileContents(fileName);
-        final String expectedString = getExpectedFileContents(fileName, folder);
+        final String expectedString = getExpectedFileContents(fileName, STANDARD_FOLDER);
         assertThat(generatedString).isEqualTo(expectedString);
     }
 
     private String getExpectedFileContents(String fileName, String folder) throws IOException {
-        final InputStream resourceAsStream = GenerateServerClassesTest.class.getClassLoader().getResourceAsStream(folder + fileName);
+        String resName = folder + fileName;
+        System.out.println("Resource location: " + resName);
+        final InputStream resourceAsStream = GenerateServerClassesTest.class.getClassLoader().getResourceAsStream(resName);
         final List<String> lines = IOUtils.readLines(resourceAsStream, StandardCharsets.UTF_8);
         final String expectedString = cleanUpLines(lines);
         return expectedString;

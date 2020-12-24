@@ -19,6 +19,8 @@ build_module framework-core && \
 build_module framework-core-clientlib && \
 build_module framework-plugins-selfdiagnose && \
 build_module framework-core-server && \
+build_module testservice-clientlib && \
+build_module testservice && \
 printf "\n\n\n\n\n\n\n\n\n" && \
 echo "---------------------- Done successfully ----------------------" && \
 printf "\n\n\n\n\n\n\n\n\n"

@@ -8,36 +8,34 @@ import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URLClassLoader;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Optional;
+import java.security.SecureClassLoader;
 import java.util.Properties;
 import java.util.Set;
 
 public abstract class Generator {
-    protected static final String TEMPLATE_BASE_PACKAGE = "com.swipecrowd";
-    public static final String TEMPLATE_SERVICE_NAME = "_service";
-    public static final String TEMPLATE_ENDPOINT = "_Endpoint";
+    protected static final String TEMPLATE_BASE_PACKAGE = "com.swipecrowd.service__";
+    public static final String TEMPLATE_SERVICE_NAME = "service__";
+    public static final String TEMPLATE_ENDPOINT = "Endpoint__";
 
-    protected void run(final String serviceName, final String basePackage, final String folderName) throws IOException {
+    protected void run(final String servicePackage, final String folderName) throws IOException {
+        System.out.println(servicePackage);
         final String workingDirectory = new File("").getAbsolutePath();
 
         final File fromFolder = new File(workingDirectory, "/target/dependency-resources/framework-core/generated-template");
         final File tempFolder = new File(workingDirectory, "/target/dependency-resources/framework-core/generated");
 
         final Properties properties = parsePropertiesFile(workingDirectory);
+        final String serviceName = (String) properties.get("*.*.name");
 
-        String hostName = Optional.ofNullable(properties.getProperty("server.host")).orElseThrow(() -> new RuntimeException("We need a host IP or hostname"));
-        String hostPort = Optional.ofNullable(properties.getProperty("server.port")).orElseThrow(() -> new RuntimeException("We need a host port"));
-
+        System.out.println("Service name: " + serviceName);
         System.out.println("Preparing folders");
-        prepareFolders(fromFolder, tempFolder, basePackage, serviceName, folderName);
+        prepareFolders(fromFolder, tempFolder, servicePackage, folderName);
 
         System.out.println("Replace file contents");
-        replaceFileContents(basePackage, serviceName, tempFolder, hostName, hostPort);
+        replaceFileContents(servicePackage, serviceName, tempFolder);
 
         final File to = new File(workingDirectory, "/src/main/generated-sources");
         System.out.println("Copy over the results to " + to.getAbsolutePath());
@@ -49,13 +47,11 @@ public abstract class Generator {
     private Properties parsePropertiesFile(String workingDirectory) throws IOException {
         final Properties properties = new Properties();
 
-        final URLClassLoader classLoader = (URLClassLoader) GenerateClientLibClasses.class.getClassLoader();
+        final SecureClassLoader classLoader = (SecureClassLoader) GenerateClientLibClasses.class.getClassLoader();
         final String propertiesFile = "application.properties";
 
         System.out.println("Working dir " + workingDirectory);
         System.out.println("getResource " + classLoader.getResource(propertiesFile));
-        System.out.println("URLs " + Arrays.asList(classLoader.getURLs()));
-        System.out.println("classLoader.findResource(propertiesFile) " + classLoader.findResource(propertiesFile));
 
         System.out.println("Loading properties");
         final InputStream resourceAsStream = classLoader.getResourceAsStream(propertiesFile);
@@ -63,8 +59,9 @@ public abstract class Generator {
         return properties;
     }
 
-    private void replaceFileContents(final String basePackage, final String serviceName, final File tempFolder, String hostname, String port) throws IOException {
-        final Set<String> activities = ActivityScanner.run(String.format("%s.%s", basePackage, serviceName));
+    private void replaceFileContents(final String servicePackage, final String serviceName, final File tempFolder) throws IOException {
+        final Set<String> activities = ActivityScanner.run(servicePackage);
+        System.out.println();
         System.out.println("Temp folder: " + tempFolder);
         Files.walk(Paths.get(tempFolder.toURI()))
                 .parallel()
@@ -74,8 +71,8 @@ public abstract class Generator {
                         final File file = path.toFile();
                         final String contents = FileUtils.readFileToString(file, Charset.defaultCharset());
 
-                        System.out.println("Replace file " + file.getName());
-                        final String newContents = ReplacerType.fromFileName(file.getName()).replace(contents, basePackage, serviceName, activities, hostname, port);
+                        System.out.println("Replace file " + file.getAbsolutePath());
+                        final String newContents = ReplacerType.fromFileName(file.getName()).replace(contents, servicePackage, serviceName, activities);
                         FileUtils.write(file, newContents, Charset.defaultCharset());
                     } catch (IOException e) {
                         Throwables.propagate(e);
@@ -83,16 +80,19 @@ public abstract class Generator {
                 });
     }
 
-    private void prepareFolders(final File from, final File temp, final String basePackage, final String serviceName, final String name) throws IOException {
+    private void prepareFolders(final File from,
+                                final File temp,
+                                final String servicePackage,
+                                final String name) throws IOException {
         FileUtils.deleteDirectory(temp);
 
         // Create base/package (e.g. target/dependency-resources/framework-core/generated/com/swipecrowd/captainhook/exampleservice)
-        final File newTarget = new File(temp, String.format("%s/%s", basePackage.replace(".", "/"), serviceName));
+        final File newTarget = new File(temp, String.format("%s", servicePackage.replace(".", "/")));
         FileUtils.deleteDirectory(newTarget);
         FileUtils.forceMkdir(newTarget);
 
-        final File _serviceFolder = new File(from, templatePackageDirectory());
-        File serverFolder = new File(_serviceFolder, name);
+        final File service__Folder = new File(from, templatePackageDirectory());
+        File serverFolder = new File(service__Folder, name);
         File newServerFolder = new File(newTarget, name);
         if(!serverFolder.exists()) {
             final boolean made = serverFolder.mkdirs();
@@ -104,10 +104,6 @@ public abstract class Generator {
     }
 
     private String templatePackageDirectory() {
-        return getPackage(TEMPLATE_BASE_PACKAGE, TEMPLATE_SERVICE_NAME).replace(".", "/");
-    }
-
-    public static String getPackage(final String basePackage, final String serviceName) {
-        return String.format("%s.%s", basePackage, serviceName);
+        return TEMPLATE_BASE_PACKAGE.replace(".", "/");
     }
 }

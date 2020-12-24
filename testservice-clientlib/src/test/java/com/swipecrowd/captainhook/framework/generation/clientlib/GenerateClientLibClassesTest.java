@@ -17,34 +17,36 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class GenerateClientLibClassesTest {
     private static final String URL = "/Users/arthur/workspace/captainhook-all/captainhook/testservice-clientlib";
     private static final String serviceName = "testservice-clientlib";
-    private static final String basePackage = "com.swipecrowd.captainhook.tutorial";
-    public static final String CLIENT_PACKAGE_PATH = "com/swipecrowd/captainhook/tutorial/testservice/client/";
-    public static final String EMPTY_FOLDER = "standard/";
+    private static final String servicePackage = "com.swipecrowd.captainhook.test.testservice";
+    public static final String CLIENT_PACKAGE_PATH = "com/swipecrowd/captainhook/test/testservice/client/";
+    public static final String STANDARD_FOLDER = "standard/";
 
     @Test
     public void testJavaClient() throws Exception {
         final String fileName = "JavaClient.java";
-        compare(fileName, EMPTY_FOLDER);
+        compare(fileName);
     }
 
     @Test
     public void testJavascriptClient() throws Exception {
         final String fileName = "JavascriptClient.js";
-        compare(fileName, EMPTY_FOLDER);
+        compare(fileName);
     }
 
-    private void compare(String fileName, String folder) throws Exception {
-        final String[] args = new String[] {serviceName, basePackage};
+    private void compare(String fileName) throws Exception {
+        final String[] args = new String[] {servicePackage};
 
         GenerateClientLibClasses.main(args);
 
         final String generatedString = readGeneratedString(fileName);
-        final String expectedString = readExpectedString(fileName, folder);
+        final String expectedString = readExpectedString(fileName, STANDARD_FOLDER);
         assertThat(generatedString).isEqualTo(expectedString);
     }
 
     private String readExpectedString(String fileName, String folder) throws IOException {
-        final InputStream resourceAsStream = GenerateClientLibClassesTest.class.getClassLoader().getResourceAsStream(folder + fileName);
+        String resName = folder + fileName;
+        System.out.println("Reading expected file " + resName);
+        final InputStream resourceAsStream = GenerateClientLibClassesTest.class.getClassLoader().getResourceAsStream(resName);
         final List<String> lines = IOUtils.readLines(resourceAsStream, StandardCharsets.UTF_8);
         final String expectedString = cleanUpLines(lines);
         return expectedString;

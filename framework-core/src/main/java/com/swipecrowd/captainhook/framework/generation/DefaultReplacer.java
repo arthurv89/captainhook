@@ -1,14 +1,13 @@
 package com.swipecrowd.captainhook.framework.generation;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.swipecrowd.captainhook.framework.generation.Generator.TEMPLATE_BASE_PACKAGE;
-import static com.swipecrowd.captainhook.framework.generation.Generator.TEMPLATE_ENDPOINT;
-import static com.swipecrowd.captainhook.framework.generation.Generator.TEMPLATE_SERVICE_NAME;
+import static com.swipecrowd.captainhook.framework.generation.Generator.*;
 
 public abstract class DefaultReplacer implements Replacer {
     protected String doReplace(final String contents, final String from, final String to) {
@@ -20,11 +19,11 @@ public abstract class DefaultReplacer implements Replacer {
     }
 
     protected static String outputClass(final EntryConfig c) {
-        return String.format("%s.activity.%s.%sOutput", c.getPackage(), c.endpointName.toLowerCase(), c.endpointName);
+        return String.format("%s.activity.%s.%sOutput", c.getServicePackage(), c.endpointName.toLowerCase(), c.endpointName);
     }
 
     protected static String inputClass(final EntryConfig c) {
-        return String.format("%s.activity.%s.%sInput", c.getPackage(), c.endpointName.toLowerCase(), c.endpointName);
+        return String.format("%s.activity.%s.%sInput", c.getServicePackage(), c.endpointName.toLowerCase(), c.endpointName);
     }
 
     protected String lowerFirst(final String s) {
@@ -49,25 +48,22 @@ public abstract class DefaultReplacer implements Replacer {
 
     @AllArgsConstructor
     public class EntryConfig {
-        private final String basePackage;
+        @Getter
+        private final String servicePackage;
+        @Getter
         private final String serviceName;
         public final String endpointName;
-
-        public String getPackage() {
-            return Generator.getPackage(basePackage, serviceName);
-        }
     }
 
-    protected List<EntryConfig> getEntryConfigs(final String basePackage, final String serviceName, final Set<String> activities) {
+    protected List<EntryConfig> getEntryConfigs(final String servicePackage, final String serviceName, final Set<String> activities) {
         return activities.stream()
-                .map(activity -> new EntryConfig(basePackage, serviceName, activity))
+                .map(activity -> new EntryConfig(servicePackage, serviceName, activity))
                 .collect(Collectors.toList());
     }
 
 
     public abstract String replace(final String contents,
-                                   final String basePackage,
+                                   final String servicePackage,
                                    final String serviceName,
-                                   final Set<String> activities,
-                                   String newHost, String newPort);
+                                   final Set<String> activities);
 }
