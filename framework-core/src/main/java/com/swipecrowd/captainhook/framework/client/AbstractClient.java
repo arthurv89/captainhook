@@ -19,7 +19,7 @@ public abstract class AbstractClient {
     private static final Serializer SERIALIZER = SerializerTypes.JSON.getSerializer();
 
     private static final AsyncHttpClient asyncHttpClient = new DefaultAsyncHttpClient();
-    private final AbstractServerProperties serverProperties;
+    public final AbstractServerProperties serverProperties;
 
     protected <I extends Input, O extends Output> Observable<O> createCall(final String serviceName,
                                                                            final String activity,

@@ -1,0 +1,1 @@
+mvn -Prun exec:java -Dexec.args="--stage=dev --region=EU --*.*.server.port=8001"

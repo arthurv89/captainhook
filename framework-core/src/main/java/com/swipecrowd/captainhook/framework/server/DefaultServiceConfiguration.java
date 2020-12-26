@@ -1,4 +1,4 @@
 package com.swipecrowd.captainhook.framework.server;
 
-public interface ServerConfiguration {
+public class DefaultServiceConfiguration {
 }

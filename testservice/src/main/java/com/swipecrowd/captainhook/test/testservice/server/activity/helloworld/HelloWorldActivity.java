@@ -13,6 +13,8 @@ import rx.Observable;
 
 import java.time.Instant;
 
+import static com.swipecrowd.captainhook.test.testservice.TestServiceServerProperties.DESTROY_KEY;
+
 @Activity
 @Component
 public class HelloWorldActivity extends SimpleActivity<HelloWorldInput, HelloWorldOutput> {
@@ -26,6 +28,20 @@ public class HelloWorldActivity extends SimpleActivity<HelloWorldInput, HelloWor
     @Override
     public Observable<HelloWorldOutput> handle(ActivityRequest<HelloWorldInput> activityRequest) {
         final HelloWorldInput helloWorldInput = activityRequest.getInput();
+        System.out.println(helloWorldInput);
+
+        if(helloWorldInput.getName().equals(DESTROY_KEY)) {
+            new Thread(() -> {
+                try {
+                    System.out.println("Self destructing in 3000 ms");
+                    Thread.sleep(3000);
+                } catch (InterruptedException ignored) {
+                }
+                System.exit(1);
+            }).start();
+            return Observable.just(createDestroyOutput());
+        }
+
         if(helloWorldInput.getForward() == 0) {
             return Observable.just(createOutput(helloWorldInput));
         }
@@ -39,9 +55,13 @@ public class HelloWorldActivity extends SimpleActivity<HelloWorldInput, HelloWor
                 .map(response -> createOutput(newHelloWorldInput));
     }
 
+    private HelloWorldOutput createDestroyOutput() {
+        return HelloWorldOutput.builder().message("SELF DESTRUCTING...").build();
+    }
+
     private HelloWorldOutput createOutput(final HelloWorldInput helloWorldInput) {
         return HelloWorldOutput.builder()
-                .message("Received name: " + helloWorldInput.getName())
+                .message(javaClient.serverProperties.getPort() + " -> Received name: " + helloWorldInput.getName())
                 .respondingTime(Instant.now())
                 .build();
     }

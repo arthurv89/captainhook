@@ -6,26 +6,36 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.Collections;
+
+import static com.swipecrowd.captainhook.framework.server.ApplicationArguments.PORT_KEY;
+
 @SpringBootApplication
 @Configuration
 public class MyApplication {
-    private static AbstractServerProperties serverProperties;
-
     public synchronized static ConfigurableApplicationContext start(
-            final AbstractServerProperties serverProperties,
-            final AbstractGeneratedServerProperties generatedServerProperties,
+            final ApplicationArguments applicationArguments,
             final Object[] sources,
             final String[] args) {
 
-        MyApplication.serverProperties = serverProperties;
-        return SpringApplication.run(
-                sources,
-                args);
+        final String port = PropertiesUtils.getPort(applicationArguments);
+        System.out.println("Running on port " + port);
+
+        final SpringApplication app = new SpringApplication(sources);
+        app.setDefaultProperties(Collections.singletonMap(PORT_KEY, port));
+        return app.run(args);
+    }
+
+
+    @Bean
+    public ServerEndpointComponent createServerEndpointComponent(final AbstractGeneratedServerProperties generatedServerProperties,
+                                                                 final AbstractServerProperties serverProperties) {
+        return new ServerEndpointComponent(generatedServerProperties, serverProperties);
     }
 
     @Bean
-    public AbstractServerProperties createServerProperties() {
-        return serverProperties;
+    public MyBean createMyBean(final AbstractGeneratedServerProperties generatedServerProperties,
+                               final AbstractServerProperties serverProperties) {
+        return new MyBean(generatedServerProperties, serverProperties);
     }
-
 }
