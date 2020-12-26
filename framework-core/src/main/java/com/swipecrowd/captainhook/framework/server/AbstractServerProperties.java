@@ -1,10 +1,12 @@
 package com.swipecrowd.captainhook.framework.server;
 
 import lombok.Getter;
+import lombok.ToString;
 
 import static com.swipecrowd.captainhook.framework.server.ApplicationArguments.PORT_KEY;
 import static com.swipecrowd.captainhook.framework.server.PropertiesUtils.getOrThrow;
 
+@ToString
 public abstract class AbstractServerProperties {
     @Getter private final String stage;
     @Getter private final String region;

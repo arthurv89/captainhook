@@ -1,12 +1,12 @@
 package com.swipecrowd.captainhook.test.testservice.server.activity.helloworld;
 
-import com.swipecrowd.captainhook.framework.server.AbstractServerProperties;
 import com.swipecrowd.captainhook.framework.server.Activity;
 import com.swipecrowd.captainhook.framework.server.ActivityRequest;
 import com.swipecrowd.captainhook.framework.server.SimpleActivity;
 import com.swipecrowd.captainhook.test.testservice.activity.helloworld.HelloWorldInput;
 import com.swipecrowd.captainhook.test.testservice.activity.helloworld.HelloWorldOutput;
 import com.swipecrowd.captainhook.test.testservice.client.JavaClient;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rx.Observable;
@@ -14,16 +14,13 @@ import rx.Observable;
 import java.time.Instant;
 
 import static com.swipecrowd.captainhook.test.testservice.TestServiceServerProperties.DESTROY_KEY;
+import static com.swipecrowd.captainhook.test.testservice.TestServiceServerProperties.SHOW_CONFIG_KEY;
 
 @Activity
 @Component
+@AllArgsConstructor
 public class HelloWorldActivity extends SimpleActivity<HelloWorldInput, HelloWorldOutput> {
-    private final JavaClient javaClient;
-
-    @Autowired
-    public HelloWorldActivity(final AbstractServerProperties serverProperties) {
-        javaClient = new JavaClient(serverProperties);
-    }
+    @Autowired private final JavaClient javaClient;
 
     @Override
     public Observable<HelloWorldOutput> handle(ActivityRequest<HelloWorldInput> activityRequest) {
@@ -31,21 +28,25 @@ public class HelloWorldActivity extends SimpleActivity<HelloWorldInput, HelloWor
         System.out.println(helloWorldInput);
 
         if(helloWorldInput.getName().equals(DESTROY_KEY)) {
-            new Thread(() -> {
-                try {
-                    System.out.println("Self destructing in 3000 ms");
-                    Thread.sleep(3000);
-                } catch (InterruptedException ignored) {
-                }
-                System.exit(1);
-            }).start();
-            return Observable.just(createDestroyOutput());
+            return handleDestroyCommand();
+        }
+
+        if(helloWorldInput.getName().equals(SHOW_CONFIG_KEY)) {
+            return handleShowConfig();
         }
 
         if(helloWorldInput.getForward() == 0) {
             return Observable.just(createOutput(helloWorldInput));
         }
 
+        return handleForwardCommand(helloWorldInput);
+    }
+
+    private Observable<HelloWorldOutput> handleShowConfig() {
+        return Observable.just(HelloWorldOutput.builder().message(javaClient.serverProperties.toString()).build());
+    }
+
+    private Observable<HelloWorldOutput> handleForwardCommand(final HelloWorldInput helloWorldInput) {
         final HelloWorldInput newHelloWorldInput = HelloWorldInput.builder()
                 .name(helloWorldInput.getName())
                 .forward(helloWorldInput.getForward()-1)
@@ -53,6 +54,18 @@ public class HelloWorldActivity extends SimpleActivity<HelloWorldInput, HelloWor
 
         return javaClient.helloWorldCall(newHelloWorldInput)
                 .map(response -> createOutput(newHelloWorldInput));
+    }
+
+    private Observable<HelloWorldOutput> handleDestroyCommand() {
+        new Thread(() -> {
+            try {
+                System.out.println("Self destructing in 3000 ms");
+                Thread.sleep(3000);
+            } catch (InterruptedException ignored) {
+            }
+            System.exit(1);
+        }).start();
+        return Observable.just(createDestroyOutput());
     }
 
     private HelloWorldOutput createDestroyOutput() {

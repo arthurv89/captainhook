@@ -1,7 +1,9 @@
 package com.swipecrowd.captainhook.test.testservice;
 
+import com.swipecrowd.captainhook.framework.server.AbstractServerProperties;
 import com.swipecrowd.captainhook.framework.server.ApplicationArguments;
 import com.swipecrowd.captainhook.framework.server.DefaultServiceConfiguration;
+import com.swipecrowd.captainhook.test.testservice.client.JavaClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -18,5 +20,10 @@ public class TestServiceConfiguration extends DefaultServiceConfiguration {
     @Bean
     public TestServiceServerProperties createTestServiceServerProperties(final ApplicationArguments applicationArguments) {
         return new TestServiceServerProperties(applicationArguments);
+    }
+
+    @Bean
+    public JavaClient createJavaClient(final AbstractServerProperties serverProperties) {
+        return new JavaClient(serverProperties);
     }
 }

@@ -24,6 +24,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 
+import static com.swipecrowd.captainhook.test.testservice.TestServiceServerProperties.SHOW_CONFIG_KEY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -104,7 +105,7 @@ public class IntegrationTest {
         final HelloWorldInput input = HelloWorldInput.builder()
                 .name(TestServiceServerProperties.DESTROY_KEY)
                 .build();
-        final Response<HelloWorldOutput> response = getJsonResponse(input);
+        final Response<HelloWorldOutput> response = getJsonResponse(input, INDEX_URL);
         final String responseMessage = response.getValue().getMessage();
         System.out.println(responseMessage);
 
@@ -124,7 +125,7 @@ public class IntegrationTest {
 
     @Test
     public void testStatus() throws IOException {
-        final String urlContents = getUrlContents(INDEX_URL);
+        final String urlContents = getUrlContents( INDEX_URL);
         assertThat(urlContents).isEqualTo(onlineStatus(PORT));
     }
 
@@ -136,13 +137,26 @@ public class IntegrationTest {
     }
 
     @Test
+    public void testShowConfig() throws IOException {
+        try(ConfigurableApplicationContext ignored = startApplication(ALTERNATIVE_PORT)) {
+            final HelloWorldInput input = HelloWorldInput.builder()
+                    .name(SHOW_CONFIG_KEY)
+                    .forward(0)
+                    .build();
+
+            final Response<HelloWorldOutput> response = getJsonResponse(input, ALTERNATIVE_INDEX_URL);
+            assertThat(response.getValue().getMessage()).isEqualTo("TestServiceServerProperties(super=AbstractServerProperties(stage=dev, region=EU, applicationArguments=ApplicationArguments(map={dev.EU.server.host=localhost, *.*.TestService.server.host=localhost, stage=dev, dev.EU.server.port=8002, *.*.name=TestService, region=EU, *.*.TestService.server.port=8002}), port=8002, name=TestService))");
+        }
+    }
+
+    @Test
     public void testHelloWorldCallWithDepthZero() throws IOException {
         final HelloWorldInput input = HelloWorldInput.builder()
                 .name(CAPTAIN_HOOK)
                 .forward(0)
                 .build();
 
-        final Response<HelloWorldOutput> response = getJsonResponse(input);
+        final Response<HelloWorldOutput> response = getJsonResponse(input, INDEX_URL);
         assertThat(response.getValue().getMessage()).isEqualTo(PORT + " -> Received name: " + CAPTAIN_HOOK);
         assertThat(response.getValue().getRespondingTime()).isNotNull();
         assertThat(response.getMetadata()).containsKeys("timeSpent", "startTime", "endTime");
@@ -164,7 +178,7 @@ public class IntegrationTest {
                     .forward(0)
                     .build();
 
-            final Response<HelloWorldOutput> response = getJsonResponse(input);
+            final Response<HelloWorldOutput> response = getJsonResponse(input, INDEX_URL);
             assertThat(response.getValue().getMessage()).isEqualTo(PORT + " -> Received name: " + CAPTAIN_HOOK);
             assertThat(response.getValue().getRespondingTime()).isNotNull();
             assertThat(response.getMetadata()).containsKeys("timeSpent", "startTime", "endTime");
@@ -187,13 +201,19 @@ public class IntegrationTest {
                     .forward(1)
                     .build();
 
-            final Response<HelloWorldOutput> response = getJsonResponse(input);
+            final Response<HelloWorldOutput> response = getJsonResponse(input, INDEX_URL);
             assertThat(response.getExceptionResult().convertToThrowable().getCause().getMessage()).startsWith("Could not find value for key dev.EU.TestService.server.host");
         }
     }
 
-    private static String createUrl(String payload) {
-        return INDEX_URL + "/activity?activity=" + ENDPOINT_NAME + "&encoding=" + ENCODING + "&payload=" + payload;
+
+
+    private static Response<HelloWorldOutput> getJsonResponse(HelloWorldInput input, final String indexUrl) throws IOException {
+        final String payload = URLEncoder.encode(createGson().toJson(input), StandardCharsets.UTF_8.toString());
+        final String url = createUrl(payload, indexUrl);
+        final String json = getUrlContents(url);
+        final TypeToken<Response<HelloWorldOutput>> typeToken = new TypeToken<Response<HelloWorldOutput>>() {};
+        return GSON.fromJson(json, typeToken.getType());
     }
 
     private static Gson createGson() {
@@ -201,12 +221,8 @@ public class IntegrationTest {
                 -> Instant.ofEpochMilli(json.getAsJsonPrimitive().getAsLong())).create();
     }
 
-    private static Response<HelloWorldOutput> getJsonResponse(HelloWorldInput input) throws IOException {
-        final String payload = URLEncoder.encode(createGson().toJson(input), StandardCharsets.UTF_8.toString());
-        final String url = createUrl(payload);
-        final String json = getUrlContents(url);
-        final TypeToken<Response<HelloWorldOutput>> typeToken = new TypeToken<Response<HelloWorldOutput>>() {};
-        return GSON.fromJson(json, typeToken.getType());
+    private static String createUrl(String payload, final String indexUrl) {
+        return indexUrl + "/activity?activity=" + ENDPOINT_NAME + "&encoding=" + ENCODING + "&payload=" + payload;
     }
 
     private static String getUrlContents(String url) throws IOException {
@@ -226,7 +242,7 @@ public class IntegrationTest {
                 "--dev.EU.server.host=" + "localhost",
                 "--dev.EU.server.port=" + port
         };
-        if(port == PORT) {
+        if(port == ALTERNATIVE_PORT) {
             final String[] dependencyArgs = new String[]{
                     "--*.*.TestService.server.host=localhost",
                     "--*.*.TestService.server.port=8002"
