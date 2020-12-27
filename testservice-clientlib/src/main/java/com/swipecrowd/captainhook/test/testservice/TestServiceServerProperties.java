@@ -10,6 +10,4 @@ public class TestServiceServerProperties extends AbstractServerProperties {
     public TestServiceServerProperties(final ApplicationArguments applicationArguments) {
         super(applicationArguments);
     }
-    
-    
 }

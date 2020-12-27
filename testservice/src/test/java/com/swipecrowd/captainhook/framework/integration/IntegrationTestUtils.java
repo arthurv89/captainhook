@@ -73,7 +73,8 @@ public class IntegrationTestUtils {
         String[] args = {
                 "--stage=" + STAGE,
                 "--region=" + REGION,
-                "--*.*.server.port=" + port
+                "--*.*.server.port=" + port,
+                "--*.*.javaStartApplicationArgument=javaStartApplicationArgumentValue"
         };
         if(dependencyPort.isPresent()) {
             final String[] dependencyArgs = new String[]{

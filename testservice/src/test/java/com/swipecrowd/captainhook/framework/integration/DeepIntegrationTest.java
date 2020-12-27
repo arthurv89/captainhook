@@ -50,6 +50,10 @@ public class DeepIntegrationTest {
 
             verifyProperties(JAVA_PORT, testServiceServerProperties);
             verifyDependencyProperties(testServiceServerProperties);
+
+            assertThat(testServiceServerProperties.getApplicationArguments().get("*.*.testProperty")).hasValue("testPropertyValue");
+            assertThat(testServiceServerProperties.getApplicationArguments().get("*.*.javaStartApplicationArgument")).hasValue("javaStartApplicationArgumentValue");
+
         }
     }
 
@@ -59,6 +63,8 @@ public class DeepIntegrationTest {
             TestServiceServerProperties testServiceServerProperties = getTestServiceServerProperties(BASH_INDEX_URL);
 
             verifyProperties(BASH_PORT, testServiceServerProperties);
+            assertThat(testServiceServerProperties.getApplicationArguments().get("*.*.commandLineArgument")).hasValue("commandLineArgumentValue");
+            assertThat(testServiceServerProperties.getApplicationArguments().get("*.*.clientlibProperty")).hasValue("clientlibPropertyValue");
         }
     }
 

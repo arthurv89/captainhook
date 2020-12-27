@@ -20,7 +20,7 @@ public class HelloWorldService {
     private final TestServiceJavaClient testServiceJavaClient;
 
     @Autowired
-    private TestServiceServerProperties testServiceServerProperties;
+    private final TestServiceServerProperties testServiceServerProperties;
 
 
     Observable<HelloWorldOutput> createNormalOutput(final HelloWorldInput helloWorldInput) {
