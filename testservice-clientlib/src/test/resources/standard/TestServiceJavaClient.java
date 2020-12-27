@@ -6,8 +6,8 @@ import com.google.gson.reflect.TypeToken;
 import com.swipecrowd.captainhook.framework.server.AbstractServerProperties;
 import rx.Observable;
 
-public class JavaClient extends AbstractClient {
-    public JavaClient(final AbstractServerProperties serverProperties) {
+public class TestServiceJavaClient extends AbstractClient {
+    public TestServiceJavaClient(final AbstractServerProperties serverProperties) {
         super(serverProperties);
     }
 

@@ -2,6 +2,7 @@ package com.swipecrowd.captainhook.framework.generation.server;
 
 import com.swipecrowd.captainhook.framework.generation.DefaultReplacer;
 
+import java.io.File;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -28,6 +29,12 @@ public class GeneratedServerPropertiesReplacer extends DefaultReplacer {
         return newContents;
     }
 
+    @Override
+    public File createRenamedFile(final String serviceName, final File file) {
+        // Keep it the same.
+        return file;
+    }
+
     private String createEntryDeclarations(final List<EntryConfig> endpointConfigs) {
         return endpointConfigs.stream()
                 .map(c -> entry(c))
@@ -50,4 +57,6 @@ public class GeneratedServerPropertiesReplacer extends DefaultReplacer {
                 inputClass(c),
                 outputClass(c));
     }
+
+
 }

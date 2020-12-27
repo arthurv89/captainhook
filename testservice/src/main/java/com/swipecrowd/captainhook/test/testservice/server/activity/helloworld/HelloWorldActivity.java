@@ -5,7 +5,7 @@ import com.swipecrowd.captainhook.framework.server.ActivityRequest;
 import com.swipecrowd.captainhook.framework.server.SimpleActivity;
 import com.swipecrowd.captainhook.test.testservice.activity.helloworld.HelloWorldInput;
 import com.swipecrowd.captainhook.test.testservice.activity.helloworld.HelloWorldOutput;
-import com.swipecrowd.captainhook.test.testservice.client.JavaClient;
+import com.swipecrowd.captainhook.test.testservice.client.TestServiceJavaClient;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -20,7 +20,7 @@ import static com.swipecrowd.captainhook.test.testservice.TestServiceServerPrope
 @Component
 @AllArgsConstructor
 public class HelloWorldActivity extends SimpleActivity<HelloWorldInput, HelloWorldOutput> {
-    @Autowired private final JavaClient javaClient;
+    @Autowired private final TestServiceJavaClient testServiceJavaClient;
 
     @Override
     public Observable<HelloWorldOutput> handle(ActivityRequest<HelloWorldInput> activityRequest) {
@@ -43,7 +43,7 @@ public class HelloWorldActivity extends SimpleActivity<HelloWorldInput, HelloWor
     }
 
     private Observable<HelloWorldOutput> handleShowConfig() {
-        return Observable.just(HelloWorldOutput.builder().message(javaClient.serverProperties.toString()).build());
+        return Observable.just(HelloWorldOutput.builder().message(testServiceJavaClient.serverProperties.toString()).build());
     }
 
     private Observable<HelloWorldOutput> handleForwardCommand(final HelloWorldInput helloWorldInput) {
@@ -52,7 +52,7 @@ public class HelloWorldActivity extends SimpleActivity<HelloWorldInput, HelloWor
                 .forward(helloWorldInput.getForward()-1)
                 .build();
 
-        return javaClient.helloWorldCall(newHelloWorldInput)
+        return testServiceJavaClient.helloWorldCall(newHelloWorldInput)
                 .map(response -> createOutput(newHelloWorldInput));
     }
 
@@ -74,7 +74,7 @@ public class HelloWorldActivity extends SimpleActivity<HelloWorldInput, HelloWor
 
     private HelloWorldOutput createOutput(final HelloWorldInput helloWorldInput) {
         return HelloWorldOutput.builder()
-                .message(javaClient.serverProperties.getPort() + " -> Received name: " + helloWorldInput.getName())
+                .message(testServiceJavaClient.serverProperties.getPort() + " -> Received name: " + helloWorldInput.getName())
                 .respondingTime(Instant.now())
                 .build();
     }

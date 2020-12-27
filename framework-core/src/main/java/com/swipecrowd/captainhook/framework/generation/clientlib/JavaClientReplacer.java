@@ -2,6 +2,7 @@ package com.swipecrowd.captainhook.framework.generation.clientlib;
 
 import com.swipecrowd.captainhook.framework.generation.DefaultReplacer;
 
+import java.io.File;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -23,6 +24,11 @@ public class JavaClientReplacer extends DefaultReplacer {
         newContents = doReplace(newContents, prototypeServiceMethod, newServiceMethod);
         newContents = doReplace(newContents, prototypePackage, servicePackage);
         return newContents;
+    }
+
+    @Override
+    public File createRenamedFile(final String serviceName, final File file) {
+        return new File(file.getParentFile(), serviceName + file.getName());
     }
 
     private String getServiceMethodDeclarations(final List<EntryConfig> endpointConfigs) {

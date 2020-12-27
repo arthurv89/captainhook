@@ -72,8 +72,12 @@ public abstract class Generator {
                         final String contents = FileUtils.readFileToString(file, Charset.defaultCharset());
 
                         System.out.println("Replace file " + file.getAbsolutePath());
-                        final String newContents = ReplacerType.fromFileName(file.getName()).replace(contents, servicePackage, serviceName, activities);
+                        Replacer replacer = ReplacerType.fromFileName(file.getName());
+                        final String newContents = replacer.replace(contents, servicePackage, serviceName, activities);
                         FileUtils.write(file, newContents, Charset.defaultCharset());
+
+                        File newName = replacer.createRenamedFile(serviceName, file);
+                        file.renameTo(newName);
                     } catch (IOException e) {
                         Throwables.propagate(e);
                     }

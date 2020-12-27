@@ -16,20 +16,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class GenerateClientLibClassesTest {
     private static final String URL = "/Users/arthur/workspace/captainhook-all/captainhook/testservice-clientlib";
-    private static final String serviceName = "testservice-clientlib";
+    private static final String clientLibName = "testservice-clientlib";
     private static final String servicePackage = "com.swipecrowd.captainhook.test.testservice";
     public static final String CLIENT_PACKAGE_PATH = "com/swipecrowd/captainhook/test/testservice/client/";
     public static final String STANDARD_FOLDER = "standard/";
 
     @Test
     public void testJavaClient() throws Exception {
-        final String fileName = "JavaClient.java";
+        final String fileName = "TestServiceJavaClient.java";
         compare(fileName);
     }
 
     @Test
     public void testJavascriptClient() throws Exception {
-        final String fileName = "JavascriptClient.js";
+        final String fileName = "TestServiceJavascriptClient.js";
         compare(fileName);
     }
 
