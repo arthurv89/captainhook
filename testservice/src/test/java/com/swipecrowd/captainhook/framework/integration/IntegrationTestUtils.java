@@ -8,6 +8,7 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.reflect.TypeToken;
 import com.swipecrowd.captainhook.framework.common.response.Response;
 import com.swipecrowd.captainhook.test.testservice.ServiceMain;
+import com.swipecrowd.captainhook.test.testservice.TestServiceServerProperties;
 import com.swipecrowd.captainhook.test.testservice.activity.helloworld.HelloWorldInput;
 import com.swipecrowd.captainhook.test.testservice.activity.helloworld.HelloWorldOutput;
 import org.apache.commons.io.IOUtils;
@@ -19,6 +20,8 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class IntegrationTestUtils {
     private static final Gson GSON = createGson();
@@ -80,6 +83,17 @@ public class IntegrationTestUtils {
             return ObjectArrays.concat(args, dependencyArgs, String.class);
         }
         return args;
+    }
+
+    public static void verifyProperties(final int port, final TestServiceServerProperties testServiceServerProperties) throws IOException {
+        assertThat(testServiceServerProperties.getStage()).isEqualTo(STAGE);
+        assertThat(testServiceServerProperties.getRegion()).isEqualTo(REGION);
+        assertThat(testServiceServerProperties.getApplicationArguments().get("stage")).hasValue(STAGE);
+        assertThat(testServiceServerProperties.getApplicationArguments().get("region")).hasValue(REGION);
+        assertThat(testServiceServerProperties.getApplicationArguments().get("*.*.server.port")).hasValue(String.valueOf(port));
+        assertThat(testServiceServerProperties.getApplicationArguments().get("*.*.name")).hasValue(TEST_SERVICE);
+        assertThat(testServiceServerProperties.getPort()).isEqualTo(port);
+        assertThat(testServiceServerProperties.getName()).isEqualTo(TEST_SERVICE);
     }
 
     public static String onlineStatus(final int port) {

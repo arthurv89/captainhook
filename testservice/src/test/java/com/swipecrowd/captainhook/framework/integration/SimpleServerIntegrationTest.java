@@ -54,14 +54,8 @@ public class SimpleServerIntegrationTest {
         final Response<HelloWorldOutput> response = getJsonResponse(input, JAVA_INDEX_URL);
         final String message = response.getValue().getMessage();
         final TestServiceServerProperties testServiceServerProperties = createGson().fromJson(message, TestServiceServerProperties.class);
-        assertThat(testServiceServerProperties.getStage()).isEqualTo(STAGE);
-        assertThat(testServiceServerProperties.getRegion()).isEqualTo(REGION);
-        assertThat(testServiceServerProperties.getApplicationArguments().get("stage")).hasValue(STAGE);
-        assertThat(testServiceServerProperties.getApplicationArguments().get("region")).hasValue(REGION);
-        assertThat(testServiceServerProperties.getApplicationArguments().get("*.*.name")).hasValue(TEST_SERVICE);
-        assertThat(testServiceServerProperties.getApplicationArguments().get("*.*.server.port")).hasValue(String.valueOf(JAVA_PORT));
-        assertThat(testServiceServerProperties.getPort()).isEqualTo(JAVA_PORT);
-        assertThat(testServiceServerProperties.getName()).isEqualTo(TEST_SERVICE);
+
+        verifyProperties(JAVA_PORT, testServiceServerProperties);
     }
 
 }
