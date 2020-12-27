@@ -37,6 +37,10 @@ public class IntegrationTest {
 
     public static final int UNUSED_PORT = 8003;
     public static final String UNUSED_PORT_INDEX_URL = "http://localhost:" + UNUSED_PORT;
+    public static final String REGION = "EU";
+    public static final String STAGE = "dev";
+    public static final String TEST_SERVICE = "TestService";
+    public static final String DEPENDENCY_HOSTNAME = "localhost";
     private static Process process;
 
     private static final Gson GSON = createGson();
@@ -138,6 +142,28 @@ public class IntegrationTest {
 
     @Test
     public void testShowConfig() throws IOException {
+        final HelloWorldInput input = HelloWorldInput.builder()
+                .name(SHOW_CONFIG_KEY)
+                .forward(0)
+                .build();
+
+        final Response<HelloWorldOutput> response = getJsonResponse(input, INDEX_URL);
+        final String message = response.getValue().getMessage();
+        final TestServiceServerProperties testServiceServerProperties = createGson().fromJson(message, TestServiceServerProperties.class);
+        assertThat(testServiceServerProperties.getStage()).isEqualTo(STAGE);
+        assertThat(testServiceServerProperties.getRegion()).isEqualTo(REGION);
+        assertThat(testServiceServerProperties.getApplicationArguments().get("stage")).hasValue(STAGE);
+        assertThat(testServiceServerProperties.getApplicationArguments().get("region")).hasValue(REGION);
+        assertThat(testServiceServerProperties.getApplicationArguments().get("*.*.server.port")).hasValue(String.valueOf(PORT));
+        assertThat(testServiceServerProperties.getApplicationArguments().get("*.*.name")).hasValue(TEST_SERVICE);
+        assertThat(testServiceServerProperties.getApplicationArguments().get("*.*.TestService.server.host")).isEmpty();
+        assertThat(testServiceServerProperties.getApplicationArguments().get("*.*.TestService.server.port")).isEmpty();
+        assertThat(testServiceServerProperties.getPort()).isEqualTo(PORT);
+        assertThat(testServiceServerProperties.getName()).isEqualTo(TEST_SERVICE);
+    }
+
+    @Test
+    public void testShowConfigOnAlternativeApplication() throws IOException {
         try(ConfigurableApplicationContext ignored = startApplication(ALTERNATIVE_PORT)) {
             final HelloWorldInput input = HelloWorldInput.builder()
                     .name(SHOW_CONFIG_KEY)
@@ -145,12 +171,23 @@ public class IntegrationTest {
                     .build();
 
             final Response<HelloWorldOutput> response = getJsonResponse(input, ALTERNATIVE_INDEX_URL);
-            assertThat(response.getValue().getMessage()).isEqualTo("TestServiceServerProperties(super=AbstractServerProperties(stage=dev, region=EU, applicationArguments=ApplicationArguments(map={dev.EU.server.host=localhost, *.*.TestService.server.host=localhost, stage=dev, dev.EU.server.port=8002, *.*.name=TestService, region=EU, *.*.TestService.server.port=8002}), port=8002, name=TestService))");
+            final String message = response.getValue().getMessage();
+            final TestServiceServerProperties testServiceServerProperties = createGson().fromJson(message, TestServiceServerProperties.class);
+            assertThat(testServiceServerProperties.getStage()).isEqualTo(STAGE);
+            assertThat(testServiceServerProperties.getRegion()).isEqualTo(REGION);
+            assertThat(testServiceServerProperties.getApplicationArguments().get("stage")).hasValue(STAGE);
+            assertThat(testServiceServerProperties.getApplicationArguments().get("region")).hasValue(REGION);
+            assertThat(testServiceServerProperties.getApplicationArguments().get("*.*.name")).hasValue(TEST_SERVICE);
+            assertThat(testServiceServerProperties.getApplicationArguments().get("dev.EU.server.port")).hasValue(String.valueOf(ALTERNATIVE_PORT));
+            assertThat(testServiceServerProperties.getApplicationArguments().get("*.*.TestService.server.host")).hasValue(DEPENDENCY_HOSTNAME);
+            assertThat(testServiceServerProperties.getApplicationArguments().get("*.*.TestService.server.port")).hasValue(String.valueOf(ALTERNATIVE_PORT));
+            assertThat(testServiceServerProperties.getPort()).isEqualTo(ALTERNATIVE_PORT);
+            assertThat(testServiceServerProperties.getName()).isEqualTo(TEST_SERVICE);
         }
     }
 
     @Test
-    public void testHelloWorldCallWithDepthZero() throws IOException {
+    public void testHelloWorldCallWithDepthOneOnBashApplication() throws IOException {
         final HelloWorldInput input = HelloWorldInput.builder()
                 .name(CAPTAIN_HOOK)
                 .forward(0)
@@ -163,7 +200,7 @@ public class IntegrationTest {
     }
 
     @Test
-    public void testHelloWorldCallWithDepthZeroWithTwoApplicationsAtSameTime() throws IOException, InterruptedException {
+    public void testHelloWorldCallWithDepthOneWithTwoApplicationsAtSameTime() throws IOException, InterruptedException {
         assertThrows(ConnectException.class, () -> {
             final String s = getUrlContents(ALTERNATIVE_INDEX_URL);
             System.out.println(s);
@@ -186,7 +223,7 @@ public class IntegrationTest {
     }
 
     @Test
-    public void testHelloWorldCallWithDepthThree() throws IOException, InterruptedException {
+    public void testHelloWorldCallWithDepthTwo() throws IOException, InterruptedException {
         assertThrows(ConnectException.class, () -> {
             final String s = getUrlContents(ALTERNATIVE_INDEX_URL);
             System.out.println(s);
@@ -237,15 +274,14 @@ public class IntegrationTest {
 
     private static String[] standardArgs(final int port) {
         String[] args = {
-                "--stage=dev",
-                "--region=EU",
-                "--dev.EU.server.host=" + "localhost",
+                "--stage=" + STAGE,
+                "--region=" + REGION,
                 "--dev.EU.server.port=" + port
         };
         if(port == ALTERNATIVE_PORT) {
             final String[] dependencyArgs = new String[]{
-                    "--*.*.TestService.server.host=localhost",
-                    "--*.*.TestService.server.port=8002"
+                    "--*.*.TestService.server.host=" + DEPENDENCY_HOSTNAME,
+                    "--*.*.TestService.server.port=" + ALTERNATIVE_PORT
             };
             return ObjectArrays.concat(args, dependencyArgs, String.class);
         }

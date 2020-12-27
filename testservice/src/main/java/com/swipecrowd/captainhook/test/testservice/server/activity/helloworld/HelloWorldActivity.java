@@ -1,5 +1,7 @@
 package com.swipecrowd.captainhook.test.testservice.server.activity.helloworld;
 
+import com.google.gson.Gson;
+import com.swipecrowd.captainhook.framework.server.AbstractServerProperties;
 import com.swipecrowd.captainhook.framework.server.Activity;
 import com.swipecrowd.captainhook.framework.server.ActivityRequest;
 import com.swipecrowd.captainhook.framework.server.SimpleActivity;
@@ -43,7 +45,11 @@ public class HelloWorldActivity extends SimpleActivity<HelloWorldInput, HelloWor
     }
 
     private Observable<HelloWorldOutput> handleShowConfig() {
-        return Observable.just(HelloWorldOutput.builder().message(testServiceJavaClient.serverProperties.toString()).build());
+        return Observable.just(HelloWorldOutput.builder().message(toJson(testServiceJavaClient.serverProperties)).build());
+    }
+
+    private String toJson(final AbstractServerProperties serverProperties) {
+        return new Gson().toJson(serverProperties);
     }
 
     private Observable<HelloWorldOutput> handleForwardCommand(final HelloWorldInput helloWorldInput) {
