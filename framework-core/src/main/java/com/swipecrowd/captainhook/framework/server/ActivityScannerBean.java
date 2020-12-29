@@ -10,7 +10,7 @@ import org.springframework.beans.factory.support.GenericBeanDefinition;
 import java.util.Collection;
 
 @AllArgsConstructor
-public class MyBean implements BeanDefinitionRegistryPostProcessor {
+public class ActivityScannerBean implements BeanDefinitionRegistryPostProcessor {
     final AbstractGeneratedServerProperties generatedServerProperties;
     final AbstractServerProperties serverProperties;
 
