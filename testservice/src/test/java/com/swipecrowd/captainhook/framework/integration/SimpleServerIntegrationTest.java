@@ -7,6 +7,7 @@ import com.swipecrowd.captainhook.test.testservice.activity.helloworld.HelloWorl
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.springframework.context.ConfigurableApplicationContext;
 
 import java.io.IOException;
@@ -21,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class SimpleServerIntegrationTest {
     private static ConfigurableApplicationContext context;
 
+    @Timeout(60)
     @BeforeAll
     static void beforeAll() {
         context = startApplication(JAVA_PORT, Optional.empty());

@@ -7,6 +7,7 @@ import com.swipecrowd.captainhook.test.testservice.activity.helloworld.HelloWorl
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.springframework.context.ConfigurableApplicationContext;
 
 import java.io.*;
@@ -26,6 +27,7 @@ public class DeepIntegrationTest {
     public static final String BASH_INDEX_URL = "http://localhost:" + BASH_PORT;
 
     @BeforeAll
+    @Timeout(60)
     public static void beforeAll() throws IOException, InterruptedException {
         try {
             final String urlContents = getUrlContents(BASH_INDEX_URL);

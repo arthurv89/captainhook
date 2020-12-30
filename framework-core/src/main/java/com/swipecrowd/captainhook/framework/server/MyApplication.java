@@ -16,7 +16,7 @@ import static com.swipecrowd.captainhook.framework.server.ApplicationArguments.P
 public class MyApplication {
     public synchronized static ConfigurableApplicationContext start(
             final ApplicationArguments applicationArguments,
-            final Object[] sources,
+            final Class<?>[] sources,
             final String[] args) {
 
         final String port = PropertiesUtils.getPort(applicationArguments);
