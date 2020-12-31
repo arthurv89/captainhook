@@ -1,26 +1,27 @@
 package com.swipecrowd.captainhook.framework.server;
 
 import com.google.common.base.Preconditions;
+import com.google.gson.Gson;
 import com.swipecrowd.captainhook.framework.common.response.FailureResponse;
 import com.swipecrowd.captainhook.framework.common.response.Output;
 import com.swipecrowd.captainhook.framework.common.response.Response;
 import com.swipecrowd.captainhook.framework.common.serialization.Serializer;
 import com.swipecrowd.captainhook.framework.common.serialization.SerializerTypes;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
-import rx.Observable;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpSession;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -28,17 +29,16 @@ import java.util.Optional;
 @RestController
 @Slf4j
 public class Controller {
-    @Autowired
-    private ApplicationContext applicationContext;
+    @Autowired private ApplicationContext applicationContext;
+    @Autowired private ServerEndpointComponent serverEndpointComponent;
+    @Autowired private AbstractServerProperties serverProperties;
 
-    @Autowired
-    private ServerEndpointComponent serverEndpointComponent;
-
-    @RequestMapping("/")
-    public String index() {
-        return "The server is online on port " + serverEndpointComponent.getServerProperties().getPort() + "!";
+    @RequestMapping(value = "/config", method = RequestMethod.GET)
+    public String showConfig() {
+        return new Gson().toJson(serverProperties);
     }
 
+    @Operation(hidden = true)
     @RequestMapping("/activity")
     @ResponseBody
     private DeferredResult<byte[]> endpoint(final @RequestParam(name = "activity") String activityName,
@@ -48,17 +48,16 @@ public class Controller {
                                             final HttpEntity<byte[]> requestEntity) {
         // Create a result that will be populated asynchronously
         final DeferredResult<byte[]> deferredResult = new DeferredResult<>();
-        getResponse(activityName, encoding, payload, requestEntity, session).subscribe(bytes -> deferredResult.setResult(bytes));
+        byte[] bytes = getResponse(activityName, encoding, payload, requestEntity, session);
+        deferredResult.setResult(bytes); // TODO: allow partial responses from the controller, if the activity defines it as an observable
         return deferredResult;
     }
 
-    private Observable<byte[]> getResponse(final String activityName,
+    private byte[] getResponse(final String activityName,
                                            final String encoding,
                                            final String payload,
                                            final HttpEntity<byte[]> requestEntity,
                                            final HttpSession session) {
-        final Map<String, Object> metadata = new HashMap<>();
-        setStartTime(metadata);
         final Serializer serializer = SerializerTypes.getByName(encoding);
         final Optional<byte[]> getParamBytes = Optional.ofNullable(payload)
                 .map(x -> String.format("{\"input\":%s}", x).getBytes());
@@ -66,16 +65,11 @@ public class Controller {
         final byte[] payloadBytes = getParamBytes.orElse(postParamBytes.orElse("{}".getBytes()));
 
         // Can't convert to lambda: compiler will complain about incompatible types
-        return runActivity(activityName, payloadBytes, serializer, metadata, session)
-                .onErrorReturn(t -> failure(t, metadata, activityName))
-                .map(response -> {
-                    Controller.this.setEndTime(metadata);
-                    Controller.this.setTimeSpentTime(metadata);
-                    byte[] bytes = serializer.serialize(response);
+        Response<Output> activityResponse = runActivity(activityName, payloadBytes, serializer, session);
+        byte[] bytes = serializer.serialize(activityResponse);
 
-                    Controller.this.logResponse((Response<Output>) response);
-                    return bytes;
-                });
+        Controller.this.logResponse(activityResponse);
+        return bytes;
     }
 
     private void logResponse(final Response<Output> response) {
@@ -87,15 +81,14 @@ public class Controller {
         }
     }
 
-    private FailureResponse failure(final Throwable t, final Map<String, Object> metadata, final String activityName) {
-        return Response.failure(new RuntimeException(String.format("Activity %s in server %s threw an exception", activityName, serverEndpointComponent.getServerProperties().getName()), t), metadata);
+    private FailureResponse<?> failure(final Throwable t, final String activityName) {
+        return Response.failure(new RuntimeException(String.format("Activity %s in server %s threw an exception", activityName, serverEndpointComponent.getServerProperties().getName()), t));
     }
 
-    private <I extends Input, O extends Output, RC extends AbstractRequestContext> Observable<Response<O>> runActivity(
+    private <I extends Input, O extends Output, RC extends AbstractRequestContext> Response<O> runActivity(
             final String activityName,
             final byte[] payload,
             final Serializer serializer,
-            final Map<String, Object> metadata,
             final HttpSession session) {
         final ServerActivityConfig<I, O, RC> activityConfig = serverEndpointComponent.get(activityName);
         Preconditions.checkNotNull(activityConfig, String.format("Activity %s could not be found!", activityName));
@@ -104,22 +97,25 @@ public class Controller {
         final Request<I> request = serializer.deserialize(payload, ioType.getRequestType());
 
         final AbstractActivity<I, O, RC> activity = activityConfig.getActivity();
-        return enactActivity(activity, request, metadata, session);
+        return enactActivity(activity, request, session);
     }
 
-    private <I extends Input, O extends Output, RC extends AbstractRequestContext> Observable<Response<O>> enactActivity(
+    /**
+     * @throws Exception
+     */
+    private <I extends Input, O extends Output, RC extends AbstractRequestContext> Response<O> enactActivity(
             final AbstractActivity<I, O, RC> activity,
             final Request<I> request,
-            final Map<String, Object> metadata,
             final HttpSession session) {
-        final I input = request.getInput();
-        final RC requestContext = activity.preActivity(input);
-        final ActivityRequest<I> activityRequest = new ActivityRequest<I>(input, session);
-        final Observable<O> activityResult = Observable.defer(() -> activity.handle(activityRequest));
-        return activityResult.map(output -> {
+        try {
+            final I input = request.getInput();
+            final RC requestContext = activity.preActivity(input);
+            O output = activity.handle(input);
             activity.postActivity(input, output, requestContext);
-            return Response.success(output, metadata);
-        });
+            return Response.success(output);
+        } catch (Throwable t) {
+            return (Response<O>) failure(t, activity.getClass().getSimpleName());
+        }
     }
 
     private void setStartTime(final Map<String, Object> map) {
@@ -137,7 +133,7 @@ public class Controller {
 
     @PostConstruct
     public void postConstruct() {
-        applicationContext.getBeansWithAnnotation(Activity.class)
+        applicationContext.getBeansOfType(AbstractActivity.class)
                 .values()
                 .stream()
                 .map(x -> (AbstractActivity<?, ?, ?>) x)

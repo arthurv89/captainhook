@@ -2,6 +2,7 @@ package com.swipecrowd.captainhook.framework.integration;
 
 import com.google.common.base.Charsets;
 import com.google.common.collect.ObjectArrays;
+import com.google.common.net.HttpHeaders;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializer;
@@ -15,16 +16,21 @@ import org.apache.commons.io.IOUtils;
 import org.springframework.context.ConfigurableApplicationContext;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.net.http.HttpResponse.BodyHandlers;
 import java.time.Instant;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class IntegrationTestUtils {
-    private static final Gson GSON = createGson();
+    public static final Gson GSON = createGson();
 
     public static final int JAVA_PORT = 8002;
     public static final String JAVA_INDEX_URL = "http://localhost:" + JAVA_PORT;
@@ -35,6 +41,7 @@ public class IntegrationTestUtils {
     public static final String STAGE = "dev";
     public static final String TEST_SERVICE = "TestService";
     public static final String HOSTNAME = "localhost";
+    public static final String NO_PAYLOAD = "{}";
 
 
     private static final String ENDPOINT_NAME = "HelloWorld";
@@ -42,26 +49,46 @@ public class IntegrationTestUtils {
 
     static final String CAPTAIN_HOOK = "Captain Hook";
 
-    public static Response<HelloWorldOutput> getJsonResponse(HelloWorldInput input, final String indexUrl) throws IOException {
-        final String payload = URLEncoder.encode(createGson().toJson(input), StandardCharsets.UTF_8.toString());
-        final String url = createUrl(payload, indexUrl);
-        final String json = getUrlContents(url);
-        final TypeToken<Response<HelloWorldOutput>> typeToken = new TypeToken<Response<HelloWorldOutput>>() {};
-        return GSON.fromJson(json, typeToken.getType());
+    public static Response<HelloWorldOutput> getJsonResponse(final HelloWorldInput input,
+                                                             final String indexUrl) throws IOException, InterruptedException {
+        final String inputJson = createGson().toJson(input);
+        final String url = createUrl(indexUrl);
+        final HttpResponse<String> response = getResponse(url, inputJson);
+        if(response.statusCode() != 200) {
+            try {
+                final String message = (String) createGson().fromJson(response.body(), Map.class).get("message");
+                throw new RuntimeException(message);
+            } catch (RuntimeException e) {
+                return Response.failure(e);
+            }
+        }
+        final String outputJson = response.body();
+        final TypeToken<HelloWorldOutput> typeToken = new TypeToken<HelloWorldOutput>() {};
+        final HelloWorldOutput output = GSON.fromJson(outputJson, typeToken.getType());
+        return Response.success(output);
     }
 
     public static Gson createGson() {
-        return new GsonBuilder().registerTypeAdapter(Instant.class, (JsonDeserializer<Instant>) (json, type, jsonDeserializationContext)
-                -> Instant.ofEpochMilli(json.getAsJsonPrimitive().getAsLong())).create();
+        return new GsonBuilder()
+                .registerTypeAdapter(Instant.class, (JsonDeserializer<Instant>) (json, type, jsonDeserializationContext)
+                        -> Instant.parse(json.getAsString())).create();
     }
 
-    public static String createUrl(String payload, final String indexUrl) {
-        return indexUrl + "/activity?activity=" + ENDPOINT_NAME + "&encoding=" + ENCODING + "&payload=" + payload;
+    public static String createUrl(final String indexUrl) {
+        return String.format("%s/%s", indexUrl, ENDPOINT_NAME.toLowerCase());
     }
 
-    public static String getUrlContents(String url) throws IOException {
-        System.out.println("Calling URL " + url);
-        return IOUtils.toString(new URL(url), Charsets.UTF_8);
+    public static HttpResponse<String> getResponse(String sUrl, String payload) throws IOException, InterruptedException {
+        System.out.printf("Calling URL %s with payload %s%n", sUrl, payload);
+
+        final HttpClient client = HttpClient.newHttpClient();
+        final HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(sUrl))
+                .setHeader(HttpHeaders.CONTENT_TYPE, "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(payload))
+                .build();
+
+        return client.send(request, BodyHandlers.ofString());
     }
 
     public static ConfigurableApplicationContext startApplication(int port, final Optional<Integer> dependencyPort) {
@@ -97,8 +124,20 @@ public class IntegrationTestUtils {
         assertThat(testServiceServerProperties.getName()).isEqualTo(TEST_SERVICE);
     }
 
-    public static String onlineStatus(final int port) {
-        return "The server is online on port " + port + "!";
+    public static TestServiceServerProperties getTestServiceServerProperties(final String indexUrl) throws IOException, InterruptedException {
+        String message = getConfigContents(indexUrl);
+        return createGson().fromJson(message, TestServiceServerProperties.class);
     }
 
+    public static String getConfigContents(final String indexUrl) throws IOException {
+        return getContents(indexUrl + "/config");
+    }
+
+    public static String getContents(final String url) throws IOException {
+        try {
+            return IOUtils.toString(new URL(url), Charsets.UTF_8);
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

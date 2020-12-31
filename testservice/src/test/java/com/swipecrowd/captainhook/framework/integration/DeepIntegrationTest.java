@@ -10,12 +10,23 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.springframework.context.ConfigurableApplicationContext;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PrintStream;
 import java.net.ConnectException;
 import java.util.Optional;
 
-import static com.swipecrowd.captainhook.framework.integration.IntegrationTestUtils.*;
-import static com.swipecrowd.captainhook.test.testservice.TestServiceServerProperties.SHOW_CONFIG_KEY;
+import static com.swipecrowd.captainhook.framework.integration.IntegrationTestUtils.CAPTAIN_HOOK;
+import static com.swipecrowd.captainhook.framework.integration.IntegrationTestUtils.HOSTNAME;
+import static com.swipecrowd.captainhook.framework.integration.IntegrationTestUtils.JAVA_INDEX_URL;
+import static com.swipecrowd.captainhook.framework.integration.IntegrationTestUtils.JAVA_PORT;
+import static com.swipecrowd.captainhook.framework.integration.IntegrationTestUtils.getJsonResponse;
+import static com.swipecrowd.captainhook.framework.integration.IntegrationTestUtils.getTestServiceServerProperties;
+import static com.swipecrowd.captainhook.framework.integration.IntegrationTestUtils.startApplication;
+import static com.swipecrowd.captainhook.framework.integration.IntegrationTestUtils.verifyProperties;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -30,9 +41,9 @@ public class DeepIntegrationTest {
     @Timeout(60)
     public static void beforeAll() throws IOException, InterruptedException {
         try {
-            final String urlContents = getUrlContents(BASH_INDEX_URL);
+            final TestServiceServerProperties testServiceServerProperties = getTestServiceServerProperties(BASH_INDEX_URL);
             throw new IllegalStateException("There is already a process running on port " + BASH_PORT +". Can't run tests");
-        } catch (IOException ignored) {}
+        } catch (ConnectException ignored) {}
 
         startApplicationOnDefaultPort();
         startProcessOutputReader(process.getInputStream(), System.out);
@@ -41,12 +52,12 @@ public class DeepIntegrationTest {
     }
 
     @Test
-    public void testStatus() throws IOException {
+    public void testStatus() throws IOException, InterruptedException {
         testServiceUp(BASH_INDEX_URL, BASH_PORT);
     }
 
     @Test
-    public void testJavaApplication_showConfig() throws IOException {
+    public void testJavaApplication_showConfig() throws IOException, InterruptedException {
         try(ConfigurableApplicationContext context = startApplication(JAVA_PORT, Optional.of(BASH_PORT))) {
             TestServiceServerProperties testServiceServerProperties = getTestServiceServerProperties(JAVA_INDEX_URL);
 
@@ -60,7 +71,7 @@ public class DeepIntegrationTest {
     }
 
     @Test
-    public void testBashApplication_showConfig() throws IOException {
+    public void testBashApplication_showConfig() throws IOException, InterruptedException {
         try(ConfigurableApplicationContext context = startApplication(JAVA_PORT, Optional.of(BASH_PORT))) {
             TestServiceServerProperties testServiceServerProperties = getTestServiceServerProperties(BASH_INDEX_URL);
 
@@ -71,35 +82,33 @@ public class DeepIntegrationTest {
     }
 
     @Test
-    public void testBashApplication_depth1() throws IOException {
+    public void testBashApplication_depth1() throws IOException, InterruptedException {
         final Response<HelloWorldOutput> response = getJsonResponse(
-                createInput(CAPTAIN_HOOK, 0),
+                createInput(0),
                 BASH_INDEX_URL);
 
         assertThat(response.getValue().getMessage()).isEqualTo(BASH_PORT + " -> Received name: " + CAPTAIN_HOOK);
         assertThat(response.getValue().getRespondingTime()).isNotNull();
-        assertThat(response.getMetadata()).containsKeys("timeSpent", "startTime", "endTime");
     }
 
     @Test
-    public void testJavaApplication_depth1() throws IOException {
+    public void testJavaApplication_depth1() throws IOException, InterruptedException {
         testJavaServiceNotUp();
 
         try(ConfigurableApplicationContext ignored = startApplication(JAVA_PORT, Optional.of(BASH_PORT))) {
             testServiceUp(JAVA_INDEX_URL, JAVA_PORT);
 
             final Response<HelloWorldOutput> response = getJsonResponse(
-                    createInput(CAPTAIN_HOOK, 0),
+                    createInput(0),
                     JAVA_INDEX_URL);
 
             assertThat(response.getValue().getMessage()).isEqualTo(JAVA_PORT + " -> Received name: " + CAPTAIN_HOOK);
             assertThat(response.getValue().getRespondingTime()).isNotNull();
-            assertThat(response.getMetadata()).containsKeys("timeSpent", "startTime", "endTime");
         }
     }
 
     @Test
-    public void testJavaApplication_depth2() throws IOException {
+    public void testJavaApplication_depth2() throws IOException, InterruptedException {
         testJavaServiceNotUp();
 
         try(ConfigurableApplicationContext ignored = startApplication(JAVA_PORT, Optional.of(BASH_PORT))) {
@@ -107,32 +116,30 @@ public class DeepIntegrationTest {
             testServiceUp(BASH_INDEX_URL, BASH_PORT);
 
             final Response<HelloWorldOutput> response = getJsonResponse(
-                    createInput(CAPTAIN_HOOK, 1),
+                    createInput(1),
                     JAVA_INDEX_URL);
 
             assertThat(response.getValue().getMessage()).isEqualTo(BASH_PORT + " -> Received name: " + CAPTAIN_HOOK);
             assertThat(response.getValue().getRespondingTime()).isNotNull();
-            assertThat(response.getMetadata()).containsKeys("timeSpent", "startTime", "endTime");
         }
     }
 
     @Test
-    public void testJavaApplication_depth3() throws IOException {
+    public void testJavaApplication_depth3() throws IOException, InterruptedException {
         testJavaServiceNotUp();
 
         try(ConfigurableApplicationContext ignored = startApplication(JAVA_PORT, Optional.of(BASH_PORT))) {
             testServiceUp(JAVA_INDEX_URL, JAVA_PORT);
 
-            final HelloWorldInput input = createInput(CAPTAIN_HOOK, 2);
+            final HelloWorldInput input = createInput(2);
 
             final Response<HelloWorldOutput> response = getJsonResponse(input, JAVA_INDEX_URL);
-            assertThat(response.getExceptionResult().convertToThrowable().getCause().getMessage()).startsWith("Activity HelloWorld in server TestService threw an exception");
-            assertThat(response.getExceptionResult().convertToThrowable().getCause().getCause().getMessage()).startsWith("Could not find value for key dev.EU.TestService.server.host");
+            assertThat(response.getExceptionResult().convertToThrowable().getMessage()).startsWith("Activity HelloWorldActivity in server TestService threw an exception");
         }
     }
 
     @AfterAll
-    public static void afterAll() throws IOException {
+    public static void afterAll() throws IOException, InterruptedException {
         final HelloWorldInput input = HelloWorldInput.builder()
                 .name(TestServiceServerProperties.DESTROY_KEY)
                 .build();
@@ -143,9 +150,9 @@ public class DeepIntegrationTest {
         while(true) {
             System.out.println("Waiting for shut down");
             try {
-                final String urlContents = getUrlContents(BASH_INDEX_URL);
+                final TestServiceServerProperties testServiceServerProperties = getTestServiceServerProperties(BASH_INDEX_URL);
                 Thread.sleep(500);
-            } catch (ConnectException connectException) {
+            } catch (ConnectException | FileNotFoundException connectException) {
                 System.out.println("Done." + connectException);
                 return;
             } catch (Exception exception) {
@@ -159,7 +166,7 @@ public class DeepIntegrationTest {
         while(true) {
             System.out.println("Waiting for status");
             try {
-                final String urlContents = getUrlContents(BASH_INDEX_URL);
+                final TestServiceServerProperties testServiceServerProperties = getTestServiceServerProperties(BASH_INDEX_URL);
                 System.out.println("Before done.");
                 return;
             } catch (ConnectException connectException) {
@@ -196,33 +203,23 @@ public class DeepIntegrationTest {
         }
     }
 
-    private HelloWorldInput createInput(final String name, final int forward) {
+    private HelloWorldInput createInput(final int forward) {
         return HelloWorldInput.builder()
-                .name(name)
+                .name(CAPTAIN_HOOK)
                 .forward(forward)
                 .build();
     }
 
 
-    private void testServiceUp(final String indexUrl, final int port) throws IOException {
-        final String urlContents = getUrlContents(indexUrl);
-        assertThat(urlContents).isEqualTo(onlineStatus(port));
+    private void testServiceUp(final String indexUrl, final int expectedPort) throws IOException, InterruptedException {
+        final TestServiceServerProperties testServiceServerProperties = getTestServiceServerProperties(indexUrl);
+        assertThat(testServiceServerProperties.getPort()).isEqualTo(expectedPort);
     }
 
     private void testJavaServiceNotUp() {
         assertThrows(ConnectException.class, () -> {
-            final String s = getUrlContents(JAVA_INDEX_URL);
-            System.out.println(s);
+            getTestServiceServerProperties(JAVA_INDEX_URL);
         });
-    }
-
-
-    private TestServiceServerProperties getTestServiceServerProperties(final String indexUrl) throws IOException {
-        final HelloWorldInput input = createInput(SHOW_CONFIG_KEY, 0);
-
-        final Response<HelloWorldOutput> response = getJsonResponse(input, indexUrl);
-        final String message = response.getValue().getMessage();
-        return createGson().fromJson(message, TestServiceServerProperties.class);
     }
 
     private void verifyDependencyProperties(final TestServiceServerProperties testServiceServerProperties) {

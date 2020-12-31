@@ -1,37 +1,31 @@
 package com.swipecrowd.captainhook.test.testservice.server.activity.helloworld;
 
-import com.swipecrowd.captainhook.framework.server.Activity;
-import com.swipecrowd.captainhook.framework.server.ActivityRequest;
 import com.swipecrowd.captainhook.framework.server.SimpleActivity;
 import com.swipecrowd.captainhook.test.testservice.TestServiceServerProperties;
 import com.swipecrowd.captainhook.test.testservice.activity.helloworld.HelloWorldInput;
 import com.swipecrowd.captainhook.test.testservice.activity.helloworld.HelloWorldOutput;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import rx.Observable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
 import static com.swipecrowd.captainhook.test.testservice.TestServiceServerProperties.DESTROY_KEY;
-import static com.swipecrowd.captainhook.test.testservice.TestServiceServerProperties.SHOW_CONFIG_KEY;
 
-@Activity
-@Component
 @AllArgsConstructor
+@RestController
 public class HelloWorldActivity extends SimpleActivity<HelloWorldInput, HelloWorldOutput> {
     @Autowired private final HelloWorldService helloWorldService;
     @Autowired private final TestServiceServerProperties testServiceServerProperties;
 
+    @RequestMapping(path = "/helloworld", method = RequestMethod.POST)
     @Override
-    public Observable<HelloWorldOutput> handle(ActivityRequest<HelloWorldInput> activityRequest) {
-        final HelloWorldInput helloWorldInput = activityRequest.getInput();
+    public HelloWorldOutput handle(@RequestBody final HelloWorldInput helloWorldInput) {
         System.out.printf("[%d] %s%n", testServiceServerProperties.getPort(), helloWorldInput);
 
         if(helloWorldInput.getName().equals(DESTROY_KEY)) {
             return helloWorldService.handleDestroyCommand();
-        }
-
-        if(helloWorldInput.getName().equals(SHOW_CONFIG_KEY)) {
-            return helloWorldService.handleShowConfig();
         }
 
         if(helloWorldInput.getForward() == 0) {
@@ -41,4 +35,3 @@ public class HelloWorldActivity extends SimpleActivity<HelloWorldInput, HelloWor
         return helloWorldService.handleForwardCommand(helloWorldInput);
     }
 }
-

@@ -1,7 +1,5 @@
 package com.swipecrowd.captainhook.test.testservice.server.activity.helloworld;
 
-import com.google.gson.Gson;
-import com.swipecrowd.captainhook.framework.server.AbstractServerProperties;
 import com.swipecrowd.captainhook.test.testservice.TestServiceServerProperties;
 import com.swipecrowd.captainhook.test.testservice.activity.helloworld.HelloWorldInput;
 import com.swipecrowd.captainhook.test.testservice.activity.helloworld.HelloWorldOutput;
@@ -9,7 +7,6 @@ import com.swipecrowd.captainhook.test.testservice.client.TestServiceJavaClient;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import rx.Observable;
 
 import java.time.Instant;
 
@@ -23,19 +20,11 @@ public class HelloWorldService {
     private final TestServiceServerProperties testServiceServerProperties;
 
 
-    Observable<HelloWorldOutput> createNormalOutput(final HelloWorldInput helloWorldInput) {
-        return Observable.just(createOutput(testServiceServerProperties.getPort() + " -> Received name: " + helloWorldInput.getName()));
+    HelloWorldOutput createNormalOutput(final HelloWorldInput helloWorldInput) {
+        return createOutput(testServiceServerProperties.getPort() + " -> Received name: " + helloWorldInput.getName());
     }
 
-    Observable<HelloWorldOutput> handleShowConfig() {
-        return Observable.just(HelloWorldOutput.builder().message(toJson(testServiceJavaClient.serverProperties)).build());
-    }
-
-    private String toJson(final AbstractServerProperties serverProperties) {
-        return new Gson().toJson(serverProperties);
-    }
-
-    Observable<HelloWorldOutput> handleForwardCommand(final HelloWorldInput helloWorldInput) {
+    HelloWorldOutput handleForwardCommand(final HelloWorldInput helloWorldInput) {
         final HelloWorldInput newHelloWorldInput = HelloWorldInput.builder()
                 .name(helloWorldInput.getName())
                 .forward(helloWorldInput.getForward()-1)
@@ -44,10 +33,12 @@ public class HelloWorldService {
         return testServiceJavaClient.helloWorldCall(newHelloWorldInput)
                 .map(response -> {
                     return createOutput(response.getMessage());
-                });
+                })
+                .toBlocking()
+                .first();
     }
 
-    Observable<HelloWorldOutput> handleDestroyCommand() {
+    HelloWorldOutput handleDestroyCommand() {
         new Thread(() -> {
             try {
                 System.out.println("Self destructing in 3000 ms");
@@ -56,7 +47,7 @@ public class HelloWorldService {
             }
             System.exit(1);
         }).start();
-        return Observable.just(createDestroyOutput());
+        return createDestroyOutput();
     }
 
     private HelloWorldOutput createDestroyOutput() {

@@ -7,7 +7,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 
-import java.util.Collection;
+import java.util.Set;
 
 @AllArgsConstructor
 public class ActivityScannerBean implements BeanDefinitionRegistryPostProcessor {
@@ -15,8 +15,8 @@ public class ActivityScannerBean implements BeanDefinitionRegistryPostProcessor 
     final AbstractServerProperties serverProperties;
 
     @Override
-    public void postProcessBeanDefinitionRegistry (BeanDefinitionRegistry registry) throws BeansException {
-        final Collection<Class<?>> activityClasses = new ActivityScanner(generatedServerProperties).scan();
+    public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
+        final Set<Class<? extends SimpleActivity>> activityClasses = new ActivityScanner(generatedServerProperties).scan();
         for(final Class<?> activityClass : activityClasses) {
             GenericBeanDefinition gbd = new GenericBeanDefinition();
             gbd.setBeanClass(activityClass);

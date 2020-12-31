@@ -7,7 +7,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.swipecrowd.captainhook.framework.generation.Generator.*;
+import static com.swipecrowd.captainhook.framework.generation.Generator.TEMPLATE_BASE_PACKAGE;
+import static com.swipecrowd.captainhook.framework.generation.Generator.TEMPLATE_ENDPOINT;
+import static com.swipecrowd.captainhook.framework.generation.Generator.TEMPLATE_SERVICE_NAME;
 
 public abstract class DefaultReplacer implements Replacer {
     protected String doReplace(final String contents, final String from, final String to) {

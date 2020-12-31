@@ -9,5 +9,6 @@ import javax.servlet.http.HttpSession;
 @Getter
 public class ActivityRequest<I extends Input> {
     private final I input;
+
     private final HttpSession session;
 }

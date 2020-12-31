@@ -12,8 +12,8 @@ import java.util.Set;
 public class ActivityScanner {
     private final AbstractGeneratedServerProperties serverProperties;
 
-    public Set<Class<?>> scan() {
+    public Set<Class<? extends SimpleActivity>> scan() {
         final String packageName = serverProperties.getPackageName();
-        return new Reflections(packageName).getTypesAnnotatedWith(Activity.class);
+        return new Reflections(packageName).getSubTypesOf(SimpleActivity.class);
     }
 }
