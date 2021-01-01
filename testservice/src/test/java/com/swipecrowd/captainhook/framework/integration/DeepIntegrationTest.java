@@ -134,7 +134,7 @@ public class DeepIntegrationTest {
             final HelloWorldInput input = createInput(2);
 
             final Response<HelloWorldOutput> response = getJsonResponse(input, JAVA_INDEX_URL);
-            assertThat(response.getExceptionResult().convertToThrowable().getMessage()).startsWith("Activity HelloWorldActivity in server TestService threw an exception");
+            assertThat(response.getValue().getMessage()).startsWith("Recovered from a failure: Could not find value for key dev.EU.TestService.server.host MAP: ApplicationArguments(map={*.*.commandLineArgument=commandLineArgumentValue, stage=dev, region=EU, *.*.name=TestService, *.*.server.port=8001, *.*.clientlibProperty=clientlibPropertyValue");
         }
     }
 

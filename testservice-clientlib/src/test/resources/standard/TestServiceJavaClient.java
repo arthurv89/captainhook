@@ -4,7 +4,7 @@ import com.swipecrowd.captainhook.framework.client.AbstractClient;
 import com.swipecrowd.captainhook.framework.common.response.Response;
 import com.google.gson.reflect.TypeToken;
 import com.swipecrowd.captainhook.framework.server.AbstractServerProperties;
-import rx.Observable;
+import io.reactivex.rxjava3.core.Observable;
 
 public class TestServiceJavaClient extends AbstractClient {
     public TestServiceJavaClient(final AbstractServerProperties serverProperties) {

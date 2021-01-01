@@ -12,7 +12,7 @@ import lombok.AllArgsConstructor;
 import org.asynchttpclient.AsyncHttpClient;
 import org.asynchttpclient.DefaultAsyncHttpClient;
 import org.asynchttpclient.ListenableFuture;
-import rx.Observable;
+import io.reactivex.rxjava3.core.Observable;
 
 @AllArgsConstructor
 public abstract class AbstractClient {
@@ -56,7 +56,7 @@ public abstract class AbstractClient {
         final ListenableFuture<org.asynchttpclient.Response> response = asyncHttpClient.preparePost(url)
                 .setBody(payload)
                 .execute();
-        final Observable<org.asynchttpclient.Response> obs = Observable.from(response);
+        final Observable<org.asynchttpclient.Response> obs = Observable.fromFuture(response);
         return obs.map(x -> x.getResponseBodyAsBytes());
     }
 }

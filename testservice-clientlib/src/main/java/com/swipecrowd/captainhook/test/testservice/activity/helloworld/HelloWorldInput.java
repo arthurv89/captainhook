@@ -16,6 +16,6 @@ public class HelloWorldInput extends Input {
     private HelloWorldInput() {}
 
     private String name;
-    private Integer forward;
+    private int forward;
 }
 

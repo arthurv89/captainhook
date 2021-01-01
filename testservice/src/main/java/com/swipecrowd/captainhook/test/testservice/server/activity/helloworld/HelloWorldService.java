@@ -13,12 +13,13 @@ import java.time.Instant;
 @Service
 @AllArgsConstructor
 public class HelloWorldService {
-    @Autowired
-    private final TestServiceJavaClient testServiceJavaClient;
+    @Autowired private final TestServiceJavaClient testServiceJavaClient;
+    @Autowired private final TestServiceServerProperties testServiceServerProperties;
+    @Autowired private final ServiceCall serviceCall;
 
-    @Autowired
-    private final TestServiceServerProperties testServiceServerProperties;
-
+    private static HelloWorldOutput getRecoveryOutput(final Throwable e) {
+        return HelloWorldOutput.builder().message("Recovered from a failure: " + e.getMessage()).build();
+    }
 
     HelloWorldOutput createNormalOutput(final HelloWorldInput helloWorldInput) {
         return createOutput(testServiceServerProperties.getPort() + " -> Received name: " + helloWorldInput.getName());
@@ -30,12 +31,13 @@ public class HelloWorldService {
                 .forward(helloWorldInput.getForward()-1)
                 .build();
 
-        return testServiceJavaClient.helloWorldCall(newHelloWorldInput)
-                .map(response -> {
-                    return createOutput(response.getMessage());
+        return serviceCall.run(testServiceJavaClient.helloWorldCall(newHelloWorldInput))
+                .map(response -> createOutput(response.getMessage()))
+                .onErrorReturn(e -> {
+                    e.printStackTrace();
+                    return getRecoveryOutput(e);
                 })
-                .toBlocking()
-                .first();
+                .blockingFirst();
     }
 
     HelloWorldOutput handleDestroyCommand() {
