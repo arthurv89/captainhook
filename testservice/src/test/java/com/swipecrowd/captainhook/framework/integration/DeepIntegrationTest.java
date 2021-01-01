@@ -17,7 +17,13 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.ConnectException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import static com.swipecrowd.captainhook.framework.integration.IntegrationTestUtils.CAPTAIN_HOOK;
 import static com.swipecrowd.captainhook.framework.integration.IntegrationTestUtils.HOSTNAME;
@@ -135,6 +141,36 @@ public class DeepIntegrationTest {
 
             final Response<HelloWorldOutput> response = getJsonResponse(input, JAVA_INDEX_URL);
             assertThat(response.getValue().getMessage()).startsWith("Recovered from a failure: Could not find value for key dev.EU.TestService.server.host MAP: ApplicationArguments(map={*.*.commandLineArgument=commandLineArgumentValue, stage=dev, region=EU, *.*.name=TestService, *.*.server.port=8001, *.*.clientlibProperty=clientlibPropertyValue");
+        }
+    }
+
+    @Test
+    public void testJavaApplication_depth3_causeRateLimitExceededException() throws IOException, InterruptedException, ExecutionException {
+        testJavaServiceNotUp();
+
+        try(ConfigurableApplicationContext ignored = startApplication(JAVA_PORT, Optional.of(BASH_PORT))) {
+            testServiceUp(JAVA_INDEX_URL, JAVA_PORT);
+
+            final ExecutorService executorService = Executors.newFixedThreadPool(10);
+            List<Future<Response<HelloWorldOutput>>> tasks = new ArrayList<>();
+            for (int i = 0; i < 10; i++) {
+                final Future<Response<HelloWorldOutput>> task = executorService.submit(() -> getJsonResponse(createInput(1), JAVA_INDEX_URL));
+                tasks.add(task);
+            }
+
+            int good = 0;
+            int error = 0;
+            for (Future<Response<HelloWorldOutput>> task : tasks) {
+                final Response<HelloWorldOutput> response = task.get();
+                final String message = response.getValue().getMessage();
+                if(message.equals("Recovered from a failure: Bulkhead 'default' is full and does not permit further calls")) {
+                    error++;
+                } else {
+                    good++;
+                }
+            }
+            assertThat(error).isGreaterThanOrEqualTo(7);
+            assertThat(good).isLessThanOrEqualTo(3);
         }
     }
 

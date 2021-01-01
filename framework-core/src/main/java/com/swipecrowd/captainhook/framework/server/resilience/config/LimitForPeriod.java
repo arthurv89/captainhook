@@ -1,8 +1,8 @@
-package com.swipecrowd.captainhook.test.testservice.config;
+package com.swipecrowd.captainhook.framework.server.resilience.config;
 
 import lombok.Value;
 
 @Value(staticConstructor = "of")
 public class LimitForPeriod {
-    int period;
+    int value;
 }
