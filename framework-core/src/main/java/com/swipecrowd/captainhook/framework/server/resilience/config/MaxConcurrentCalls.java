@@ -2,7 +2,9 @@ package com.swipecrowd.captainhook.framework.server.resilience.config;
 
 import lombok.Value;
 
+import java.util.Optional;
+
 @Value(staticConstructor = "of")
 public class MaxConcurrentCalls {
-    int value;
+    Optional<Integer> value;
 }

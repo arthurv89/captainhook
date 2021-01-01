@@ -1,6 +1,7 @@
 package com.swipecrowd.captainhook.framework.integration;
 
 import com.swipecrowd.captainhook.framework.common.response.Response;
+import com.swipecrowd.captainhook.test.testservice.ServiceMain;
 import com.swipecrowd.captainhook.test.testservice.TestServiceServerProperties;
 import com.swipecrowd.captainhook.test.testservice.activity.helloworld.HelloWorldInput;
 import com.swipecrowd.captainhook.test.testservice.activity.helloworld.HelloWorldOutput;
@@ -31,6 +32,7 @@ import static com.swipecrowd.captainhook.framework.integration.IntegrationTestUt
 import static com.swipecrowd.captainhook.framework.integration.IntegrationTestUtils.JAVA_PORT;
 import static com.swipecrowd.captainhook.framework.integration.IntegrationTestUtils.getJsonResponse;
 import static com.swipecrowd.captainhook.framework.integration.IntegrationTestUtils.getTestServiceServerProperties;
+import static com.swipecrowd.captainhook.framework.integration.IntegrationTestUtils.standardArgs;
 import static com.swipecrowd.captainhook.framework.integration.IntegrationTestUtils.startApplication;
 import static com.swipecrowd.captainhook.framework.integration.IntegrationTestUtils.verifyProperties;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -146,9 +148,19 @@ public class DeepIntegrationTest {
 
     @Test
     public void testJavaApplication_depth3_causeRateLimitExceededException() throws IOException, InterruptedException, ExecutionException {
+        depth3(7, 3, "--*.*.maxConcurrentCalls=1");
+
+    }
+
+    @Test
+    public void testJavaApplication_depth3_withHighMaxConcurrentCalls_doesNotCauseRateLimit() throws IOException, InterruptedException, ExecutionException {
+        depth3(0, 10);
+    }
+
+    private void depth3(final int expectedErrors, final int expectedGood, final String... extraArgs) throws IOException, InterruptedException, ExecutionException {
         testJavaServiceNotUp();
 
-        try(ConfigurableApplicationContext ignored = startApplication(JAVA_PORT, Optional.of(BASH_PORT))) {
+        try(ConfigurableApplicationContext ignored = ServiceMain.startApplication(standardArgs(JAVA_PORT, Optional.of(BASH_PORT), extraArgs))) {
             testServiceUp(JAVA_INDEX_URL, JAVA_PORT);
 
             final ExecutorService executorService = Executors.newFixedThreadPool(10);
@@ -169,8 +181,8 @@ public class DeepIntegrationTest {
                     good++;
                 }
             }
-            assertThat(error).isGreaterThanOrEqualTo(7);
-            assertThat(good).isLessThanOrEqualTo(3);
+            assertThat(error).isGreaterThanOrEqualTo(expectedErrors);
+            assertThat(good).isLessThanOrEqualTo(expectedGood);
         }
     }
 

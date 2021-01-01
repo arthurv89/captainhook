@@ -1,31 +1,39 @@
 package com.swipecrowd.captainhook.framework.server;
 
 import com.swipecrowd.captainhook.framework.server.resilience.ServiceCall;
+import com.swipecrowd.captainhook.framework.server.resilience.config.CircuitBreakerIgnoreExceptions;
+import com.swipecrowd.captainhook.framework.server.resilience.config.FailureRateThreshold;
 import com.swipecrowd.captainhook.framework.server.resilience.config.FairCallHandlingStrategyEnabled;
-import com.swipecrowd.captainhook.framework.server.resilience.config.IgnoreExceptions;
 import com.swipecrowd.captainhook.framework.server.resilience.config.LimitForPeriod;
 import com.swipecrowd.captainhook.framework.server.resilience.config.LimitRefreshPeriod;
 import com.swipecrowd.captainhook.framework.server.resilience.config.MaxAttempts;
 import com.swipecrowd.captainhook.framework.server.resilience.config.MaxConcurrentCalls;
 import com.swipecrowd.captainhook.framework.server.resilience.config.MaxWaitDuration;
+import com.swipecrowd.captainhook.framework.server.resilience.config.MinimumNumberOfCalls;
+import com.swipecrowd.captainhook.framework.server.resilience.config.PermittedNumberOfCallsInHalfOpenState;
+import com.swipecrowd.captainhook.framework.server.resilience.config.RecordExceptions;
 import com.swipecrowd.captainhook.framework.server.resilience.config.RetryExceptions;
+import com.swipecrowd.captainhook.framework.server.resilience.config.RetryIgnoreExceptions;
 import com.swipecrowd.captainhook.framework.server.resilience.config.RetryOnException;
 import com.swipecrowd.captainhook.framework.server.resilience.config.RetryOnResult;
+import com.swipecrowd.captainhook.framework.server.resilience.config.SlidingWindowSize;
+import com.swipecrowd.captainhook.framework.server.resilience.config.SlidingWindowTypeWrapper;
 import com.swipecrowd.captainhook.framework.server.resilience.config.TimeoutDuration;
 import com.swipecrowd.captainhook.framework.server.resilience.config.WaitDuration;
+import com.swipecrowd.captainhook.framework.server.resilience.config.WaitDurationInOpenStateMs;
 import com.swipecrowd.captainhook.framework.server.resilience.config.WritableStackTraceEnabled;
 import io.github.resilience4j.bulkhead.Bulkhead;
 import io.github.resilience4j.bulkhead.BulkheadConfig;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
 import io.github.resilience4j.core.EventPublisher;
 import io.github.resilience4j.ratelimiter.RateLimiter;
 import io.github.resilience4j.ratelimiter.RateLimiterConfig;
 import io.github.resilience4j.retry.Retry;
 import io.github.resilience4j.retry.RetryConfig;
-import io.github.resilience4j.retry.RetryRegistry;
 import org.springframework.context.annotation.Bean;
 
-import java.time.Duration;
+import java.util.Optional;
 
 public class DefaultServiceConfiguration {
     private static final String DEFAULT = "default";
@@ -39,33 +47,33 @@ public class DefaultServiceConfiguration {
     }
 
     @Bean
-    public MaxAttempts createMaxAttempts(final AbstractServerProperties AbstractServerProperties) {
-        return MaxAttempts.of(AbstractServerProperties.getMaxAttempts().orElse(1));
+    public MaxAttempts createMaxAttempts(final AbstractServerProperties abstractServerProperties) {
+        return MaxAttempts.of(abstractServerProperties.getMaxAttempts());
     }
 
     @Bean
-    public WaitDuration createWaitDuration(final AbstractServerProperties AbstractServerProperties) {
-        return WaitDuration.of(Duration.ofMillis(AbstractServerProperties.getWaitDurationMs().orElse(1)));
+    public WaitDuration createWaitDuration(final AbstractServerProperties abstractServerProperties) {
+        return WaitDuration.of(abstractServerProperties.getWaitDuration());
     }
 
     @Bean
     public RetryOnResult createRetryOnResult() {
-        return RetryOnResult.of(x -> false);
+        return RetryOnResult.of(Optional.of(x -> false));
     }
 
     @Bean
     public RetryOnException createRetryOnException() {
-        return RetryOnException.of(e -> false);
+        return RetryOnException.of(Optional.of(e -> false));
     }
 
     @Bean
-    public RetryExceptions createRetryExceptions() {
-        return RetryExceptions.of(null);
+    public RetryExceptions createRetryExceptions(final AbstractServerProperties abstractServerProperties) {
+        return RetryExceptions.of(abstractServerProperties.getRetryExceptions());
     }
 
     @Bean
-    public IgnoreExceptions createIgnoreExceptions() {
-        return IgnoreExceptions.of(null);
+    public RetryIgnoreExceptions createRetryIgnoreExceptions(final AbstractServerProperties abstractServerProperties) {
+        return RetryIgnoreExceptions.of(abstractServerProperties.getRetryIgnoreExceptions());
     }
 
     @Bean
@@ -74,79 +82,159 @@ public class DefaultServiceConfiguration {
                              final RetryOnResult retryOnResult,
                              final RetryOnException retryOnException,
                              final RetryExceptions retryExceptions,
-                             final IgnoreExceptions ignoreExceptions) {
-        RetryConfig config = RetryConfig.custom()
-                .maxAttempts(maxAttempts.getValue())
-                .waitDuration(waitDuration.getValue())
-                .retryOnResult(retryOnResult.getValue())
-                .retryOnException(retryOnException.getValue())
-                .ignoreExceptions(ignoreExceptions.getValue())
-                .retryExceptions(retryExceptions.getValue())
-                .build();
-
-        // Create a RetryRegistry with a custom global configuration
-        RetryRegistry registry = RetryRegistry.of(config);
-
-        return registry.retry(DEFAULT, config);
+                             final RetryIgnoreExceptions retryIgnoreExceptions) {
+        RetryConfig.Builder<Object> builder = RetryConfig.custom();
+        if(maxAttempts.getValue().isPresent()) {
+            builder.maxAttempts(maxAttempts.getValue().get());
+        }
+        if(waitDuration.getValue().isPresent()) {
+            builder.waitDuration(waitDuration.getValue().get());
+        }
+        if(retryOnResult.getValue().isPresent()) {
+            builder.retryOnResult(retryOnResult.getValue().get());
+        }
+        if(retryOnException.getValue().isPresent()) {
+            builder.retryOnException(retryOnException.getValue().get());
+        }
+        if(retryIgnoreExceptions.getValue().isPresent()) {
+            builder.ignoreExceptions(retryIgnoreExceptions.getValue().get());
+        }
+        if(retryExceptions.getValue().isPresent()) {
+            builder.retryExceptions(retryExceptions.getValue().get());
+        }
+        return Retry.of(DEFAULT, builder.build());
+    }
+    
+    @Bean
+    CircuitBreakerIgnoreExceptions createCircuitBreakerIgnoreExceptions(final AbstractServerProperties abstractServerProperties) {
+        return CircuitBreakerIgnoreExceptions.of(abstractServerProperties.getCircuitBreakerIgnoreExceptions());
     }
 
     @Bean
-    public CircuitBreaker createCircuitBreaker() {
-        return CircuitBreaker.ofDefaults(DEFAULT);
+    RecordExceptions createRecordExceptions(final AbstractServerProperties abstractServerProperties) {
+        return RecordExceptions.of(abstractServerProperties.getRecordExceptions());
     }
 
     @Bean
-    public EventPublisher createEventHandler(final CircuitBreaker circuitBreaker) {
+    MinimumNumberOfCalls createMinimumNumberOfCalls(final AbstractServerProperties abstractServerProperties) {
+        return MinimumNumberOfCalls.of(abstractServerProperties.getMinimumNumberOfCalls());
+    }
+
+    @Bean
+    SlidingWindowSize createSlidingWindowSize(final AbstractServerProperties abstractServerProperties) {
+        return SlidingWindowSize.of(abstractServerProperties.getSlidingWindowSize());
+    }
+
+    @Bean
+    SlidingWindowTypeWrapper createSlidingWindowType(final AbstractServerProperties abstractServerProperties) {
+        return SlidingWindowTypeWrapper.of(abstractServerProperties.getSlidingWindowType());
+    }
+
+    @Bean
+    PermittedNumberOfCallsInHalfOpenState createPermittedNumberOfCallsInHalfOpenState(final AbstractServerProperties abstractServerProperties) {
+        return PermittedNumberOfCallsInHalfOpenState.of(abstractServerProperties.getPermittedNumberOfCallsInHalfOpenState());
+    }
+
+    @Bean
+    WaitDurationInOpenStateMs createWaitDurationInOpenStateMs(final AbstractServerProperties abstractServerProperties) {
+        return WaitDurationInOpenStateMs.of(abstractServerProperties.getWaitDurationInOpenState());
+    }
+
+    @Bean
+    FailureRateThreshold createFailureRateThreshold(final AbstractServerProperties abstractServerProperties) {
+        return FailureRateThreshold.of(abstractServerProperties.getFailureRateThreshold());
+    }
+
+    @Bean
+    public CircuitBreaker createCircuitBreaker(final CircuitBreakerIgnoreExceptions circuitBreakerIgnoreExceptions,
+                                               final RecordExceptions recordExceptions,
+                                               final MinimumNumberOfCalls minimumNumberOfCalls,
+                                               final SlidingWindowSize slidingWindowSize,
+                                               final SlidingWindowTypeWrapper slidingWindowType,
+                                               final PermittedNumberOfCallsInHalfOpenState permittedNumberOfCallsInHalfOpenState,
+                                               final WaitDurationInOpenStateMs waitDurationInOpenStateMs,
+                                               final FailureRateThreshold failureRateThreshold) {
+        CircuitBreakerConfig.Builder builder = CircuitBreakerConfig.custom();
+        if(failureRateThreshold.getValue().isPresent()) {
+            builder.failureRateThreshold(failureRateThreshold.getValue().get());
+        }
+        if(waitDurationInOpenStateMs.getValue().isPresent()) {
+            builder.waitDurationInOpenState(waitDurationInOpenStateMs.getValue().get());
+        }
+        if(permittedNumberOfCallsInHalfOpenState.getValue().isPresent()) {
+            builder.permittedNumberOfCallsInHalfOpenState(permittedNumberOfCallsInHalfOpenState.getValue().get());
+        }
+        if(slidingWindowSize.getValue().isPresent() || slidingWindowType.getValue().isPresent() || minimumNumberOfCalls.getValue().isPresent()) {
+            builder.slidingWindow(
+                    slidingWindowSize.getValue().get(),
+                    minimumNumberOfCalls.getValue().get(),
+                    slidingWindowType.getValue().get());
+        }
+        if(recordExceptions.getValue().isPresent()) {
+            builder.recordExceptions(recordExceptions.getValue().get());
+        }
+        if(circuitBreakerIgnoreExceptions.getValue().isPresent()) {
+            builder.ignoreExceptions(circuitBreakerIgnoreExceptions.getValue().get());
+        }
+        return CircuitBreaker.of(DEFAULT, builder.build());
+    }
+
+    @Bean
+    public EventPublisher<?> createEventHandler(final CircuitBreaker circuitBreaker) {
         return circuitBreaker.getEventPublisher()
                 .onError(event -> System.out.println(event));
     }
 
     @Bean
     TimeoutDuration createTimeoutDuration(final AbstractServerProperties abstractServerProperties) {
-        return TimeoutDuration.of(Duration.ofSeconds(abstractServerProperties.getTimeDuration().orElse(1)));
+        return TimeoutDuration.of(abstractServerProperties.getTimeDuration());
     }
 
     @Bean
     LimitRefreshPeriod createLimitRefreshPeriod(final AbstractServerProperties abstractServerProperties) {
-        return LimitRefreshPeriod.of(Duration.ofSeconds(abstractServerProperties.getLimitRefreshPeriod().orElse(1)));
+        return LimitRefreshPeriod.of(abstractServerProperties.getLimitRefreshPeriod());
     }
 
     @Bean
     LimitForPeriod createLimitForPeriod(final AbstractServerProperties abstractServerProperties) {
-        return LimitForPeriod.of(abstractServerProperties.getLimitForPeriod().orElse(1));
+        return LimitForPeriod.of(abstractServerProperties.getLimitForPeriod());
     }
 
     @Bean
     public RateLimiter createRateLimiter(final TimeoutDuration timeoutDuration,
                                          final LimitRefreshPeriod limitRefreshPeriod,
                                          final LimitForPeriod limitForPeriod) {
-        final RateLimiterConfig config = RateLimiterConfig.custom()
-                .timeoutDuration(timeoutDuration.getValue())
-                .limitRefreshPeriod(limitRefreshPeriod.getValue())
-                .limitForPeriod(limitForPeriod.getValue())
-                .build();
-
-        return RateLimiter.of(DEFAULT, config);
+        RateLimiterConfig.Builder builder = RateLimiterConfig.custom();
+        if(timeoutDuration.getValue().isPresent()) {
+            builder.timeoutDuration(timeoutDuration.getValue().get());
+        }
+        if(limitRefreshPeriod.getValue().isPresent()) {
+            builder.limitRefreshPeriod(limitRefreshPeriod.getValue().get());
+        }
+        if(limitForPeriod.getValue().isPresent()) {
+            builder.limitForPeriod(limitForPeriod.getValue().get());
+        }
+        return RateLimiter.of(DEFAULT, builder.build());
     }
 
     @Bean
     public FairCallHandlingStrategyEnabled createFairCallHandlingStrategyEnabled(final AbstractServerProperties abstractServerProperties) {
-        return FairCallHandlingStrategyEnabled.of(abstractServerProperties.getFairCallHandlingStrategyEnabled().orElse(false));
+        return FairCallHandlingStrategyEnabled.of(abstractServerProperties.getFairCallHandlingStrategyEnabled());
     }
 
     @Bean
-    public MaxConcurrentCalls maxConcurrentCalls(final AbstractServerProperties AbstractServerProperties) {
-        return MaxConcurrentCalls.of(AbstractServerProperties.getMaxConcurrentCalls().orElse(1));
+    public MaxConcurrentCalls maxConcurrentCalls(final AbstractServerProperties abstractServerProperties) {
+        return MaxConcurrentCalls.of(abstractServerProperties.getMaxConcurrentCalls());
     }
 
     @Bean
     public MaxWaitDuration maxWaitDuration(final AbstractServerProperties abstractServerProperties) {
-        return MaxWaitDuration.of(Duration.ofSeconds(abstractServerProperties.getMaxWaitDuration().orElse(1)));
+        return MaxWaitDuration.of(abstractServerProperties.getMaxWaitDuration());
     }
 
     @Bean
-    public WritableStackTraceEnabled writableStackTraceEnabled(final AbstractServerProperties AbstractServerProperties) {
-        return WritableStackTraceEnabled.of(AbstractServerProperties.getWritableStackTraceEnabled().orElse(false));
+    public WritableStackTraceEnabled writableStackTraceEnabled(final AbstractServerProperties abstractServerProperties) {
+        return WritableStackTraceEnabled.of(abstractServerProperties.getWritableStackTraceEnabled());
     }
 
     @Bean
@@ -154,12 +242,19 @@ public class DefaultServiceConfiguration {
                                    final MaxConcurrentCalls maxConcurrentCalls,
                                    final MaxWaitDuration maxWaitDuration,
                                    final WritableStackTraceEnabled writableStackTraceEnabled) {
-        final BulkheadConfig config = BulkheadConfig.custom()
-                .fairCallHandlingStrategyEnabled(fairCallHandlingStrategyEnabled.isEnabled())
-                .maxConcurrentCalls(maxConcurrentCalls.getValue())
-                .maxWaitDuration(maxWaitDuration.getValue())
-                .writableStackTraceEnabled(writableStackTraceEnabled.isEnabled())
-                .build();
-        return Bulkhead.of(DEFAULT, config);
+        BulkheadConfig.Builder builder = BulkheadConfig.custom();
+        if(fairCallHandlingStrategyEnabled.getValue().isPresent()) {
+            builder.fairCallHandlingStrategyEnabled(fairCallHandlingStrategyEnabled.getValue().get());
+        }
+        if(maxConcurrentCalls.getValue().isPresent()) {
+            builder.maxConcurrentCalls(maxConcurrentCalls.getValue().get());
+        }
+        if(maxWaitDuration.getValue().isPresent()) {
+            builder.maxWaitDuration(maxWaitDuration.getValue().get());
+        }
+        if(writableStackTraceEnabled.getValue().isPresent()) {
+            builder.writableStackTraceEnabled(writableStackTraceEnabled.getValue().get());
+        }
+        return Bulkhead.of(DEFAULT, builder.build());
     }
 }

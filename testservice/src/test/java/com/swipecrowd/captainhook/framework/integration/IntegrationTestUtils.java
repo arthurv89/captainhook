@@ -1,7 +1,6 @@
 package com.swipecrowd.captainhook.framework.integration;
 
 import com.google.common.base.Charsets;
-import com.google.common.collect.ObjectArrays;
 import com.google.common.net.HttpHeaders;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -27,6 +26,7 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
 
+import static com.google.common.collect.ObjectArrays.concat;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class IntegrationTestUtils {
@@ -96,7 +96,7 @@ public class IntegrationTestUtils {
         return ServiceMain.startApplication(standardArgs(port, dependencyPort));
     }
 
-    public static String[] standardArgs(final int port, final Optional<Integer> dependencyPort) {
+    public static String[] standardArgs(final int port, final Optional<Integer> dependencyPort, String... extraArgs) {
         String[] args = {
                 "--stage=" + STAGE,
                 "--region=" + REGION,
@@ -108,9 +108,9 @@ public class IntegrationTestUtils {
                     "--*.*.TestService.server.host=" + HOSTNAME,
                     "--*.*.TestService.server.port=" + dependencyPort.get()
             };
-            return ObjectArrays.concat(args, dependencyArgs, String.class);
+            return concat(args, concat(dependencyArgs, extraArgs, String.class), String.class);
         }
-        return args;
+        return concat(args, extraArgs, String.class);
     }
 
     public static void verifyProperties(final int port, final TestServiceServerProperties testServiceServerProperties) throws IOException {
