@@ -1,6 +1,7 @@
 package com.swipecrowd.captainhook.test.testservice.server.activity.helloworld;
 
 import com.swipecrowd.captainhook.framework.server.resilience.ServiceCall;
+import com.swipecrowd.captainhook.test.testservice.HelloWorldCache;
 import com.swipecrowd.captainhook.test.testservice.TestServiceServerProperties;
 import com.swipecrowd.captainhook.test.testservice.activity.helloworld.HelloWorldInput;
 import com.swipecrowd.captainhook.test.testservice.activity.helloworld.HelloWorldOutput;
@@ -17,6 +18,7 @@ public class HelloWorldService {
     @Autowired private final TestServiceJavaClient testServiceJavaClient;
     @Autowired private final TestServiceServerProperties testServiceServerProperties;
     @Autowired private final ServiceCall serviceCall;
+    @Autowired private final HelloWorldCache cache;
 
     private static HelloWorldOutput getRecoveryOutput(final Throwable e) {
         return HelloWorldOutput.builder().message("Recovered from a failure: " + e.getMessage()).build();
@@ -26,17 +28,19 @@ public class HelloWorldService {
         return createOutput(testServiceServerProperties.getPort() + " -> Received name: " + helloWorldInput.getName());
     }
 
-    HelloWorldOutput handleForwardCommand(final HelloWorldInput helloWorldInput) {
+    HelloWorldOutput handleForwardCommand(final HelloWorldInput _helloWorldInput) {
         final HelloWorldInput newHelloWorldInput = HelloWorldInput.builder()
-                .name(helloWorldInput.getName())
-                .forward(helloWorldInput.getForward()-1)
+                .name(_helloWorldInput.getName())
+                .forward(_helloWorldInput.getForward()-1)
                 .build();
 
         return serviceCall.run(testServiceJavaClient.helloWorldCall(newHelloWorldInput))
-                .map(response -> createOutput(response.getMessage()))
+                .map(x -> {
+                    cache.put(newHelloWorldInput, createOutput("CACHED"));
+                    return x;
+                })
                 .onErrorReturn(e -> {
-                    e.printStackTrace();
-                    return getRecoveryOutput(e);
+                    return cache.get(newHelloWorldInput).map(x -> createOutput("CACHED " + e.getMessage())).orElse(getRecoveryOutput(e));
                 })
                 .blockingFirst();
     }

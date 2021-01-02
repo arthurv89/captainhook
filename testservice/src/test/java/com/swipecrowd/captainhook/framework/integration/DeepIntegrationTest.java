@@ -44,6 +44,7 @@ public class DeepIntegrationTest {
 
     public static final int BASH_PORT = 8001;
     public static final String BASH_INDEX_URL = "http://localhost:" + BASH_PORT;
+    final ExecutorService executorService = Executors.newFixedThreadPool(100);
 
     @BeforeAll
     @Timeout(60)
@@ -142,47 +143,61 @@ public class DeepIntegrationTest {
             final HelloWorldInput input = createInput(2);
 
             final Response<HelloWorldOutput> response = getJsonResponse(input, JAVA_INDEX_URL);
-            assertThat(response.getValue().getMessage()).startsWith("Recovered from a failure: Could not find value for key dev.EU.TestService.server.host MAP: ApplicationArguments(map={*.*.commandLineArgument=commandLineArgumentValue, stage=dev, region=EU, *.*.name=TestService, *.*.server.port=8001, *.*.clientlibProperty=clientlibPropertyValue");
+            assertThat(response.getValue().getMessage()).startsWith("Recovered from a failure: The source did not signal an event for 1000 milliseconds and has been terminated");
         }
     }
 
     @Test
-    public void testJavaApplication_depth3_causeRateLimitExceededException() throws IOException, InterruptedException, ExecutionException {
-        depth3(7, 3, "--*.*.maxConcurrentCalls=1");
-
+    public void testJavaApplication_depth3_withHighMaxConcurrentCalls_doesNotCauseRateLimit() throws IOException, InterruptedException, ExecutionException {
+        depth3(0,
+                100,
+                0);
     }
 
     @Test
-    public void testJavaApplication_depth3_withHighMaxConcurrentCalls_doesNotCauseRateLimit() throws IOException, InterruptedException, ExecutionException {
-        depth3(0, 10);
+    public void testJavaApplication_depth3_causeRateLimitExceededException() throws IOException, InterruptedException, ExecutionException {
+        depth3(0,
+                70,
+                30,
+                "--*.*.maxConcurrentCalls=1", "--*.*.cancelRunningFuture=True", "--*.*.timeoutDuration=100");
     }
 
-    private void depth3(final int expectedErrors, final int expectedGood, final String... extraArgs) throws IOException, InterruptedException, ExecutionException {
+    private void depth3(final int expectedErrors,
+                        final int expectedGood,
+                        final int expectedCached,
+                        final String... extraArgs) throws IOException, InterruptedException, ExecutionException {
         testJavaServiceNotUp();
 
         try(ConfigurableApplicationContext ignored = ServiceMain.startApplication(standardArgs(JAVA_PORT, Optional.of(BASH_PORT), extraArgs))) {
             testServiceUp(JAVA_INDEX_URL, JAVA_PORT);
 
-            final ExecutorService executorService = Executors.newFixedThreadPool(10);
-            List<Future<Response<HelloWorldOutput>>> tasks = new ArrayList<>();
-            for (int i = 0; i < 10; i++) {
-                final Future<Response<HelloWorldOutput>> task = executorService.submit(() -> getJsonResponse(createInput(1), JAVA_INDEX_URL));
-                tasks.add(task);
-            }
-
             int good = 0;
             int error = 0;
-            for (Future<Response<HelloWorldOutput>> task : tasks) {
-                final Response<HelloWorldOutput> response = task.get();
-                final String message = response.getValue().getMessage();
-                if(message.equals("Recovered from a failure: Bulkhead 'default' is full and does not permit further calls")) {
-                    error++;
-                } else {
-                    good++;
+            int cached = 0;
+
+            for (int j = 0; j < 10; j++) {
+                final List<Future<Response<HelloWorldOutput>>> tasks = new ArrayList<>();
+                for (int i = 0; i < 10; i++) {
+                    final Future<Response<HelloWorldOutput>> task = executorService.submit(() -> getJsonResponse(createInput(1), JAVA_INDEX_URL));
+                    tasks.add(task);
+                }
+
+                for (Future<Response<HelloWorldOutput>> task : tasks) {
+                    final Response<HelloWorldOutput> response = task.get();
+                    final String message = response.getValue().getMessage();
+                    if (message.startsWith("Recovered from a failure: ")) {
+                        error++;
+                    } else if (message.startsWith("CACHED ")) {
+                        cached++;
+                    } else {
+                        good++;
+                    }
+                    System.out.println(message);
                 }
             }
             assertThat(error).isGreaterThanOrEqualTo(expectedErrors);
             assertThat(good).isLessThanOrEqualTo(expectedGood);
+            assertThat(cached).isGreaterThanOrEqualTo(expectedCached);
         }
     }
 
@@ -251,9 +266,17 @@ public class DeepIntegrationTest {
         }
     }
 
+    private HelloWorldInput createInput(final int forward, final int i) {
+        return createInput(forward, String.format("%s ---- %d", CAPTAIN_HOOK, i));
+    }
+
     private HelloWorldInput createInput(final int forward) {
+        return createInput(forward, CAPTAIN_HOOK);
+    }
+
+    private HelloWorldInput createInput(final int forward, final String message) {
         return HelloWorldInput.builder()
-                .name(CAPTAIN_HOOK)
+                .name(message)
                 .forward(forward)
                 .build();
     }

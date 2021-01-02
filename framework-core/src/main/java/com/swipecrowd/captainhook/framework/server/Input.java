@@ -1,4 +1,6 @@
 package com.swipecrowd.captainhook.framework.server;
 
-public abstract class Input {
+import java.io.Serializable;
+
+public abstract class Input implements Serializable {
 }

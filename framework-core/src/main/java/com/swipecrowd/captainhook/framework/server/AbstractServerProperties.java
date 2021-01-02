@@ -39,6 +39,8 @@ public abstract class AbstractServerProperties {
     @Getter private final Optional<Class<? extends Throwable>[]> recordExceptions;
     @Getter private final Optional<Class<? extends Throwable>[]> circuitBreakerIgnoreExceptions;
     @Getter private final Optional<Class<? extends Throwable>[]> retryIgnoreExceptions;
+    @Getter private final Optional<Boolean> cancelRunningFuture;
+    @Getter private final Optional<Duration> timeoutDuration;
 
     public AbstractServerProperties(final ApplicationArguments applicationArguments) {
         this.applicationArguments = applicationArguments;
@@ -69,6 +71,8 @@ public abstract class AbstractServerProperties {
         this.recordExceptions = getExceptionClasses("*.*.recordExceptions");
         this.circuitBreakerIgnoreExceptions = getExceptionClasses("*.*.circuitBreakerIgnoreExceptions");
         this.retryIgnoreExceptions = getExceptionClasses("*.*.retryIgnoreExceptions");
+        this.cancelRunningFuture = getBool("*.*.cancelRunningFuture");
+        this.timeoutDuration = getDuration("*.*.timeoutDuration");
     }
 
     private Optional<Duration> getDuration(final String key) {

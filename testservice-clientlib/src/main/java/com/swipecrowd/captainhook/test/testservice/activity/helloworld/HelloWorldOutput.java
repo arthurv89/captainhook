@@ -11,7 +11,7 @@ import java.time.Instant;
 @Value
 @EqualsAndHashCode(callSuper = false)
 public class HelloWorldOutput extends Output {
-    private String message;
-    private Instant respondingTime;
+    String message;
+    Instant respondingTime;
 }
 

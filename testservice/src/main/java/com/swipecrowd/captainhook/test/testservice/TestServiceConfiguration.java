@@ -24,10 +24,17 @@ public class TestServiceConfiguration extends DefaultServiceConfiguration {
     @Bean
     public HelloWorldService createHelloWorldService(final TestServiceJavaClient testServiceJavaClient,
                                                      final TestServiceServerProperties testServiceServerProperties,
-                                                     final ServiceCall serviceCall) {
+                                                     final ServiceCall serviceCall,
+                                                     final HelloWorldCache helloWorldCache) {
         return new HelloWorldService(
                 testServiceJavaClient,
                 testServiceServerProperties,
-                serviceCall);
+                serviceCall,
+                helloWorldCache);
+    }
+
+    @Bean
+    public HelloWorldCache createCache(final AbstractServerProperties abstractServerProperties) {
+        return new HelloWorldCache();
     }
 }
