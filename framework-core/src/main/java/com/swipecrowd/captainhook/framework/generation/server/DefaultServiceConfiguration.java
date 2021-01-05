@@ -1,6 +1,7 @@
 package com.swipecrowd.captainhook.framework.server;
 
 import com.swipecrowd.captainhook.framework.server.resilience.ServiceCall;
+import com.swipecrowd.captainhook.framework.server.AbstractServerProperties;
 import io.github.resilience4j.bulkhead.Bulkhead;
 import io.github.resilience4j.bulkhead.BulkheadConfig;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;

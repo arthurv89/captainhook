@@ -1,6 +1,9 @@
-package com.swipecrowd.captainhook.framework.server;
+package com.swipecrowd.captainhook.framework.generation;
 
 import com.swipecrowd.captainhook.framework.common.response.Output;
+import com.swipecrowd.captainhook.framework.server.AbstractServerProperties;
+import com.swipecrowd.captainhook.framework.server.IOType;
+import com.swipecrowd.captainhook.framework.server.Input;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

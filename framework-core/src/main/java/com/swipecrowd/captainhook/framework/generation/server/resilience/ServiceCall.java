@@ -1,7 +1,6 @@
 package com.swipecrowd.captainhook.framework.server.resilience;
 
 import io.github.resilience4j.bulkhead.Bulkhead;
-import io.github.resilience4j.cache.Cache;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.ratelimiter.RateLimiter;
 import io.github.resilience4j.retry.Retry;
@@ -30,13 +29,5 @@ public class ServiceCall {
                 .compose(BulkheadOperator.of(bulkhead))
                 .compose(RetryTransformer.of(retry))
                 .compose(TimeLimiterTransformer.of(timeLimiter));
-
-
-
-//        CheckedFunction1<String, String> cachedFunction = Decorators
-//                .ofCheckedSupplier(() -> backendService.doSomething())
-//                .withCache(cacheContext)
-//                .decorate();
-//        String value = Try.of(() -> cachedFunction.apply("cacheKey")).get();
     }
 }

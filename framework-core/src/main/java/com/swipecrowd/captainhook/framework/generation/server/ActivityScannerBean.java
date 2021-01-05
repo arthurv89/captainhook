@@ -1,5 +1,6 @@
 package com.swipecrowd.captainhook.framework.server;
 
+import com.swipecrowd.captainhook.framework.generation.AbstractGeneratedServerProperties;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -16,7 +17,7 @@ public class ActivityScannerBean implements BeanDefinitionRegistryPostProcessor 
 
     @Override
     public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
-        final Set<Class<? extends SimpleActivity>> activityClasses = new ActivityScanner(generatedServerProperties).scan();
+        final Set<Class<? extends SimpleActivity>> activityClasses = new ServerActivityScanner(generatedServerProperties).scan();
         for(final Class<?> activityClass : activityClasses) {
             GenericBeanDefinition gbd = new GenericBeanDefinition();
             gbd.setBeanClass(activityClass);

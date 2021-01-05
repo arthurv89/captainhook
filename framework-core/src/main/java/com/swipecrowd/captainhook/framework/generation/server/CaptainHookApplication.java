@@ -2,6 +2,7 @@ package com.swipecrowd.captainhook.framework.server;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.swipecrowd.captainhook.framework.server.ApplicationArguments;
 import org.springframework.context.ConfigurableApplicationContext;
 
 import java.io.IOException;

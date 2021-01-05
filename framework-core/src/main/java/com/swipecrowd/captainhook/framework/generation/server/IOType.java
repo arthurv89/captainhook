@@ -7,6 +7,6 @@ import lombok.Value;
 
 @Value
 public class IOType<I extends Input, O extends Output> {
-    private final TypeToken<Request<I>> requestType;
-    private final TypeToken<Response<O>> responseType;
+    TypeToken<Request<I>> requestType;
+    TypeToken<Response<O>> responseType;
 }
