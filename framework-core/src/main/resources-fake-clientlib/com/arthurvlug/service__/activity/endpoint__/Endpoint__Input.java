@@ -2,7 +2,7 @@ package com.swipecrowd.service__.activity.endpoint__;
 
 import lombok.Builder;
 import lombok.Getter;
-import com.swipecrowd.captainhook.framework.server.Input;
+import com.swipecrowd.captainhook.framework.application.server.Input;
 
 @Builder
 @Getter

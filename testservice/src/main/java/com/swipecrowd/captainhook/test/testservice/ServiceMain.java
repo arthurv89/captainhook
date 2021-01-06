@@ -1,6 +1,6 @@
 package com.swipecrowd.captainhook.test.testservice;
 
-import com.swipecrowd.captainhook.framework.server.CaptainHookApplication;
+import com.swipecrowd.captainhook.framework.application.server.CaptainHookApplication;
 import com.swipecrowd.captainhook.test.testservice.server.GeneratedServerProperties;
 import org.springframework.context.ConfigurableApplicationContext;
 

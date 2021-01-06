@@ -1,7 +1,7 @@
 package com.swipecrowd.captainhook.test.testservice.activity.helloworld;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.swipecrowd.captainhook.framework.server.Input;
+import com.swipecrowd.captainhook.framework.application.common.Input;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;

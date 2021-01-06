@@ -1,11 +1,11 @@
 package com.swipecrowd.captainhook.test.testservice.server;
 
-import com.swipecrowd.captainhook.framework.common.response.Output;
-import com.swipecrowd.captainhook.framework.common.response.Response;
-import com.swipecrowd.captainhook.framework.server.AbstractGeneratedServerProperties;
-import com.swipecrowd.captainhook.framework.server.IOType;
-import com.swipecrowd.captainhook.framework.server.Input;
-import com.swipecrowd.captainhook.framework.server.Request;
+import com.swipecrowd.captainhook.framework.application.common.response.Output;
+import com.swipecrowd.captainhook.framework.application.common.response.Response;
+import com.swipecrowd.captainhook.framework.application.server.AbstractGeneratedServerProperties;
+import com.swipecrowd.captainhook.framework.application.common.IOType;
+import com.swipecrowd.captainhook.framework.application.common.Input;
+import com.swipecrowd.captainhook.framework.application.common.Request;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.reflect.TypeToken;
 import lombok.Getter;

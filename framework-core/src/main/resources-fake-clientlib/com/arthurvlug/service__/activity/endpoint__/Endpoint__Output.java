@@ -3,7 +3,7 @@ package com.swipecrowd.service__.activity.endpoint__;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
-import com.swipecrowd.captainhook.framework.common.response.Output;
+import com.swipecrowd.captainhook.framework.application.common.response.Output;
 
 @Builder
 @Value

@@ -1,6 +1,6 @@
 package com.swipecrowd.captainhook.test.testservice.server.activity.helloworld;
 
-import com.swipecrowd.captainhook.framework.server.resilience.ServiceCall;
+import com.swipecrowd.captainhook.framework.application.server.resilience.ServiceCall;
 import com.swipecrowd.captainhook.test.testservice.HelloWorldCache;
 import com.swipecrowd.captainhook.test.testservice.TestServiceServerProperties;
 import com.swipecrowd.captainhook.test.testservice.activity.helloworld.HelloWorldInput;

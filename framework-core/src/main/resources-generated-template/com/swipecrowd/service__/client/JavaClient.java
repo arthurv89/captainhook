@@ -1,9 +1,9 @@
 package com.swipecrowd.service__.client;
 
-import com.swipecrowd.captainhook.framework.client.AbstractClient;
-import com.swipecrowd.captainhook.framework.common.response.Response;
+import com.swipecrowd.captainhook.framework.application.common.AbstractClient;
+import com.swipecrowd.captainhook.framework.application.common.response.Response;
 import com.google.gson.reflect.TypeToken;
-import com.swipecrowd.captainhook.framework.server.AbstractServerProperties;
+import com.swipecrowd.captainhook.framework.application.server.AbstractServerProperties;
 import io.reactivex.rxjava3.core.Observable;
 
 public class TestServiceJavaClient extends AbstractClient {

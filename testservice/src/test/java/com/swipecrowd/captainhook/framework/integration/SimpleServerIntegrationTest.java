@@ -31,7 +31,9 @@ public class SimpleServerIntegrationTest {
 
     @AfterAll
     static void afterAll() {
-        context.close();
+        if(context != null) {
+            context.close();
+        }
     }
 
     @Test

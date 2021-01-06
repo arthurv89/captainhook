@@ -1,6 +1,6 @@
 package com.swipecrowd.captainhook.framework.integration;
 
-import com.swipecrowd.captainhook.framework.common.response.Response;
+import com.swipecrowd.captainhook.framework.application.common.response.Response;
 import com.swipecrowd.captainhook.test.testservice.ServiceMain;
 import com.swipecrowd.captainhook.test.testservice.TestServiceServerProperties;
 import com.swipecrowd.captainhook.test.testservice.activity.helloworld.HelloWorldInput;

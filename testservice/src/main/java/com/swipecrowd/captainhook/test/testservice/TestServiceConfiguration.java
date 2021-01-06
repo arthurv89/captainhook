@@ -1,9 +1,9 @@
 package com.swipecrowd.captainhook.test.testservice;
 
-import com.swipecrowd.captainhook.framework.server.AbstractServerProperties;
-import com.swipecrowd.captainhook.framework.server.ApplicationArguments;
-import com.swipecrowd.captainhook.framework.server.DefaultServiceConfiguration;
-import com.swipecrowd.captainhook.framework.server.resilience.ServiceCall;
+import com.swipecrowd.captainhook.framework.application.server.AbstractServerProperties;
+import com.swipecrowd.captainhook.framework.application.server.ApplicationArguments;
+import com.swipecrowd.captainhook.framework.application.server.DefaultServiceConfiguration;
+import com.swipecrowd.captainhook.framework.application.server.resilience.ServiceCall;
 import com.swipecrowd.captainhook.test.testservice.client.TestServiceJavaClient;
 import com.swipecrowd.captainhook.test.testservice.server.activity.helloworld.HelloWorldService;
 import org.springframework.context.annotation.Bean;

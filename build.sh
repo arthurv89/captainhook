@@ -16,6 +16,7 @@ function build_module {
 }
 
 build_module framework-core && \
+build_module framework-generate && \
 build_module framework-core-clientlib && \
 build_module framework-plugins-selfdiagnose && \
 build_module framework-core-server && \

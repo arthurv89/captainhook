@@ -1,6 +1,6 @@
 package com.swipecrowd.captainhook.test.testservice.server.activity.helloworld;
 
-import com.swipecrowd.captainhook.framework.server.SimpleActivity;
+import com.swipecrowd.captainhook.framework.application.server.SimpleActivity;
 import com.swipecrowd.captainhook.test.testservice.TestServiceServerProperties;
 import com.swipecrowd.captainhook.test.testservice.activity.helloworld.HelloWorldInput;
 import com.swipecrowd.captainhook.test.testservice.activity.helloworld.HelloWorldOutput;
