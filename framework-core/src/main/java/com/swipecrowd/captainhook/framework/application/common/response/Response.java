@@ -1,5 +1,6 @@
 package com.swipecrowd.captainhook.framework.application.common.response;
 
+import com.swipecrowd.captainhook.framework.application.common.Output;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;

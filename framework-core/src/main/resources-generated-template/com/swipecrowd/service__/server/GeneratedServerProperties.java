@@ -1,6 +1,6 @@
 package com.swipecrowd.service__.server;
 
-import com.swipecrowd.captainhook.framework.application.common.response.Output;
+import com.swipecrowd.captainhook.framework.application.common.Output;
 import com.swipecrowd.captainhook.framework.application.common.response.Response;
 import com.swipecrowd.captainhook.framework.application.server.AbstractGeneratedServerProperties;
 import com.swipecrowd.captainhook.framework.application.common.IOType;

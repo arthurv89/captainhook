@@ -1,9 +1,9 @@
 package com.swipecrowd.captainhook.test.testservice.activity.helloworld;
 
+import com.swipecrowd.captainhook.framework.application.common.Output;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
-import com.swipecrowd.captainhook.framework.application.common.response.Output;
 
 import java.time.Instant;
 

@@ -5,7 +5,6 @@ import com.swipecrowd.captainhook.test.testservice.HelloWorldCache;
 import com.swipecrowd.captainhook.test.testservice.TestServiceServerProperties;
 import com.swipecrowd.captainhook.test.testservice.activity.helloworld.HelloWorldInput;
 import com.swipecrowd.captainhook.test.testservice.activity.helloworld.HelloWorldOutput;
-import com.swipecrowd.captainhook.test.testservice.client.TestServiceJavaClient;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,7 +14,7 @@ import java.time.Instant;
 @Service
 @AllArgsConstructor
 public class HelloWorldService {
-    @Autowired private final TestServiceJavaClient testServiceJavaClient;
+//    @Autowired private final TestServiceJavaClient testServiceJavaClient;
     @Autowired private final TestServiceServerProperties testServiceServerProperties;
     @Autowired private final ServiceCall serviceCall;
     @Autowired private final HelloWorldCache cache;
@@ -34,15 +33,16 @@ public class HelloWorldService {
                 .forward(_helloWorldInput.getForward()-1)
                 .build();
 
-        return serviceCall.run(testServiceJavaClient.helloWorldCall(newHelloWorldInput))
-                .map(x -> {
-                    cache.put(newHelloWorldInput, createOutput("CACHED"));
-                    return x;
-                })
-                .onErrorReturn(e -> {
-                    return cache.get(newHelloWorldInput).map(x -> createOutput("CACHED " + e.getMessage())).orElse(getRecoveryOutput(e));
-                })
-                .blockingFirst();
+//        return serviceCall.run(testServiceJavaClient.helloWorldCall(newHelloWorldInput))
+//                .map(x -> {
+//                    cache.put(newHelloWorldInput, createOutput("CACHED"));
+//                    return x;
+//                })
+//                .onErrorReturn(e -> {
+//                    return cache.get(newHelloWorldInput).map(x -> createOutput("CACHED " + e.getMessage())).orElse(getRecoveryOutput(e));
+//                })
+//                .blockingFirst();
+        return null;
     }
 
     HelloWorldOutput handleDestroyCommand() {

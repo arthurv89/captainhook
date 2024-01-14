@@ -10,10 +10,7 @@ import java.util.Set;
  */
 @AllArgsConstructor
 public class ServerActivityScanner {
-    private final AbstractGeneratedServerProperties serverProperties;
-
-    public Set<Class<? extends SimpleActivity>> scan() {
-        final String packageName = serverProperties.getPackageName();
+    public Set<Class<? extends SimpleActivity>> scan(final String packageName) {
         return new Reflections(packageName).getSubTypesOf(SimpleActivity.class);
     }
 }

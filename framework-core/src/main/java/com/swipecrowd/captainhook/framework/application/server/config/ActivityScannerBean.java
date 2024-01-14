@@ -20,7 +20,8 @@ public class ActivityScannerBean implements BeanDefinitionRegistryPostProcessor 
 
     @Override
     public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
-        final Set<Class<? extends SimpleActivity>> activityClasses = new ServerActivityScanner(generatedServerProperties).scan();
+        final Set<Class<? extends SimpleActivity>> activityClasses = new ServerActivityScanner()
+                .scan(generatedServerProperties.getPackageName());
         for(final Class<?> activityClass : activityClasses) {
             GenericBeanDefinition gbd = new GenericBeanDefinition();
             gbd.setBeanClass(activityClass);

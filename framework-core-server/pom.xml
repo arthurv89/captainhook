@@ -231,26 +231,6 @@
                             </artifactItems>
                         </configuration>
                     </execution>
-                    <execution>
-                        <id>copy-dependency-resources-to-target-folder-framework-core</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>unpack</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>com.swipecrowd.captainhook</groupId>
-                                    <artifactId>framework-core</artifactId>
-                                    <version>0.1.1-SNAPSHOT</version>
-                                    <type>jar</type>
-                                    <overWrite>true</overWrite>
-                                    <outputDirectory>${project.build.directory}/dependency-resources/framework-core/generated-template</outputDirectory>
-                                    <includes>**/*.java</includes>
-                                </artifactItem>
-                            </artifactItems>
-                        </configuration>
-                    </execution>
                 </executions>
             </plugin>
 
@@ -328,11 +308,6 @@
     </build>
 
     <dependencies>
-        <dependency>
-            <groupId>com.swipecrowd.captainhook</groupId>
-            <artifactId>framework-core</artifactId>
-            <version>0.1.1-SNAPSHOT</version>
-        </dependency>
         <dependency>
             <groupId>com.swipecrowd.captainhook</groupId>
             <artifactId>framework-generate</artifactId>

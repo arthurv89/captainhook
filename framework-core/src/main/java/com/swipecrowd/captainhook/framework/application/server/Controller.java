@@ -2,11 +2,13 @@ package com.swipecrowd.captainhook.framework.application.server;
 
 import com.google.common.base.Preconditions;
 import com.google.gson.Gson;
+import com.swipecrowd.captainhook.framework.application.common.AbstractActivity;
+import com.swipecrowd.captainhook.framework.application.common.AbstractRequestContext;
 import com.swipecrowd.captainhook.framework.application.common.IOType;
 import com.swipecrowd.captainhook.framework.application.common.Input;
+import com.swipecrowd.captainhook.framework.application.common.Output;
 import com.swipecrowd.captainhook.framework.application.common.Request;
 import com.swipecrowd.captainhook.framework.application.common.response.FailureResponse;
-import com.swipecrowd.captainhook.framework.application.common.response.Output;
 import com.swipecrowd.captainhook.framework.application.common.response.Response;
 import com.swipecrowd.captainhook.framework.application.common.serialization.Serializer;
 import com.swipecrowd.captainhook.framework.application.common.serialization.SerializerTypes;
@@ -68,7 +70,7 @@ public class Controller {
         final byte[] payloadBytes = getParamBytes.orElse(postParamBytes.orElse("{}".getBytes()));
 
         // Can't convert to lambda: compiler will complain about incompatible types
-        Response<Output> activityResponse = runActivity(activityName, payloadBytes, serializer, session);
+        final Response<Output> activityResponse = runActivity(activityName, payloadBytes, serializer, session);
         byte[] bytes = serializer.serialize(activityResponse);
 
         Controller.this.logResponse(activityResponse);

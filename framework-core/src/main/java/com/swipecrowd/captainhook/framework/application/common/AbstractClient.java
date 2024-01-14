@@ -2,7 +2,7 @@ package com.swipecrowd.captainhook.framework.application.common;
 
 import com.google.gson.reflect.TypeToken;
 import com.swipecrowd.captainhook.framework.application.client.DependencyProperties;
-import com.swipecrowd.captainhook.framework.application.common.response.Output;
+import com.swipecrowd.captainhook.framework.application.common.Output;
 import com.swipecrowd.captainhook.framework.application.common.response.Response;
 import com.swipecrowd.captainhook.framework.application.common.serialization.Serializer;
 import com.swipecrowd.captainhook.framework.application.common.serialization.SerializerTypes;

@@ -2,7 +2,7 @@ package com.swipecrowd.captainhook.test.testservice;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.swipecrowd.captainhook.framework.application.common.response.Output;
+import com.swipecrowd.captainhook.framework.application.common.Output;
 import com.swipecrowd.captainhook.framework.application.common.Input;
 
 import java.util.Optional;
